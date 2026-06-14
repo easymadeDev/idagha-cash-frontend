@@ -10,6 +10,7 @@ export default function Document() {
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
         <meta name="description" content="Idagha Group — Public Financial Transparency Portal" />
         <meta name="theme-color" content="#0a0f0d" />
+        <link rel="icon" href="/logo.png" />
       </Head>
       <body>
         <Main />

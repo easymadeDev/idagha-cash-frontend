@@ -343,7 +343,7 @@ export default function HomePage() {
                 <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-3)' }}>Live balance for each group wallet</p>
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 20 }}>
+            <div className="wallet-cards-grid">
               {walletCards.map((ws: any) => {
                 const w = ws.wallet;
                 const color = w?.color || '#22c55e';

@@ -68,13 +68,14 @@ export default function WelcomePopup() {
 
   if (!visible) return null;
 
-  const popAnim = animOut ? 'popDown 0.3s var(--ease) forwards' : 'popUp 0.35s var(--ease) forwards';
   const overlayAnim = animOut ? 'fadeOut 0.3s var(--ease) forwards' : 'fadeIn 0.3s var(--ease) forwards';
+  const popupClass = `wp-popup${animOut ? ' wp-popup-out' : ' wp-popup-in'}`;
 
   return (
     <>
       <div className="wp-overlay" style={{ animation: overlayAnim }} />
-      <div className="wp-popup" style={{ animation: popAnim }} onClick={(e) => e.stopPropagation()}>
+      <div className={popupClass} onClick={(e) => e.stopPropagation()}>
+        <div className="wp-drag-handle" />
         <div className="wp-glow" />
 
         {/* Logo */}
@@ -239,44 +240,49 @@ export default function WelcomePopup() {
           z-index: 9000;
         }
 
-        /* ── Desktop: centered card ── */
+        /* ── Shared base ── */
         .wp-popup {
-          position: fixed; top: 50%; left: 50%;
-          transform: translate(-50%, -50%);
+          position: fixed;
           z-index: 9001;
-          width: min(460px, calc(100vw - 32px));
-          max-height: 90vh;
-          overflow-y: auto;
           background: linear-gradient(160deg, #0d2010 0%, #060d08 100%);
           border: 1px solid rgba(34,197,94,0.25);
-          border-radius: 24px;
-          padding: 36px 32px 28px;
           text-align: center;
-          overflow: hidden;
           box-shadow: 0 0 0 1px rgba(34,197,94,0.06), 0 32px 80px rgba(0,0,0,0.75), 0 0 60px rgba(34,197,94,0.08);
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+
+        /* ── Desktop: centered card ── */
+        @media (min-width: 601px) {
+          .wp-popup {
+            top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: min(460px, calc(100vw - 32px));
+            max-height: 90vh;
+            border-radius: 24px;
+            padding: 36px 32px 28px;
+          }
+          .wp-popup-in  { animation: popUp   0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
+          .wp-popup-out { animation: popDown  0.3s  cubic-bezier(0.4,0,0.2,1) forwards; }
         }
 
         /* ── Mobile: bottom sheet ── */
         @media (max-width: 600px) {
           .wp-popup {
             top: auto; left: 0; right: 0; bottom: 0;
-            transform: none;
             width: 100%;
             max-height: 88vh;
-            overflow-y: auto;
             border-radius: 20px 20px 0 0;
-            padding: 20px 18px 32px;
+            padding: 8px 18px 36px;
           }
+          .wp-popup-in  { animation: slideUp   0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
+          .wp-popup-out { animation: slideDown  0.3s  cubic-bezier(0.4,0,0.2,1) forwards; }
         }
 
         .wp-drag-handle {
-          display: none;
           width: 36px; height: 4px; border-radius: 99px;
-          background: rgba(255,255,255,0.15);
-          margin: 0 auto 16px;
-        }
-        @media (max-width: 600px) {
-          .wp-drag-handle { display: block; }
+          background: rgba(255,255,255,0.18);
+          margin: 10px auto 18px;
         }
 
         .wp-glow {
@@ -286,8 +292,8 @@ export default function WelcomePopup() {
           pointer-events: none;
         }
         .wp-logo-wrap {
-          position: relative; width: 80px; height: 80px;
-          margin: 0 auto 14px;
+          position: relative; width: 72px; height: 72px;
+          margin: 0 auto 12px;
           display: flex; align-items: center; justify-content: center;
         }
         @media (min-width: 601px) {
@@ -308,22 +314,20 @@ export default function WelcomePopup() {
           background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25);
           border-radius: 99px; font-size: 0.68rem; font-weight: 600;
           letter-spacing: 0.06em; text-transform: uppercase; color: var(--green-400);
-          margin-bottom: 12px;
+          margin-bottom: 10px;
         }
         .wp-title {
           font-family: var(--font-d);
-          font-size: clamp(1.15rem, 5vw, 1.65rem);
+          font-size: clamp(1.1rem, 5vw, 1.6rem);
           font-weight: 800; letter-spacing: -0.03em;
-          color: var(--text-1); margin-bottom: 8px; position: relative;
+          color: var(--text-1); margin-bottom: 8px;
         }
         .wp-sub {
           font-size: 0.84rem; color: var(--text-3);
-          line-height: 1.7; margin-bottom: 18px; position: relative;
+          line-height: 1.7; margin-bottom: 16px;
         }
         .wp-sub strong { color: var(--text-2); }
-        .wp-actions {
-          display: flex; gap: 10px; flex-direction: column; margin-bottom: 12px;
-        }
+        .wp-actions { display: flex; gap: 10px; flex-direction: column; margin-bottom: 12px; }
         .wp-btn-yes {
           display: flex; align-items: center; justify-content: center; gap: 8px;
           padding: 13px 20px; min-height: 48px;
@@ -349,7 +353,7 @@ export default function WelcomePopup() {
           border-radius: var(--radius-sm); color: var(--text-3);
           font-size: 0.85rem; padding: 10px 16px; min-height: 44px;
           cursor: pointer; font-family: var(--font);
-          transition: all 0.2s var(--ease);
+          transition: all 0.2s var(--ease); width: 100%;
         }
         .wp-btn-back:hover { color: var(--text-1); border-color: var(--border-mid); }
         .wp-input-wrap { position: relative; width: 100%; text-align: left; }
@@ -382,36 +386,21 @@ export default function WelcomePopup() {
           display: flex; align-items: center; justify-content: center;
           overflow: hidden; position: relative;
         }
-        .wp-avatar-initials {
-          font-size: 1.4rem; font-weight: 800; color: var(--green-400); letter-spacing: -0.02em;
-        }
+        .wp-avatar-initials { font-size: 1.4rem; font-weight: 800; color: var(--green-400); }
         .wp-avatar-tick {
           position: absolute; bottom: 2px; right: 2px;
           width: 20px; height: 20px; border-radius: 50%;
           background: var(--green-600); border: 2px solid #0d2010;
           display: flex; align-items: center; justify-content: center;
         }
-        @keyframes wp-spin { to { transform: rotate(360deg); } }
-        @keyframes popUp {
-          from { opacity: 0; transform: translate(-50%, calc(-50% + 24px)) scale(0.95); }
-          to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-        }
-        @keyframes popDown {
-          from { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-          to   { opacity: 0; transform: translate(-50%, calc(-50% + 16px)) scale(0.96); }
-        }
-        @media (max-width: 600px) {
-          @keyframes popUp {
-            from { opacity: 0; transform: translateY(100%); }
-            to   { opacity: 1; transform: translateY(0); }
-          }
-          @keyframes popDown {
-            from { opacity: 1; transform: translateY(0); }
-            to   { opacity: 0; transform: translateY(100%); }
-          }
-        }
-        @keyframes fadeOut { from { opacity: 1; } to { opacity: 0; } }
-        @keyframes fadeIn  { from { opacity: 0; } to { opacity: 1; } }
+
+        @keyframes wp-spin  { to { transform: rotate(360deg); } }
+        @keyframes popUp    { from { opacity:0; transform:translate(-50%,calc(-50% + 20px)) scale(0.96); } to { opacity:1; transform:translate(-50%,-50%) scale(1); } }
+        @keyframes popDown  { from { opacity:1; transform:translate(-50%,-50%) scale(1); } to { opacity:0; transform:translate(-50%,calc(-50% + 16px)) scale(0.96); } }
+        @keyframes slideUp  { from { opacity:1; transform:translateY(100%); } to { opacity:1; transform:translateY(0); } }
+        @keyframes slideDown{ from { opacity:1; transform:translateY(0); } to { opacity:1; transform:translateY(100%); } }
+        @keyframes fadeOut  { from { opacity:1; } to { opacity:0; } }
+        @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
       `}</style>
     </>
   );

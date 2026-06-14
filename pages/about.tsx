@@ -25,8 +25,7 @@ export default function AboutPage() {
         </div>
 
         {/* Who we are */}
-        <div className="anim-fade-up" style={{
-          marginBottom: 24, padding: '36px 40px',
+        <div className="anim-fade-up about-hero-card" style={{
           background: 'linear-gradient(160deg, #0c1a0f, #081208)',
           border: '1px solid var(--border-mid)', borderRadius: 'var(--radius)',
           position: 'relative', overflow: 'hidden',
@@ -43,7 +42,7 @@ export default function AboutPage() {
         </div>
 
         {/* 3 pillars */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(270px, 1fr))', gap: 16, marginBottom: 24 }}>
+        <div className="about-values-grid">
           {[
             {
               icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
@@ -97,7 +96,7 @@ export default function AboutPage() {
             This website serves as a real-time financial transparency dashboard where every member can stay fully informed about how group funds are managed. No hidden records. No private tracking. Everything is visible to all members.
           </p>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 12 }}>
+          <div className="about-principles-grid">
             {[
               'View total contributions from all members',
               'Track reunion fund progress in real time',
@@ -119,7 +118,7 @@ export default function AboutPage() {
         </div>
 
         {/* 2026 Reunion + Financial responsibility */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16, marginBottom: 24 }}>
+        <div className="about-contact-grid">
           <div className="card" style={{ cursor: 'pointer' }} onClick={() => router.push('/reunion-fund')}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
               <span className="badge badge-yellow"><span className="badge-dot" />Active</span>
@@ -151,11 +150,9 @@ export default function AboutPage() {
         </div>
 
         {/* Closing note */}
-        <div className="anim-fade-up" style={{
-          marginBottom: 56, padding: '36px 40px',
+        <div className="anim-fade-up about-cta-card" style={{
           background: 'linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02))',
           border: '1px solid rgba(34,197,94,0.2)', borderRadius: 'var(--radius)',
-          textAlign: 'center',
         }}>
           <div style={{ fontFamily: 'var(--font-d)', fontSize: '1.4rem', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 16 }}>
             More Than a Financial Dashboard

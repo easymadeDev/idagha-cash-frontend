@@ -114,14 +114,7 @@ export default function ReunionFundPage() {
         </div>
 
         {/* Main progress card */}
-        <div style={{
-          marginBottom: 28, padding: '40px',
-          background: 'linear-gradient(160deg, #0c1a0f, #081208)',
-          border: '1px solid var(--border-mid)',
-          borderRadius: 'var(--radius)',
-          position: 'relative', overflow: 'hidden',
-          animation: 'fadeUp 0.6s var(--ease) both',
-        }}>
+        <div className="rf-progress-card">
           <div style={{ position: 'absolute', top: -80, right: -80, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,197,94,0.12), transparent)', pointerEvents: 'none' }} />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 24, marginBottom: 32, position: 'relative' }}>
@@ -157,7 +150,7 @@ export default function ReunionFundPage() {
             <div className="progress-fill" style={{ width: `${pct}%` }} />
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 12 }}>
+          <div className="rf-stats-grid">
             {[
               { label: 'Raised', val: rf ? formatNaira(rf.raisedAmount) : '₦0', color: 'var(--green-400)' },
               { label: 'Remaining', val: rf ? formatNaira(rf.remaining) : '₦3,000,000', color: 'var(--yellow)' },
@@ -173,13 +166,7 @@ export default function ReunionFundPage() {
         </div>
 
         {/* Per-member how-it-works banner */}
-        <div style={{
-          marginBottom: 28, padding: '20px 24px',
-          background: 'linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02))',
-          border: '1px solid rgba(34,197,94,0.2)', borderRadius: 'var(--radius)',
-          display: 'flex', gap: 20, alignItems: 'flex-start', flexWrap: 'wrap',
-          animation: 'fadeUp 0.6s var(--ease) 0.15s both',
-        }}>
+        <div className="rf-how-banner">
           {[
             { icon: '₦', title: '₦10,000 per member', desc: 'Each registered member is expected to contribute ₦10,000 toward the 2026 reunion.' },
             { icon: '↗', title: 'Pay any amount', desc: 'You can pay in installments — any amount at any time. Your balance updates instantly.' },
@@ -231,7 +218,7 @@ export default function ReunionFundPage() {
               </div>
             )}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
+            <div className="rf-member-grid">
               {members.map((m: any, i: number) => (
                 <MemberPaymentCard key={m.name} member={m} memberTarget={memberTarget} index={i} />
               ))}
@@ -277,7 +264,7 @@ export default function ReunionFundPage() {
         {/* How it works */}
         <div className="card">
           <div className="section-title" style={{ marginBottom: 20 }}>How the Reunion Fund Works</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 16 }}>
+          <div className="rf-steps-grid">
             {[
               { num: '01', title: 'Each member: ₦10,000', desc: 'Every registered member contributes ₦10,000 total. You can spread this across multiple payments — no fixed installment size.' },
               { num: '02', title: 'Pay any amount, any time', desc: 'Pay ₦500, ₦2,000, ₦5,000 — whatever you can. Your running balance is tracked until you hit ₦10,000.' },

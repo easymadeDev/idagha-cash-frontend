@@ -102,7 +102,7 @@ export default function ContributionsPage() {
 
         {/* Content */}
         {isLoading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(300px,1fr))', gap: 14 }}>
+          <div className="contrib-grid">
             {[...Array(6)].map((_, i) => (
               <div key={i} className="skeleton" style={{ height: 84, borderRadius: 'var(--radius)' }} />
             ))}

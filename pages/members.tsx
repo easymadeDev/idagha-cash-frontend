@@ -85,13 +85,7 @@ export default function MembersPage() {
         </div>
 
         {/* Wallet CTA */}
-        <div style={{
-          marginBottom: 36, padding: '24px 28px',
-          background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.03))',
-          border: '1px solid rgba(34,197,94,0.22)', borderRadius: 'var(--radius)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16,
-          animation: 'fadeUp 0.6s var(--ease) 0.3s both',
-        }}>
+        <div className="members-cta-bar">
           <div>
             <div style={{ fontWeight: 800, fontSize: '1.05rem', marginBottom: 5, fontFamily: 'var(--font-d)' }}>
               Support with Any Amount
@@ -125,7 +119,7 @@ export default function MembersPage() {
               : 'No members match your search.'}
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(290px, 1fr))', gap: 14 }}>
+          <div className="members-grid">
             {filtered.map((m: any, i: number) => {
               const [bg, fg] = avatarColors[i % avatarColors.length];
               const contrib = contribByName[m.name] || { total: 0, count: 0, last: '' };
@@ -220,6 +214,25 @@ export default function MembersPage() {
           Member information is publicly visible for group transparency. Contact the Secretary to register or update your details.
         </div>
       </div>
+      <style>{`
+        .members-cta-bar {
+          margin-bottom: 36px; padding: 20px 22px;
+          background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.03));
+          border: 1px solid rgba(34,197,94,0.22); border-radius: var(--radius);
+          display: flex; align-items: center; justify-content: space-between;
+          flex-wrap: wrap; gap: 16px;
+          animation: fadeUp 0.6s var(--ease) 0.3s both;
+        }
+        .members-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+          gap: 14px;
+        }
+        @media (max-width: 600px) {
+          .members-cta-bar { padding: 16px 14px; }
+          .members-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
     </Layout>
   );
 }
