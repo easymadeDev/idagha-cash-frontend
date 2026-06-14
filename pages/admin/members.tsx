@@ -275,7 +275,7 @@ export default function AdminMembers() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
                 <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                   <label className="form-label">Full Name *</label>
-                  <input className="form-input" value={form.name} onChange={f('name')} required placeholder="e.g. Isaac Sunday Udoh" />
+                  <input className="form-input" value={form.name} onChange={f('name')} required placeholder="e.g. Chukwuemeka Obi" />
                 </div>
 
                 <div className="form-group">
@@ -304,7 +304,7 @@ export default function AdminMembers() {
 
                 <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                   <label className="form-label">Email Address</label>
-                  <input className="form-input" type="email" value={form.email} onChange={f('email')} placeholder="e.g. isaac@email.com" />
+                  <input className="form-input" type="email" value={form.email} onChange={f('email')} placeholder="e.g. emeka@email.com" />
                 </div>
 
                 <div className="form-group">

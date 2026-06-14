@@ -131,7 +131,7 @@ export default function WelcomePopup() {
                 <input
                   ref={inputRef}
                   className="wp-input"
-                  placeholder="e.g. Isaac Sunday, 08012345678, isaac@email.com"
+                  placeholder="e.g. Chukwuemeka Obi, 08034567890, emeka@email.com"
                   value={query}
                   onChange={(e) => { setQuery(e.target.value); setVerifyError(''); }}
                   disabled={checking}

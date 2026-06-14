@@ -163,7 +163,7 @@ export default function RegisterPage() {
 
               <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                 <label className="form-label">Full Name *</label>
-                <input className="form-input" value={form.name} onChange={f('name')} required placeholder="e.g. Isaac Sunday Udoh" />
+                <input className="form-input" value={form.name} onChange={f('name')} required placeholder="e.g. Chukwuemeka Obi" />
               </div>
 
               <div className="form-group">
