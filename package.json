@@ -25,5 +25,13 @@
     "@types/react": "^19.2.17",
     "@types/react-dom": "^19.2.3",
     "typescript": "^6.0.3"
-  }
+  },
+  "browserslist": [
+    "chrome 80",
+    "firefox 80",
+    "safari 13",
+    "ios_saf 13",
+    "edge 80",
+    "samsung 10"
+  ]
 }
