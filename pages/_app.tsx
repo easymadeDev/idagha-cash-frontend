@@ -16,6 +16,7 @@ export const useGate = () => useContext(GateContext);
 const EXEMPT = (pathname: string) =>
   pathname === '/' ||
   pathname === '/home' ||
+  pathname === '/test' ||
   pathname.startsWith('/admin');
 
 export default function App({ Component, pageProps }: AppProps) {
