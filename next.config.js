@@ -1,10 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
-  // Target older browsers including iOS 15 (iPhone 7)
-  experimental: {
-    legacyBrowsers: false,
-  },
+  swcMinify: false,
   async rewrites() {
     return [
       {
