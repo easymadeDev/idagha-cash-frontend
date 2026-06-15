@@ -90,12 +90,11 @@ export default function WelcomePopup() {
 
   if (!visible) return null;
 
-  const overlayAnim = animOut ? 'fadeOut 0.3s var(--ease) forwards' : 'fadeIn 0.3s var(--ease) forwards';
   const popupClass = `wp-popup${animOut ? ' wp-popup-out' : ' wp-popup-in'}`;
 
   return (
     <>
-      <div className="wp-overlay" style={{ animation: overlayAnim }} />
+      <div className={`wp-overlay${animOut ? ' wp-overlay-out' : ' wp-overlay-in'}`} onClick={() => dismiss()} />
       <div className={popupClass} onClick={(e) => e.stopPropagation()}>
         <div className="wp-drag-handle" />
         <div className="wp-glow" />
@@ -299,7 +298,10 @@ export default function WelcomePopup() {
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
           z-index: 9000;
+          cursor: pointer;
         }
+        .wp-overlay-in  { animation: fadeIn  0.3s ease forwards; }
+        .wp-overlay-out { animation: fadeOut 0.3s ease forwards; }
 
         @keyframes wp-shake {
           0%, 100% { transform: translateX(0); }
@@ -336,8 +338,8 @@ export default function WelcomePopup() {
             border-radius: 24px;
             padding: 36px 32px 28px;
           }
-          .wp-popup-in  { animation: popUp   0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
-          .wp-popup-out { animation: popDown  0.3s  cubic-bezier(0.4,0,0.2,1) forwards; }
+          .wp-popup-in  { animation: popUp   0.35s ease forwards; }
+          .wp-popup-out { animation: popDown  0.3s  ease forwards; }
         }
 
         /* ── Mobile: centered card ── */
@@ -353,8 +355,8 @@ export default function WelcomePopup() {
             padding: 18px 16px 22px;
             margin: 0;
           }
-          .wp-popup-in  { animation: popUp   0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
-          .wp-popup-out { animation: popDown  0.3s  cubic-bezier(0.4,0,0.2,1) forwards; }
+          .wp-popup-in  { animation: popUp   0.35s ease forwards; }
+          .wp-popup-out { animation: popDown  0.3s  ease forwards; }
           .wp-title { font-size: clamp(1rem, 5vw, 1.35rem); }
           .wp-sub { font-size: clamp(0.72rem, 3vw, 0.82rem); line-height: 1.55; margin-bottom: 12px; }
           .wp-logo-wrap { width: 62px; height: 62px; margin-bottom: 8px; }
@@ -404,12 +406,10 @@ export default function WelcomePopup() {
         }
         .wp-logo-ring {
           position: absolute; inset: -7px; border-radius: 50%;
-          background: conic-gradient(from 0deg, transparent 0%, rgba(34,197,94,0.5) 25%, rgba(74,222,128,0.85) 50%, rgba(34,197,94,0.5) 75%, transparent 100%);
-          animation: wp-spin 3s linear infinite;
-        }
-        .wp-logo-ring::after {
-          content: ''; position: absolute; inset: 3px;
-          border-radius: 50%; background: #0d2010;
+          border: 3px solid transparent;
+          border-top-color: #4ade80;
+          border-right-color: rgba(34,197,94,0.4);
+          animation: wp-spin 1.8s linear infinite;
         }
         .wp-badge {
           display: inline-flex; align-items: center; gap: 6px;
