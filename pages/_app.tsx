@@ -24,8 +24,11 @@ export default function App({ Component, pageProps }: AppProps) {
   const [cleared, setClearedState] = useState(false);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && sessionStorage.getItem(SESSION_KEY) === '1') {
-      setClearedState(true);
+    if (typeof window !== 'undefined') {
+      const val = sessionStorage.getItem(SESSION_KEY);
+      if (val === '1') {
+        setClearedState(true);
+      }
     }
   }, []);
 

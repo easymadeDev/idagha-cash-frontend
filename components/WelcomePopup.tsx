@@ -25,9 +25,11 @@ export default function WelcomePopup() {
   const pinRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Only show on /home and only if not yet cleared
-    if (router.pathname !== '/home' || cleared) return;
-    const t = setTimeout(() => setVisible(true), 500);
+    // Show on /home or / (index redirects to /home) only if not yet cleared
+    const onHome = router.pathname === '/home' || router.pathname === '/';
+    if (!onHome || cleared) return;
+    // Delay slightly to let router settle on iOS
+    const t = setTimeout(() => setVisible(true), 600);
     return () => clearTimeout(t);
   }, [router.pathname, cleared]);
 
