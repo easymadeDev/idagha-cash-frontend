@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
-import { useGate } from '../pages/_app';
+import { useGate } from '../lib/gate';
 
 type Step = 'pin' | 'question' | 'verify' | 'found' | 'notfound';
 

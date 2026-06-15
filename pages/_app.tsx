@@ -1,17 +1,11 @@
-import { useState, useEffect, createContext, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import '../styles/globals.css';
 import WelcomePopup from '../components/WelcomePopup';
+import { GateContext } from '../lib/gate';
 
 const SESSION_KEY = 'idagha_gate_cleared';
-
-export const GateContext = createContext<{
-  cleared: boolean;
-  setCleared: (v: boolean) => void;
-}>({ cleared: false, setCleared: () => {} });
-
-export const useGate = () => useContext(GateContext);
 
 const EXEMPT = (pathname: string) =>
   pathname === '/' ||

@@ -1,7 +1,7 @@
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import Image from 'next/image';
-import { useGate } from '../pages/_app';
+import { useGate } from '../lib/gate';
 
 const links = [
   { label: 'Home',         href: '/home' },
