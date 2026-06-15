@@ -326,7 +326,7 @@ export default function HomePage() {
             </div>
             <div className="hero-logo-wrap">
               <div style={{ position: 'absolute', inset: -24, background: 'radial-gradient(circle, rgba(34,197,94,0.15) 0%, transparent 70%)', borderRadius: '50%', animation: 'heroBreathe 5s ease-in-out infinite' }} />
-              <div style={{ position: 'absolute', inset: -2, borderRadius: '50%', background: 'conic-gradient(from 0deg, transparent 0%, rgba(34,197,94,0.3) 25%, transparent 50%, rgba(34,197,94,0.3) 75%, transparent 100%)', animation: 'spin 8s linear infinite', opacity: 0.6 }} />
+              <div style={{ position: 'absolute', inset: -2, borderRadius: '50%', border: '2px solid transparent', borderTopColor: 'rgba(34,197,94,0.5)', borderRightColor: 'rgba(34,197,94,0.2)', animation: 'spin 8s linear infinite', opacity: 0.7 }} />
               <Image src="/logo.png" alt="IDAGHA Alumni Logo" width={200} height={200}
                 className="hero-logo-img"
                 style={{ objectFit: 'contain', position: 'relative', zIndex: 1, filter: 'drop-shadow(0 0 30px rgba(34,197,94,0.5)) drop-shadow(0 0 60px rgba(34,197,94,0.2))', animation: 'heroLogoBob 6s ease-in-out infinite' }}
