@@ -81,7 +81,7 @@ export default function AdminAnnouncements() {
                     <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', lineHeight: 1.6 }}>{a.content}</p>
                     <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 8 }}>{formatDate(a.createdAt)}</p>
                   </div>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flexShrink: 0 }}>
+                  <div className="announce-actions">
                     <button className="btn btn-ghost btn-sm" onClick={() => openEdit(a)}>Edit</button>
                     <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(a)}>{a.isActive ? 'Hide' : 'Show'}</button>
                     <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(a._id)}>Delete</button>

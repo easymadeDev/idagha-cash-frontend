@@ -124,7 +124,7 @@ export default function AdminWallets() {
         </div>
 
         {/* Wallet list table */}
-        <div className="table-wrap">
+        <div className="table-wrap table-single-col">
           <table>
             <thead>
               <tr>
