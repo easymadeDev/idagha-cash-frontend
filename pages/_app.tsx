@@ -30,9 +30,6 @@ export default function App({ Component, pageProps }: AppProps) {
 
   return (
     <GateContext.Provider value={{ cleared, setCleared }}>
-      <Head>
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-      </Head>
       <WelcomePopup />
       <Component {...pageProps} />
     </GateContext.Provider>
