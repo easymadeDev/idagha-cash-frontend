@@ -94,7 +94,7 @@ export default function WelcomePopup() {
 
   return (
     <>
-      <div className={`wp-overlay${animOut ? ' wp-overlay-out' : ' wp-overlay-in'}`} onClick={() => dismiss()} />
+      <div className={`wp-overlay${animOut ? ' wp-overlay-out' : ' wp-overlay-in'}`} />
       <div className={popupClass} onClick={(e) => e.stopPropagation()}>
         <div className="wp-drag-handle" />
         <div className="wp-glow" />
@@ -298,7 +298,6 @@ export default function WelcomePopup() {
           backdrop-filter: blur(8px);
           -webkit-backdrop-filter: blur(8px);
           z-index: 9000;
-          cursor: pointer;
         }
         .wp-overlay-in  { animation: fadeIn  0.3s ease forwards; }
         .wp-overlay-out { animation: fadeOut 0.3s ease forwards; }
