@@ -714,8 +714,8 @@ tbody tr:hover td { background: var(--glow2); }
 
 @media (max-width: 480px) {
   /* ── Nav ── */
-  .nav-logo-img   { width: 32px; height: 32px; }
-  .nav-logo-title { font-size: 0.82rem; }
+  .nav-logo-img   { width: 34px; height: 34px; }
+  .nav-logo-title { font-size: 0.85rem; }
   .nav-logo-sub   { display: none; }
   .nav-logo       { gap: 8px; }
   .btn-nav-admin  { padding: 5px 9px; font-size: 0.7rem; }
@@ -811,9 +811,9 @@ tbody tr:hover td { background: var(--glow2); }
   .page-wrap { padding-top: 90px; }
 
   /* Nav */
-  .navbar       { height: 56px; }
-  .nav-logo-img { width: 26px; height: 26px; }
-  .nav-logo-title { font-size: 0.72rem; }
+  .navbar         { height: 52px; }
+  .nav-logo-img   { width: 32px; height: 32px; }
+  .nav-logo-text  { display: none; }
   .btn-nav-admin { padding: 4px 8px; font-size: 0.66rem; }
 
   /* Hero */

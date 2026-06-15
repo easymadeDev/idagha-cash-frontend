@@ -43,7 +43,7 @@ export default function Navbar() {
               priority
             />
           </div>
-          <div>
+          <div className="nav-logo-text">
             <div className="nav-logo-title">IDAGHA Alumni</div>
             <div className="nav-logo-sub">Class of 2018</div>
           </div>
