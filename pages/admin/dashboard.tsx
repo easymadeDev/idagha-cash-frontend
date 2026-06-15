@@ -74,7 +74,7 @@ export default function AdminDashboard() {
         </div>
 
         {/* Recent activity */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+        <div className="admin-dash-grid">
           {/* Recent contributions */}
           <div className="card">
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>

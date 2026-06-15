@@ -170,60 +170,41 @@ export default function AdminMembers() {
                 <th>Location</th>
                 <th>Occupation</th>
                 <th>Position</th>
-                <th>Birthday</th>
                 <th>Status</th>
                 <th>Actions</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={12} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>Loading…</td></tr>
+                <tr><td colSpan={11} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>Loading…</td></tr>
               ) : list.length === 0 ? (
-                <tr><td colSpan={12} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>No members yet. Add one above.</td></tr>
+                <tr><td colSpan={11} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>No members yet. Add one above.</td></tr>
               ) : list.map((m: any, i: number) => (
                 <tr key={m._id} style={{ opacity: m.isActive ? 1 : 0.5 }}>
-                  <td style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>{i + 1}</td>
-                  <td>
-                    <div style={{
-                      width: 36, height: 36, borderRadius: '50%', overflow: 'hidden',
-                      background: 'rgba(34,197,94,0.1)', display: 'flex', alignItems: 'center',
-                      justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0,
-                    }}>
-                      {m.photo ? (
-                        <img src={m.photo} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : (
-                        <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--green-400)' }}>
-                          {m.name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()}
-                        </span>
-                      )}
+                  <td className="hide-mobile" style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>{i + 1}</td>
+                  <td className="hide-mobile">
+                    <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', background: 'rgba(34,197,94,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0 }}>
+                      {m.photo ? <img src={m.photo} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--green-400)' }}>{m.name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()}</span>}
                     </div>
                   </td>
-                  <td style={{ fontWeight: 700, minWidth: 130 }}>{m.name}</td>
-                  <td style={{ color: 'var(--text-3)' }}>{m.nickname || '—'}</td>
-                  <td style={{ color: 'var(--text-3)' }}>{m.gender || '—'}</td>
-                  <td style={{ color: 'var(--text-3)', whiteSpace: 'nowrap' }}>{m.phone || '—'}</td>
-                  <td style={{ color: 'var(--text-3)' }}>{m.location || '—'}</td>
-                  <td style={{ color: 'var(--text-3)', maxWidth: 140, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.occupation || '—'}</td>
-                  <td>
-                    {m.position ? (
-                      <span className="badge badge-green">{m.position}</span>
-                    ) : (
-                      <span className="badge" style={{ background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)' }}>Member</span>
-                    )}
+                  <td data-label="Name" style={{ fontWeight: 700 }}>{m.name}</td>
+                  <td data-label="Nickname" style={{ color: 'var(--text-3)' }}>{m.nickname || '—'}</td>
+                  <td data-label="Gender" style={{ color: 'var(--text-3)' }}>{m.gender || '—'}</td>
+                  <td data-label="Phone" style={{ color: 'var(--text-3)' }}>{m.phone || '—'}</td>
+                  <td data-label="Location" style={{ color: 'var(--text-3)' }}>{m.location || '—'}</td>
+                  <td data-label="Occupation" style={{ color: 'var(--text-3)' }}>{m.occupation || '—'}</td>
+                  <td data-label="Position">
+                    {m.position ? <span className="badge badge-green">{m.position}</span> : <span className="badge" style={{ background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)' }}>Member</span>}
                   </td>
-                  <td style={{ color: 'var(--text-3)', whiteSpace: 'nowrap' }}>{m.birthday || '—'}</td>
-                  <td>
-                    <span className={`badge ${m.isActive ? 'badge-green' : ''}`}
-                      style={!m.isActive ? { background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)' } : {}}>
+                  <td data-label="Status">
+                    <span className={`badge ${m.isActive ? 'badge-green' : ''}`} style={!m.isActive ? { background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)' } : {}}>
                       {m.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(m)}>Edit</button>
-                      <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(m)}>{m.isActive ? 'Deactivate' : 'Activate'}</button>
-                      <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(m._id)}>Delete</button>
-                    </div>
+                  <td className="actions-cell">
+                    <button className="btn btn-ghost btn-sm" onClick={() => openEdit(m)}>Edit</button>
+                    <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(m)}>{m.isActive ? 'Deactivate' : 'Activate'}</button>
+                    <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(m._id)}>Delete</button>
                   </td>
                 </tr>
               ))}

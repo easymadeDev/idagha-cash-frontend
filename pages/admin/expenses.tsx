@@ -219,7 +219,7 @@ export default function AdminExpenses() {
         <div className="table-wrap">
           <table>
             <thead>
-              <tr><th>#</th><th>Title</th><th>Amount</th><th>Wallet</th><th>Date</th><th>Category</th><th>Approved By</th><th>Actions</th></tr>
+              <tr><th>#</th><th>Title</th><th>Amount</th><th>Wallet</th><th>Date</th><th>Category</th><th>Actions</th></tr>
             </thead>
             <tbody>
               {isLoading ? (
@@ -230,36 +230,25 @@ export default function AdminExpenses() {
                 const namedWallet = e.walletId ? getWalletById(e.walletId) : null;
                 return (
                   <tr key={e._id}>
-                    <td style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>{i + 1}</td>
-                    <td style={{ fontWeight: 600 }}>{e.title}</td>
-                    <td style={{ color: 'var(--red)', fontWeight: 700 }}>{formatNaira(e.amount)}</td>
-                    <td>
+                    <td className="hide-mobile" style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>{i + 1}</td>
+                    <td data-label="Title" style={{ fontWeight: 600 }}>{e.title}</td>
+                    <td data-label="Amount" style={{ color: 'var(--red)', fontWeight: 700 }}>{formatNaira(e.amount)}</td>
+                    <td data-label="Wallet">
                       {namedWallet ? (
-                        <span style={{
-                          fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: 99,
-                          background: `${namedWallet.color}1a`, color: namedWallet.color,
-                          border: `1px solid ${namedWallet.color}44`,
-                        }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: 99, background: `${namedWallet.color}1a`, color: namedWallet.color, border: `1px solid ${namedWallet.color}44` }}>
                           {namedWallet.name}
                         </span>
                       ) : (
-                        <span style={{
-                          fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: 99,
-                          background: legacyBg(e.wallet), color: legacyColor(e.wallet),
-                          border: `1px solid ${legacyBorder(e.wallet)}`,
-                        }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: 99, background: legacyBg(e.wallet), color: legacyColor(e.wallet), border: `1px solid ${legacyBorder(e.wallet)}` }}>
                           {legacyLabel(e.wallet)}
                         </span>
                       )}
                     </td>
-                    <td style={{ color: 'var(--text-3)' }}>{formatDate(e.date)}</td>
-                    <td><span className="badge badge-red">{e.category}</span></td>
-                    <td style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>{e.approvedBy || '—'}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => openEdit(e)}>Edit</button>
-                        <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(e._id)}>Delete</button>
-                      </div>
+                    <td data-label="Date" style={{ color: 'var(--text-3)' }}>{formatDate(e.date)}</td>
+                    <td data-label="Category"><span className="badge badge-red">{e.category}</span></td>
+                    <td className="actions-cell">
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(e)}>Edit</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(e._id)}>Delete</button>
                     </td>
                   </tr>
                 );

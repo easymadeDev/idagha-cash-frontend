@@ -714,9 +714,10 @@ tbody tr:hover td { background: var(--glow2); }
 
 @media (max-width: 480px) {
   /* ── Nav ── */
-  .nav-logo-img   { width: 30px; height: 30px; }
-  .nav-logo-title { font-size: 0.78rem; }
+  .nav-logo-img   { width: 32px; height: 32px; }
+  .nav-logo-title { font-size: 0.82rem; }
   .nav-logo-sub   { display: none; }
+  .nav-logo       { gap: 8px; }
   .btn-nav-admin  { padding: 5px 9px; font-size: 0.7rem; }
 
   /* ── Hero ── */
@@ -1006,6 +1007,70 @@ tbody tr:hover td { background: var(--glow2); }
   .rf-how-banner    { padding: 16px 14px; gap: 14px; }
   .rf-steps-grid    { grid-template-columns: 1fr; gap: 14px; }
   .rf-stats-grid    { grid-template-columns: 1fr 1fr; gap: 8px; }
+}
+
+/* ─── ADMIN DASHBOARD GRID ─────────────────────── */
+.admin-dash-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 20px;
+}
+@media (max-width: 768px) {
+  .admin-dash-grid { grid-template-columns: 1fr; gap: 16px; }
+}
+
+/* ─── ADMIN TABLE → CARD on mobile ─────────────── */
+@media (max-width: 768px) {
+  /* Hide table headers */
+  .table-wrap table thead { display: none; }
+
+  /* Each row becomes a card */
+  .table-wrap table, .table-wrap tbody, .table-wrap tr, .table-wrap td {
+    display: block; width: 100%;
+  }
+  .table-wrap tr {
+    margin-bottom: 12px;
+    background: var(--grad-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 12px 14px;
+  }
+  .table-wrap td {
+    padding: 4px 0 !important;
+    font-size: 0.82rem !important;
+    border: none !important;
+    display: flex; align-items: center; gap: 8px;
+    flex-wrap: wrap;
+  }
+  /* Label each cell using data-label */
+  .table-wrap td[data-label]::before {
+    content: attr(data-label);
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--text-3);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+  /* Hide index and photo columns on mobile */
+  .table-wrap td.hide-mobile { display: none !important; }
+  /* Action buttons row */
+  .table-wrap td.actions-cell {
+    padding-top: 10px !important;
+    border-top: 1px solid var(--border) !important;
+    margin-top: 6px;
+    justify-content: flex-start;
+    gap: 8px;
+  }
+}
+
+/* ─── ADMIN MODAL FORMS: stack to 1 col on mobile ── */
+@media (max-width: 600px) {
+  .modal { max-width: 100% !important; margin: 8px !important; padding: 16px 14px 20px !important; max-height: 90vh; overflow-y: auto; }
+  .modal [style*="gridTemplateColumns: '1fr 1fr'"],
+  .modal [style*='gridTemplateColumns: "1fr 1fr"'],
+  .modal [style*="grid-template-columns: 1fr 1fr"] {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 /* ── Touch targets ── */

@@ -146,32 +146,24 @@ export default function AdminWallets() {
                 const s = getStats(w._id);
                 return (
                   <tr key={w._id}>
-                    <td style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>{i + 1}</td>
-                    <td style={{ fontWeight: 600 }}>{w.name}</td>
-                    <td>
-                      <span style={{
-                        fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: 99,
-                        background: 'rgba(255,255,255,0.05)',
-                        color: 'var(--text-2)',
-                        border: '1px solid var(--border)',
-                        textTransform: 'capitalize',
-                      }}>
+                    <td className="hide-mobile" style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>{i + 1}</td>
+                    <td data-label="Name" style={{ fontWeight: 600 }}>{w.name}</td>
+                    <td data-label="Type">
+                      <span style={{ fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: 99, background: 'rgba(255,255,255,0.05)', color: 'var(--text-2)', border: '1px solid var(--border)', textTransform: 'capitalize' }}>
                         {w.type}
                       </span>
                     </td>
-                    <td style={{ color: 'var(--text-3)', fontSize: '0.85rem', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.description || '—'}</td>
-                    <td>
+                    <td className="hide-mobile" style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>{w.description || '—'}</td>
+                    <td data-label="Color">
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <div style={{ width: 18, height: 18, borderRadius: 4, background: w.color || '#22c55e', border: '1px solid rgba(255,255,255,0.1)' }} />
+                        <div style={{ width: 18, height: 18, borderRadius: 4, background: w.color || '#22c55e', border: '1px solid rgba(255,255,255,0.1)', flexShrink: 0 }} />
                         <span style={{ fontSize: '0.78rem', color: 'var(--text-3)', fontFamily: 'monospace' }}>{w.color}</span>
                       </div>
                     </td>
-                    <td style={{ color: s.balance >= 0 ? 'var(--green-400)' : 'var(--red)', fontWeight: 700 }}>{formatNaira(s.balance)}</td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => openEdit(w)}>Edit</button>
-                        <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(w._id)}>Delete</button>
-                      </div>
+                    <td data-label="Balance" style={{ color: s.balance >= 0 ? 'var(--green-400)' : 'var(--red)', fontWeight: 700 }}>{formatNaira(s.balance)}</td>
+                    <td className="actions-cell">
+                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(w)}>Edit</button>
+                      <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(w._id)}>Delete</button>
                     </td>
                   </tr>
                 );
