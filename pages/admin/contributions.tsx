@@ -30,7 +30,7 @@ const CAT_META: Record<string, { label: string; color: string; bg: string }> = {
 };
 
 export default function AdminContributions() {
-  const { data: contributions, isLoading } = useSWR('/api/contributions', fetcher);
+  const { data: contributions, isLoading } = useSWR('/api/contributions/admin/all', authFetcher);
   const { data: members } = useSWR('/api/members/admin/all', authFetcher);
   const { data: wallets } = useSWR('/api/wallets', fetcher);
   const { data: walletStats } = useSWR('/api/stats/wallets', fetcher);
@@ -42,6 +42,16 @@ export default function AdminContributions() {
   const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [filterCat, setFilterCat] = useState('all');
+  const [activeTab, setActiveTab] = useState<'approved' | 'pending'>('approved');
+  const [receiptViewer, setReceiptViewer] = useState<string | null>(null);
+
+  // Approval modal state
+  const [approveModal, setApproveModal] = useState<any>(null); // holds the pending contribution
+  const [approveWalletId, setApproveWalletId] = useState('');
+  const [approveMemberId, setApproveMemberId] = useState('');
+  const [approveCategory, setApproveCategory] = useState('general');
+  const [approving, setApproving] = useState(false);
+  const [approveError, setApproveError] = useState('');
 
   const list = Array.isArray(contributions) ? contributions : [];
   const memberList = Array.isArray(members)
@@ -55,7 +65,10 @@ export default function AdminContributions() {
     return s ? s.balance : 0;
   };
 
-  const filtered = filterCat === 'all' ? list : list.filter((c: any) => c.category === filterCat);
+  const approvedList = list.filter((c: any) => c.status !== 'pending');
+  const pendingList = list.filter((c: any) => c.status === 'pending');
+
+  const filtered = filterCat === 'all' ? approvedList : approvedList.filter((c: any) => c.category === filterCat);
 
   const getWalletName = (walletId: string) => walletList.find((w: any) => w._id === walletId)?.name ?? null;
   const getWalletColor = (walletId: string) => walletList.find((w: any) => w._id === walletId)?.color ?? '#22c55e';
@@ -63,11 +76,11 @@ export default function AdminContributions() {
   // How much has a member already paid toward reunion fund (from existing records)
   const reunionPaidByMember = useMemo(() => {
     const map: Record<string, number> = {};
-    list.filter((c: any) => c.category === 'reunion-fund').forEach((c: any) => {
+    approvedList.filter((c: any) => c.category === 'reunion-fund').forEach((c: any) => {
       map[c.contributorName] = (map[c.contributorName] || 0) + c.amount;
     });
     return map;
-  }, [list]);
+  }, [approvedList]);
 
   const isReunion = form.category === 'reunion-fund';
   const isMonthlyDues = form.category === 'monthly-dues';
@@ -136,11 +149,48 @@ export default function AdminContributions() {
   const remove = async (id: string) => {
     try {
       await api.delete(`/contributions/${id}`);
-      mutate('/api/contributions');
+      mutate('/api/contributions/admin/all');
       mutate('/api/stats/summary');
       mutate('/api/stats/wallets');
     } catch { /* silent */ }
     setDeleteId(null);
+  };
+
+
+  const openApproveModal = (c: any) => {
+    // Pre-select wallet based on category
+    const cat = c.category || 'general';
+    let defaultWallet = walletList.find((w: any) => w.type === 'general')?._id || '';
+    if (cat === 'reunion-fund') defaultWallet = walletList.find((w: any) => w.type === 'reunion')?._id || defaultWallet;
+    // Pre-select member if contributorName matches
+    const matched = memberList.find((m: any) => m.name.toLowerCase() === c.contributorName?.toLowerCase());
+    setApproveModal(c);
+    setApproveWalletId(defaultWallet);
+    setApproveCategory(cat);
+    setApproveMemberId(matched?._id || '');
+    setApproveError('');
+  };
+
+  const confirmApprove = async () => {
+    if (!approveWalletId) { setApproveError('Please select a wallet to credit.'); return; }
+    setApproving(true);
+    setApproveError('');
+    try {
+      await api.put(`/contributions/${approveModal._id}/approve`, {
+        walletId: approveWalletId,
+        category: approveCategory,
+        memberId: approveMemberId || undefined,
+      });
+      mutate('/api/contributions/admin/all');
+      mutate('/api/stats/summary');
+      mutate('/api/stats/wallets');
+      mutate('/api/activity?limit=25');
+      setApproveModal(null);
+    } catch (err: any) {
+      setApproveError(err.response?.data?.message || 'Failed to approve.');
+    } finally {
+      setApproving(false);
+    }
   };
 
   return (
@@ -177,12 +227,39 @@ export default function AdminContributions() {
           </div>
         )}
 
-        {/* Category filter pills */}
-        <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
-          {['all', ...CATS].map((cat) => {
-            const count = cat === 'all' ? list.length : list.filter((c: any) => c.category === cat).length;
-            const total = (cat === 'all' ? list : list.filter((c: any) => c.category === cat)).reduce((s: number, c: any) => s + c.amount, 0);
-            const active = filterCat === cat;
+        {/* Tabs */}
+        <div style={{ display: 'flex', gap: 16, borderBottom: '1px solid var(--border)', marginBottom: 24 }}>
+          {(['approved', 'pending'] as const).map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              style={{
+                background: 'none', border: 'none', padding: '0 0 12px', cursor: 'pointer',
+                fontWeight: activeTab === tab ? 800 : 600,
+                color: activeTab === tab ? 'var(--green-400)' : 'var(--text-3)',
+                borderBottom: `3px solid ${activeTab === tab ? 'var(--green-400)' : 'transparent'}`,
+                fontSize: '0.9rem', position: 'relative'
+              }}
+            >
+              {tab === 'approved' ? 'Approved Records' : 'Pending Approvals'}
+              {tab === 'pending' && pendingList.length > 0 && (
+                <span style={{
+                  background: 'var(--red)', color: '#fff', fontSize: '0.65rem', fontWeight: 800,
+                  padding: '1px 6px', borderRadius: 99, marginLeft: 8
+                }}>{pendingList.length}</span>
+              )}
+            </button>
+          ))}
+        </div>
+
+        {activeTab === 'approved' ? (
+          <>
+            {/* Category filter pills */}
+            <div style={{ display: 'flex', gap: 8, marginBottom: 20, flexWrap: 'wrap' }}>
+              {['all', ...CATS].map((cat) => {
+                const count = cat === 'all' ? approvedList.length : approvedList.filter((c: any) => c.category === cat).length;
+                const total = (cat === 'all' ? approvedList : approvedList.filter((c: any) => c.category === cat)).reduce((s: number, c: any) => s + c.amount, 0);
+                const active = filterCat === cat;
             const meta = CAT_META[cat];
             return (
               <button key={cat} onClick={() => setFilterCat(cat)} style={{
@@ -199,63 +276,224 @@ export default function AdminContributions() {
           })}
         </div>
 
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr><th>#</th><th>Name</th><th>Amount</th><th>Wallet</th><th>Date</th><th>Category</th><th>Note</th><th>Actions</th></tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>Loading…</td></tr>
-              ) : filtered.length === 0 ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>No contributions found.</td></tr>
-              ) : filtered.map((c: any, i: number) => {
-                const meta = CAT_META[c.category] || CAT_META.general;
-                return (
-                  <tr key={c._id}>
-                    <td style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>{i + 1}</td>
-                    <td style={{ fontWeight: 600 }}>{c.contributorName}</td>
-                    <td style={{ color: 'var(--green-400)', fontWeight: 700 }}>{formatNaira(c.amount)}</td>
-                    <td>
-                      {c.walletId && getWalletName(c.walletId) ? (
-                        <span style={{
-                          fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: 99,
-                          background: `${getWalletColor(c.walletId)}1a`,
-                          color: getWalletColor(c.walletId),
-                          border: `1px solid ${getWalletColor(c.walletId)}44`,
-                        }}>
-                          {getWalletName(c.walletId)}
-                        </span>
-                      ) : (
-                        <span style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>—</span>
-                      )}
-                    </td>
-                    <td style={{ color: 'var(--text-3)' }}>{formatDate(c.date)}</td>
-                    <td>
-                      <span style={{
-                        fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: 99,
-                        background: meta.bg, color: meta.color,
-                        border: `1px solid ${meta.color}33`, textTransform: 'capitalize',
-                      }}>
-                        {meta.label}
-                      </span>
-                    </td>
-                    <td style={{ color: 'var(--text-3)', fontSize: '0.85rem', maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {c.note || '—'}
-                    </td>
-                    <td>
-                      <div style={{ display: 'flex', gap: 6 }}>
-                        <button className="btn btn-ghost btn-sm" onClick={() => openEdit(c)}>Edit</button>
-                        <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(c._id)}>Delete</button>
-                      </div>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+        <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+          {isLoading ? (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 40, color: 'var(--text-3)', background: 'var(--bg-base)', borderRadius: 'var(--radius)' }}>
+              Loading…
+            </div>
+          ) : filtered.length === 0 ? (
+            <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 40, color: 'var(--text-3)', background: 'var(--bg-base)', borderRadius: 'var(--radius)' }}>
+              No contributions found.
+            </div>
+          ) : filtered.map((c: any) => {
+            const meta = CAT_META[c.category] || CAT_META.general;
+            return (
+              <div key={c._id} style={{ background: 'var(--bg-base)', borderRadius: 'var(--radius)', padding: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                  <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-1)' }}>{c.contributorName}</div>
+                  <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '4px 10px', borderRadius: 99, background: meta.bg, color: meta.color, border: `1px solid ${meta.color}33`, textTransform: 'capitalize' }}>
+                    {meta.label}
+                  </span>
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.02)', padding: '10px 12px', borderRadius: 8 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Amount</span>
+                    <span style={{ color: 'var(--green-400)', fontWeight: 800, fontSize: '1.2rem' }}>{formatNaira(c.amount)}</span>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Date</span>
+                    <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{formatDate(c.date)}</span>
+                  </div>
+                </div>
+
+                {c.walletId && getWalletName(c.walletId) && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>Wallet:</span>
+                    <span style={{
+                      fontSize: '0.72rem', fontWeight: 700, padding: '3px 9px', borderRadius: 99,
+                      background: `${getWalletColor(c.walletId)}1a`,
+                      color: getWalletColor(c.walletId),
+                      border: `1px solid ${getWalletColor(c.walletId)}44`,
+                    }}>
+                      {getWalletName(c.walletId)}
+                    </span>
+                  </div>
+                )}
+
+                {c.note && (
+                  <div style={{ fontSize: '0.85rem', color: 'var(--text-2)', fontStyle: 'italic', background: 'rgba(251,191,36,0.1)', padding: '8px 12px', borderRadius: 6, borderLeft: '3px solid var(--yellow)' }}>
+                    "{c.note}"
+                  </div>
+                )}
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 'auto', paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                  <button className="btn btn-ghost btn-sm" style={{ padding: '0 12px', height: 32 }} onClick={() => openEdit(c)}>Edit</button>
+                  <button className="btn btn-danger btn-sm" style={{ padding: '0 12px', height: 32 }} onClick={() => setDeleteId(c._id)}>Delete</button>
+                </div>
+              </div>
+            );
+          })}
         </div>
+        </>
+        ) : (
+          <div style={{ display: 'grid', gap: 16, gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+            {pendingList.length === 0 ? (
+              <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: 40, color: 'var(--text-3)', background: 'var(--bg-base)', borderRadius: 'var(--radius)' }}>
+                No pending contributions.
+              </div>
+            ) : pendingList.map((c: any) => {
+              const meta = CAT_META[c.category] || CAT_META.general;
+              return (
+                <div key={c._id} style={{ background: 'var(--bg-base)', borderRadius: 'var(--radius)', padding: 20, boxShadow: '0 2px 8px rgba(0,0,0,0.04)', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: '1.05rem', color: 'var(--text-1)' }}>{c.contributorName}</div>
+                      {c.email && <div style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>{c.email}</div>}
+                      {c.phone && <div style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>{c.phone}</div>}
+                    </div>
+                    <span style={{ fontSize: '0.7rem', fontWeight: 700, padding: '4px 10px', borderRadius: 99, background: meta.bg, color: meta.color, border: `1px solid ${meta.color}33`, textTransform: 'capitalize' }}>
+                      {meta.label}
+                    </span>
+                  </div>
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(0,0,0,0.02)', padding: '10px 12px', borderRadius: 8 }}>
+                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Amount</span>
+                      <span style={{ color: 'var(--green-400)', fontWeight: 800, fontSize: '1.2rem' }}>{formatNaira(c.amount)}</span>
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Date</span>
+                      <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{formatDate(c.date)}</span>
+                    </div>
+                  </div>
+
+                  {c.note && (
+                    <div style={{ fontSize: '0.85rem', color: 'var(--text-2)', fontStyle: 'italic', background: 'rgba(251,191,36,0.1)', padding: '8px 12px', borderRadius: 6, borderLeft: '3px solid var(--yellow)' }}>
+                      "{c.note}"
+                    </div>
+                  )}
+
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 'auto', paddingTop: 12, borderTop: '1px solid var(--border)' }}>
+                    <div>
+                      {c.receiptUrl ? (
+                        <button className="btn btn-ghost btn-sm" style={{ padding: '0 8px', height: 32 }} onClick={() => setReceiptViewer(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}`.replace('/api', '') + c.receiptUrl)}>
+                          <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ marginRight: 4 }}><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                          Receipt
+                        </button>
+                      ) : (
+                        <span style={{ fontSize: '0.75rem', color: 'var(--text-3)', paddingLeft: 8 }}>No receipt</span>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button className="btn btn-danger btn-sm" style={{ padding: '0 12px', height: 32 }} onClick={() => setDeleteId(c._id)}>Reject</button>
+                      <button className="btn btn-primary btn-sm" style={{ padding: '0 16px', height: 32 }} onClick={() => openApproveModal(c)}>Approve</button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
+
+      {/* Receipt Viewer Modal */}
+      {receiptViewer && (
+        <div className="modal-overlay" onClick={() => setReceiptViewer(null)}>
+          <div className="modal" style={{ maxWidth: 600, padding: 8, background: 'var(--bg-base)' }} onClick={(e) => e.stopPropagation()}>
+            <img src={receiptViewer} alt="Receipt" style={{ width: '100%', height: 'auto', borderRadius: 'var(--radius)' }} />
+            <button className="btn btn-ghost" style={{ width: '100%', marginTop: 8 }} onClick={() => setReceiptViewer(null)}>Close</button>
+          </div>
+        </div>
+      )}
+
+      {/* ── Approve Contribution Modal ── */}
+      {approveModal && (
+        <div className="modal-overlay" onClick={() => { if (!approving) setApproveModal(null); }}>
+          <div className="modal" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
+            <p className="modal-title">Approve Contribution</p>
+
+            {/* Summary card */}
+            <div style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ color: 'var(--text-3)', fontSize: '0.82rem' }}>Contributor</span>
+                <strong style={{ fontSize: '0.88rem' }}>{approveModal.contributorName}</strong>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
+                <span style={{ color: 'var(--text-3)', fontSize: '0.82rem' }}>Amount</span>
+                <strong style={{ color: 'var(--green-400)', fontSize: '0.95rem' }}>{formatNaira(approveModal.amount)}</strong>
+              </div>
+              {approveModal.email && (
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ color: 'var(--text-3)', fontSize: '0.82rem' }}>Email</span>
+                  <span style={{ fontSize: '0.82rem' }}>{approveModal.email}</span>
+                </div>
+              )}
+            </div>
+
+            {approveError && <div className="alert alert-error" style={{ marginBottom: 14 }}>{approveError}</div>}
+
+            {/* Wallet selector */}
+            <div className="form-group">
+              <label className="form-label">Credit to Wallet <span style={{ color: 'var(--red)' }}>*</span></label>
+              <select
+                className="form-input"
+                value={approveWalletId}
+                onChange={(e) => setApproveWalletId(e.target.value)}
+                required
+              >
+                <option value="">— Select wallet —</option>
+                {walletList.map((w: any) => (
+                  <option key={w._id} value={w._id}>{w.name}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Category override */}
+            <div className="form-group">
+              <label className="form-label">Category</label>
+              <select
+                className="form-input"
+                value={approveCategory}
+                onChange={(e) => setApproveCategory(e.target.value)}
+              >
+                {CATS.map((c) => (
+                  <option key={c} value={c}>{CAT_META[c]?.label || c}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Link to member */}
+            <div className="form-group">
+              <label className="form-label">Link to Verified Member <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(optional)</span></label>
+              <select
+                className="form-input"
+                value={approveMemberId}
+                onChange={(e) => setApproveMemberId(e.target.value)}
+              >
+                <option value="">— No member link —</option>
+                {memberList.map((m: any) => (
+                  <option key={m._id} value={m._id}>{m.name}</option>
+                ))}
+              </select>
+              <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 5 }}>Linking ties this payment to a verified member's profile.</div>
+            </div>
+
+            {(approveModal.email || approveMemberId) && (
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
+                📧 An approval email will be sent to <strong>{approveModal.email || memberList.find((m: any) => m._id === approveMemberId)?.email || 'contributor'}</strong>
+              </div>
+            )}
+
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
+              <button className="btn btn-ghost" onClick={() => setApproveModal(null)} disabled={approving}>Cancel</button>
+              <button className="btn btn-primary" onClick={confirmApprove} disabled={approving || !approveWalletId}>
+                {approving ? 'Approving…' : '✓ Confirm & Approve'}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Add/Edit Modal */}
       {modal && (

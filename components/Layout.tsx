@@ -22,6 +22,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               { label: 'Contributions', href: '/contributions' },
               { label: 'Reports', href: '/reports' },
               { label: 'About', href: '/about' },
+              { label: 'Admin Login', href: '/admin' },
             ].map((l) => (
               <span key={l.href}
                 onClick={() => router.push(l.href)}

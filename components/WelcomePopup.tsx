@@ -3,19 +3,26 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { useGate } from '../pages/_app';
 
-type Step = 'question' | 'verify' | 'found' | 'notfound';
+type Step = 'pin' | 'question' | 'verify' | 'found' | 'notfound';
+
+// Set your group PIN in .env.local as NEXT_PUBLIC_GROUP_PIN=IDAGHA2018
+const GROUP_PIN = process.env.NEXT_PUBLIC_GROUP_PIN || 'IDAGHA2018';
 
 export default function WelcomePopup() {
   const router = useRouter();
   const { cleared, setCleared } = useGate();
   const [visible, setVisible] = useState(false);
   const [animOut, setAnimOut] = useState(false);
-  const [step, setStep] = useState<Step>('question');
+  const [step, setStep] = useState<Step>('pin');
+  const [pin, setPin] = useState('');
+  const [pinError, setPinError] = useState('');
+  const [pinShake, setPinShake] = useState(false);
   const [query, setQuery] = useState('');
   const [checking, setChecking] = useState(false);
   const [foundMember, setFoundMember] = useState<any>(null);
   const [verifyError, setVerifyError] = useState('');
   const inputRef = useRef<HTMLInputElement>(null);
+  const pinRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Only show on /home and only if not yet cleared
@@ -26,16 +33,31 @@ export default function WelcomePopup() {
 
   useEffect(() => {
     if (step === 'verify') setTimeout(() => inputRef.current?.focus(), 100);
+    if (step === 'pin') setTimeout(() => pinRef.current?.focus(), 100);
   }, [step]);
 
+  const handlePin = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (pin.trim().toUpperCase() === GROUP_PIN.toUpperCase()) {
+      setPinError('');
+      setStep('question');
+    } else {
+      setPinError('Incorrect PIN. Please check with the group admin.');
+      setPinShake(true);
+      setTimeout(() => setPinShake(false), 600);
+      setPin('');
+    }
+  };
+
   const dismiss = (destination?: string) => {
-    // Mark as cleared in context — gates open for this page load
     setCleared(true);
     setAnimOut(true);
     setTimeout(() => {
       setVisible(false);
       setAnimOut(false);
-      setStep('question');
+      setStep('pin');
+      setPin('');
+      setPinError('');
       setQuery('');
       setFoundMember(null);
       setVerifyError('');
@@ -89,6 +111,45 @@ export default function WelcomePopup() {
           <span className="badge-dot" style={{ background: 'var(--green-400)' }} />
           IDAGHA Class of 2018
         </div>
+
+        {/* ── STEP 0: PIN ── */}
+        {step === 'pin' && (
+          <>
+            <h2 className="wp-title">Enter Group PIN</h2>
+            <p className="wp-sub">
+              This portal is <strong>private</strong> to the IDAGHA Class of 2018 Alumni.
+              Enter the secret group PIN shared in your WhatsApp group to continue.
+            </p>
+            <form onSubmit={handlePin} style={{ width: '100%' }}>
+              <div className={`wp-input-wrap${pinShake ? ' wp-shake' : ''}`}>
+                <svg className="wp-input-icon" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" strokeLinecap="round" />
+                </svg>
+                <input
+                  ref={pinRef}
+                  className="wp-input"
+                  placeholder="Enter group PIN…"
+                  value={pin}
+                  type="password"
+                  onChange={(e) => { setPin(e.target.value); setPinError(''); }}
+                  autoComplete="off"
+                />
+              </div>
+              {pinError && (
+                <p style={{ color: 'var(--red)', fontSize: '0.8rem', marginTop: 8, marginBottom: 0 }}>{pinError}</p>
+              )}
+              <div className="wp-actions" style={{ marginTop: 16 }}>
+                <button type="submit" className="wp-btn-yes" disabled={!pin.trim()}>
+                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" strokeLinecap="round" />
+                  </svg>
+                  Unlock Portal
+                </button>
+              </div>
+            </form>
+            <p className="wp-note">Contact your class group admin to get the PIN.</p>
+          </>
+        )}
 
         {/* ── STEP 1: Question ── */}
         {step === 'question' && (
@@ -240,8 +301,20 @@ export default function WelcomePopup() {
           z-index: 9000;
         }
 
+        @keyframes wp-shake {
+          0%, 100% { transform: translateX(0); }
+          15%       { transform: translateX(-8px); }
+          30%       { transform: translateX(8px); }
+          45%       { transform: translateX(-6px); }
+          60%       { transform: translateX(6px); }
+          75%       { transform: translateX(-4px); }
+          90%       { transform: translateX(4px); }
+        }
+        .wp-shake { animation: wp-shake 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both; }
+
         /* ── Shared base ── */
         .wp-popup {
+          box-sizing: border-box;
           position: fixed;
           z-index: 9001;
           background: linear-gradient(160deg, #0d2010 0%, #060d08 100%);
@@ -249,6 +322,7 @@ export default function WelcomePopup() {
           text-align: center;
           box-shadow: 0 0 0 1px rgba(34,197,94,0.06), 0 32px 80px rgba(0,0,0,0.75), 0 0 60px rgba(34,197,94,0.08);
           overflow-y: auto;
+          overflow-x: hidden;
           -webkit-overflow-scrolling: touch;
         }
 
@@ -257,8 +331,8 @@ export default function WelcomePopup() {
           .wp-popup {
             top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: min(460px, calc(100vw - 32px));
-            max-height: 90vh;
+            width: min(460px, calc(100vw - 40px));
+            max-height: min(90vh, 700px);
             border-radius: 24px;
             padding: 36px 32px 28px;
           }
@@ -266,17 +340,46 @@ export default function WelcomePopup() {
           .wp-popup-out { animation: popDown  0.3s  cubic-bezier(0.4,0,0.2,1) forwards; }
         }
 
-        /* ── Mobile: bottom sheet ── */
+        /* ── Mobile: centered card ── */
         @media (max-width: 600px) {
           .wp-popup {
-            top: auto; left: 0; right: 0; bottom: 0;
-            width: 100%;
-            max-height: 88vh;
-            border-radius: 20px 20px 0 0;
-            padding: 8px 18px 36px;
+            position: fixed;
+            top: 50%; left: 50%; right: auto; bottom: auto;
+            transform: translate(-50%, -50%);
+            width: calc(100vw - 28px);
+            max-width: calc(100vw - 28px);
+            max-height: min(85vh, 580px);
+            border-radius: 20px;
+            padding: 18px 16px 22px;
+            margin: 0;
           }
-          .wp-popup-in  { animation: slideUp   0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
-          .wp-popup-out { animation: slideDown  0.3s  cubic-bezier(0.4,0,0.2,1) forwards; }
+          .wp-popup-in  { animation: popUp   0.35s cubic-bezier(0.4,0,0.2,1) forwards; }
+          .wp-popup-out { animation: popDown  0.3s  cubic-bezier(0.4,0,0.2,1) forwards; }
+          .wp-title { font-size: clamp(1rem, 5vw, 1.35rem); }
+          .wp-sub { font-size: clamp(0.72rem, 3vw, 0.82rem); line-height: 1.55; margin-bottom: 12px; }
+          .wp-logo-wrap { width: 62px; height: 62px; margin-bottom: 8px; }
+          .wp-btn-yes, .wp-btn-no { min-height: 46px; font-size: 0.88rem; }
+        }
+        @media (max-width: 480px) {
+          .wp-popup { padding: 14px 14px 18px; }
+          .wp-logo-wrap { width: 54px; height: 54px; margin-bottom: 6px; }
+          .wp-title { font-size: clamp(0.95rem, 5vw, 1.2rem); }
+          .wp-sub { font-size: 0.74rem; margin-bottom: 10px; }
+          .wp-btn-yes, .wp-btn-no { min-height: 44px; padding: 10px 14px; font-size: 0.82rem; }
+          .wp-input { padding: 11px 12px 11px 36px; font-size: 15px; }
+          .wp-badge { font-size: 0.62rem; padding: 3px 10px; }
+        }
+        @media (max-width: 375px) {
+          .wp-popup { padding: 10px 12px 14px; max-height: min(88vh, 520px); border-radius: 16px; }
+          .wp-logo-wrap { width: 46px; height: 46px; margin-bottom: 4px; }
+          .wp-title { font-size: 0.98rem; margin-bottom: 5px; }
+          .wp-sub { font-size: 0.68rem; margin-bottom: 8px; line-height: 1.5; }
+          .wp-btn-yes, .wp-btn-no { min-height: 40px; padding: 8px 12px; font-size: 0.78rem; gap: 6px; }
+          .wp-input { padding: 9px 10px 9px 32px; font-size: 14px; }
+          .wp-badge { font-size: 0.58rem; padding: 2px 8px; margin-bottom: 6px; }
+          .wp-drag-handle { margin: 4px auto 10px; }
+          .wp-note { font-size: 0.66rem; }
+          .wp-actions { gap: 7px; }
         }
 
         .wp-drag-handle {
@@ -321,10 +424,14 @@ export default function WelcomePopup() {
           font-size: clamp(1.1rem, 5vw, 1.6rem);
           font-weight: 800; letter-spacing: -0.03em;
           color: var(--text-1); margin-bottom: 8px;
+          white-space: normal; word-wrap: break-word;
+          width: 100%; max-width: 100%;
         }
         .wp-sub {
           font-size: 0.84rem; color: var(--text-3);
           line-height: 1.7; margin-bottom: 16px;
+          white-space: normal; word-wrap: break-word;
+          width: 100%; max-width: 100%;
         }
         .wp-sub strong { color: var(--text-2); }
         .wp-actions { display: flex; gap: 10px; flex-direction: column; margin-bottom: 12px; }

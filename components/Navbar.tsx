@@ -64,9 +64,6 @@ export default function Navbar() {
         </ul>
 
         <div className="nav-cta">
-          <button className="btn-nav-admin" onClick={() => router.push('/admin')}>
-            Admin Portal
-          </button>
           <button className="nav-mobile-btn" onClick={() => setOpen(!open)} aria-label="Toggle menu">
             <svg width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
               {open

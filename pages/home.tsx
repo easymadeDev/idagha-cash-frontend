@@ -40,7 +40,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
       <div style={{
         position: 'relative', zIndex: 1,
         width: '100%', maxWidth: 680,
-        maxHeight: '92vh',
+        maxHeight: '80vh',
         background: 'linear-gradient(180deg, #0d1f10 0%, #070e09 100%)',
         border: `1px solid ${color}33`,
         borderBottom: 'none',
@@ -253,9 +253,12 @@ export default function HomePage() {
   const { data: activityRaw } = useSWR('/api/activity?limit=25', fetcher, { refreshInterval: 30000 });
 
   const [activeWallet, setActiveWallet] = useState<any>(null);
+  const [visibleCount, setVisibleCount] = useState(3);
 
   const recentContribs = Array.isArray(contributions) ? contributions.slice(0, 6) : [];
   const activityFeed   = Array.isArray(activityRaw) ? activityRaw : [];
+  const visibleFeed    = activityFeed.slice(0, visibleCount);
+  const hasMore        = visibleCount < activityFeed.length;
   const pct = stats?.reunionFund?.percentage ?? 0;
   const walletCards = Array.isArray(walletStats) ? walletStats : [];
 
@@ -362,50 +365,44 @@ export default function HomePage() {
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: color }} />
                     <div style={{ position: 'absolute', top: 0, right: 0, width: 120, height: 120, borderRadius: '50%', background: `${color}08`, transform: 'translate(30%, -30%)' }} />
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, marginTop: 8 }}>
+                    <div className="wallet-card-header">
                       <div style={{
-                        width: 36, height: 36, borderRadius: 9,
+                        width: 36, height: 36, borderRadius: 9, flexShrink: 0,
                         background: `${color}18`, border: `1px solid ${color}33`,
-                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
                       }}>
                         <svg width="17" height="17" fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24">
                           <path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" />
                         </svg>
                       </div>
                       <div>
-                        <div style={{ fontWeight: 700, fontSize: '0.9rem', lineHeight: 1.3 }}>{w?.name || 'Wallet'}</div>
-                        <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', textTransform: 'capitalize' }}>{w?.type} wallet</div>
+                        <div className="wallet-card-name">{w?.name || 'Wallet'}</div>
+                        <div className="wallet-card-type">{w?.type} wallet</div>
                       </div>
                     </div>
 
-                    {/* Balance — big number */}
-                    <div style={{ marginBottom: 16 }}>
+                    {/* Balance */}
+                    <div style={{ marginBottom: 12 }}>
                       <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Balance</div>
-                      <div style={{
-                        fontFamily: 'var(--font-d)', fontWeight: 900,
-                        fontSize: '1.6rem', letterSpacing: '-0.03em',
-                        color: ws.balance >= 0 ? color : 'var(--red)',
-                        textShadow: `0 0 24px ${ws.balance >= 0 ? color : 'var(--red)'}33`,
-                        lineHeight: 1.1,
-                      }}>
+                      <div className="wallet-card-balance" style={{ color: ws.balance >= 0 ? color : 'var(--red)', textShadow: `0 0 24px ${ws.balance >= 0 ? color : 'var(--red)'}33` }}>
                         <AnimatedNaira amount={Math.abs(ws.balance)} />
-                        {ws.balance < 0 && <span style={{ fontSize: '1rem' }}> deficit</span>}
+                        {ws.balance < 0 && <span style={{ fontSize: '0.85em' }}> deficit</span>}
                       </div>
                     </div>
 
                     {/* Income vs Spent */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 14 }}>
-                      <div style={{ background: 'rgba(34,197,94,0.06)', borderRadius: 8, padding: '8px 12px', border: '1px solid rgba(34,197,94,0.12)' }}>
-                        <div style={{ fontSize: '0.62rem', color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Income</div>
-                        <div style={{ fontFamily: 'var(--font-d)', fontWeight: 700, fontSize: '0.82rem', color: 'var(--green-400)' }}>{formatNaira(ws.income)}</div>
+                    <div className="wallet-card-sub">
+                      <div className="wallet-card-sub-item" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.12)' }}>
+                        <div className="wallet-card-sub-label">Income</div>
+                        <div className="wallet-card-sub-value" style={{ color: 'var(--green-400)' }}>{formatNaira(ws.income)}</div>
                       </div>
-                      <div style={{ background: 'rgba(248,113,113,0.06)', borderRadius: 8, padding: '8px 12px', border: '1px solid rgba(248,113,113,0.12)' }}>
-                        <div style={{ fontSize: '0.62rem', color: 'var(--text-3)', marginBottom: 3, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Spent</div>
-                        <div style={{ fontFamily: 'var(--font-d)', fontWeight: 700, fontSize: '0.82rem', color: 'var(--red)' }}>{formatNaira(ws.spent)}</div>
+                      <div className="wallet-card-sub-item" style={{ background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.12)' }}>
+                        <div className="wallet-card-sub-label">Spent</div>
+                        <div className="wallet-card-sub-value" style={{ color: 'var(--red)' }}>{formatNaira(ws.spent)}</div>
                       </div>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: '0.72rem', color: color, opacity: 0.8, fontWeight: 600 }}>
-                      View contributors & transactions
+                    <div className="wallet-card-link" style={{ color }}>
+                      View details
                       <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
                         <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
@@ -503,7 +500,7 @@ export default function HomePage() {
               overflow: 'hidden',
               backdropFilter: 'blur(12px)',
             }}>
-              {activityFeed.map((item: any, i: number) => {
+              {visibleFeed.map((item: any, i: number) => {
                 const isContrib = item.type === 'contribution';
                 const isExpense = item.type === 'expense';
 
@@ -517,8 +514,8 @@ export default function HomePage() {
 
                 return (
                   <div key={item.id} className="feed-item" style={{
-                    borderBottom: i < activityFeed.length - 1 ? '1px solid rgba(34,197,94,0.06)' : 'none',
-                    animation: `fadeUp 0.4s cubic-bezier(0.4,0,0.2,1) ${Math.min(i * 0.025, 0.4)}s both`,
+                    borderBottom: i < visibleFeed.length - 1 ? '1px solid rgba(34,197,94,0.06)' : 'none',
+                    animation: `fadeUp 0.4s cubic-bezier(0.4,0,0.2,1) ${Math.min(i * 0.05, 0.3)}s both`,
                   }}
                     onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(34,197,94,0.03)')}
                     onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
@@ -580,19 +577,47 @@ export default function HomePage() {
                 );
               })}
 
-              {/* Footer */}
-              <div className="feed-footer">
-                <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>Auto-refreshes every 30 seconds</span>
-                <div className="feed-legend">
-                  <span style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 5, color: 'var(--green-400)' }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green-400)', display: 'inline-block' }} /> Contributions
-                  </span>
-                  <span style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 5, color: 'var(--red)' }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--red)', display: 'inline-block' }} /> Expenses
-                  </span>
-                  <span style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 5, color: 'var(--blue)' }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--blue)', display: 'inline-block' }} /> Members
-                  </span>
+              {/* Load More / Footer */}
+              <div className="feed-footer" style={{ flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                {hasMore ? (
+                  <button
+                    onClick={() => setVisibleCount(c => c + 3)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 7,
+                      padding: '9px 22px',
+                      background: 'rgba(34,197,94,0.07)',
+                      border: '1px solid rgba(34,197,94,0.25)',
+                      borderRadius: 99,
+                      color: 'var(--green-400)',
+                      fontSize: '0.8rem', fontWeight: 700,
+                      cursor: 'pointer', fontFamily: 'var(--font)',
+                      transition: 'all 0.2s',
+                      width: '100%', justifyContent: 'center',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(34,197,94,0.13)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'rgba(34,197,94,0.07)')}
+                  >
+                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Load More ({activityFeed.length - visibleCount} remaining)
+                  </button>
+                ) : (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>All {activityFeed.length} events shown</span>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: 8 }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>Auto-refreshes every 30s · Showing {visibleFeed.length} of {activityFeed.length}</span>
+                  <div className="feed-legend">
+                    <span style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 5, color: 'var(--green-400)' }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green-400)', display: 'inline-block' }} /> Contributions
+                    </span>
+                    <span style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 5, color: 'var(--red)' }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--red)', display: 'inline-block' }} /> Expenses
+                    </span>
+                    <span style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 5, color: 'var(--blue)' }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--blue)', display: 'inline-block' }} /> Members
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -601,32 +626,32 @@ export default function HomePage() {
 
         {/* ── Reunion Progress ── */}
         {stats?.reunionFund && (
-          <div className="card" style={{ marginBottom: 40, padding: '32px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 16, marginBottom: 24 }}>
+          <div className="card reunion-card" style={{ marginBottom: 28 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
               <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
-                  <div className="section-title">2026 Reunion Fund</div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <div className="section-title" style={{ fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>2026 Reunion Fund</div>
                   <span className="badge badge-yellow"><span className="badge-dot" />Active</span>
                 </div>
-                <p style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>
+                <p style={{ color: 'var(--text-3)', fontSize: 'clamp(0.72rem, 2.5vw, 0.82rem)' }}>
                   Target: <strong style={{ color: 'var(--text-2)' }}>{formatNaira(stats.reunionFund.targetAmount)}</strong>
                 </p>
               </div>
               <div style={{ textAlign: 'right' }}>
-                <div style={{ fontFamily: 'var(--font-d)', fontSize: '2.2rem', fontWeight: 800, color: 'var(--yellow)', letterSpacing: '-0.03em' }}>{pct}%</div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-3)' }}>funded</div>
+                <div style={{ fontFamily: 'var(--font-d)', fontSize: 'clamp(1.4rem, 5vw, 1.9rem)', fontWeight: 800, color: 'var(--yellow)', letterSpacing: '-0.03em' }}>{pct}%</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>funded</div>
               </div>
             </div>
-            <div className="progress-track" style={{ height: 14, marginBottom: 16 }}>
+            <div className="progress-track" style={{ height: 10, marginBottom: 10 }}>
               <div className="progress-fill" style={{ width: `${pct}%` }} />
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.82rem', marginBottom: 20 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'clamp(0.7rem, 2.5vw, 0.8rem)', marginBottom: 14, flexWrap: 'wrap', gap: 4 }}>
               <span style={{ color: 'var(--text-3)' }}>Raised: <strong style={{ color: 'var(--green-400)' }}>{formatNaira(stats.reunionFund.raisedAmount)}</strong></span>
               <span style={{ color: 'var(--text-3)' }}>Remaining: <strong style={{ color: 'var(--yellow)' }}>{formatNaira(stats.reunionFund.remaining)}</strong></span>
             </div>
             <button className="btn btn-ghost btn-sm" onClick={() => router.push('/reunion-fund')}>
               View Full Details
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" />
               </svg>
             </button>
@@ -634,22 +659,17 @@ export default function HomePage() {
         )}
 
         {/* ── Support banner ── */}
-        <div style={{
-          marginBottom: 40, padding: '28px 32px', borderRadius: 'var(--radius)',
-          background: 'linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.04))',
-          border: '1px solid rgba(34,197,94,0.25)',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20,
-        }}>
+        <div className="support-banner">
           <div>
-            <div style={{ fontFamily: 'var(--font-d)', fontSize: '1.2rem', fontWeight: 800, marginBottom: 6, letterSpacing: '-0.02em' }}>
+            <div style={{ fontFamily: 'var(--font-d)', fontSize: 'clamp(0.95rem, 3vw, 1.15rem)', fontWeight: 800, marginBottom: 4, letterSpacing: '-0.02em' }}>
               Support the Group Wallet
             </div>
-            <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', maxWidth: 460 }}>
-              Any member or well-wisher can contribute any amount. Every payment is recorded publicly with your name and date.
+            <p style={{ color: 'var(--text-2)', fontSize: 'clamp(0.75rem, 2.5vw, 0.85rem)', maxWidth: 420 }}>
+              Any member or well-wisher can contribute any amount. Every payment is recorded publicly.
             </p>
           </div>
-          <button className="btn btn-primary" onClick={() => router.push('/contributions')}>
-            <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+          <button className="btn btn-primary btn-sm" onClick={() => router.push('/contributions?view=contribute')}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
               <path d="M12 4v16m8-8H4" strokeLinecap="round" />
             </svg>
             Make a Contribution

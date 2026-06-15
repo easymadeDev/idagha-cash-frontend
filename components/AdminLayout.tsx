@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import api from '../lib/api';
+import useSWR from 'swr';
 
 const navItems = [
   { label: 'Dashboard', href: '/admin/dashboard', icon: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6', section: 'Overview' },
@@ -9,8 +10,9 @@ const navItems = [
   { label: 'Expenses', href: '/admin/expenses', icon: 'M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z', section: 'Records' },
   { label: 'Members', href: '/admin/members', icon: 'M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z', section: 'Records' },
   { label: 'Wallets', href: '/admin/wallets', icon: 'M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z', section: 'Records' },
-  { label: 'Reunion Fund', href: '/admin/reunion-fund', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z', section: 'Settings' },
-  { label: 'Announcements', href: '/admin/announcements', icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z', section: 'Settings' },
+  { label: 'Reunion Fund', href: '/admin/reunion-fund', icon: 'M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z', section: 'Fund' },
+  { label: 'Announcements', href: '/admin/announcements', icon: 'M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z', section: 'Communications' },
+  { label: 'Settings', href: '/admin/settings', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z', section: 'System' },
 ];
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -18,6 +20,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [username, setUsername] = useState('Secretary');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
+
+  // Live pending registrations count — polls every 30s
+  const token = typeof window !== 'undefined' ? localStorage.getItem('idagha_token') || '' : '';
+  const { data: allMembers } = useSWR(
+    authChecked ? '/api/members/admin/all' : null,
+    (url: string) => fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+    { refreshInterval: 30000 }
+  );
+  const pendingCount = Array.isArray(allMembers) ? allMembers.filter((m: any) => m.status === 'pending').length : 0;
 
   useEffect(() => {
     const token = localStorage.getItem('idagha_token');
@@ -86,11 +97,27 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                   key={item.href}
                   className={`admin-nav-item ${router.pathname === item.href ? 'active' : ''}`}
                   onClick={() => { router.push(item.href); setSidebarOpen(false); }}
+                  style={{ position: 'relative' }}
                 >
                   <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
                     <path d={item.icon} strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
                   {item.label}
+                  {/* Pending badge on Members */}
+                  {item.label === 'Members' && pendingCount > 0 && (
+                    <span style={{
+                      position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                      background: 'var(--red)', color: '#fff',
+                      fontSize: '0.6rem', fontWeight: 800,
+                      minWidth: 18, height: 18, borderRadius: 99,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      padding: '0 5px', letterSpacing: 0,
+                      boxShadow: '0 0 10px rgba(248,113,113,0.6)',
+                      animation: 'badgePulse 1.5s ease-in-out infinite',
+                    }}>
+                      {pendingCount}
+                    </span>
+                  )}
                 </button>
               ))}
             </div>
@@ -134,6 +161,46 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             Signed in as <strong style={{ color: 'var(--text-1)' }}>{username}</strong>
           </div>
         </div>
+        {/* Pending registration alert banner */}
+        {pendingCount > 0 && (
+          <div
+            onClick={() => router.push('/admin/members')}
+            style={{
+              marginBottom: 24, padding: '14px 20px',
+              background: 'rgba(248,113,113,0.08)',
+              border: '1px solid rgba(248,113,113,0.35)',
+              borderRadius: 'var(--radius-sm)',
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              gap: 16, cursor: 'pointer', flexWrap: 'wrap',
+              animation: 'fadeUp 0.4s var(--ease) both',
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{
+                background: 'var(--red)', color: '#fff',
+                fontSize: '0.7rem', fontWeight: 800,
+                minWidth: 24, height: 24, borderRadius: 99,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                padding: '0 7px', flexShrink: 0,
+                boxShadow: '0 0 14px rgba(248,113,113,0.5)',
+                animation: 'badgePulse 1.5s ease-in-out infinite',
+              }}>
+                {pendingCount}
+              </span>
+              <div>
+                <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--text-1)' }}>
+                  {pendingCount} Pending Member Approval{pendingCount > 1 ? 's' : ''}
+                </div>
+                <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 2 }}>
+                  New self-registration{pendingCount > 1 ? 's are' : ' is'} awaiting your review
+                </div>
+              </div>
+            </div>
+            <span style={{ fontSize: '0.78rem', color: 'var(--red)', fontWeight: 700, whiteSpace: 'nowrap' }}>
+              Review Now →
+            </span>
+          </div>
+        )}
         {children}
       </main>
 
@@ -142,7 +209,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 40, backdropFilter: 'blur(4px)' }} />
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes badgePulse {
+          0%, 100% { box-shadow: 0 0 10px rgba(248,113,113,0.5); transform: translateY(-50%) scale(1); }
+          50%       { box-shadow: 0 0 18px rgba(248,113,113,0.9); transform: translateY(-50%) scale(1.12); }
+        }
+      `}</style>
     </div>
   );
 }

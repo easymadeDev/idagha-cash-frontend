@@ -94,8 +94,8 @@ export default function MembersPage() {
               Any member or well-wisher can contribute to the group wallet monthly. Your name and amount will appear publicly.
             </p>
           </div>
-          <button className="btn btn-primary btn-sm" onClick={() => router.push('/contributions')}>
-            View All Contributions
+          <button className="btn btn-primary btn-sm" onClick={() => router.push('/contributions?view=contribute')}>
+            Make a Contribution
           </button>
         </div>
 
