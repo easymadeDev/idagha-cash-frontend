@@ -1022,16 +1022,21 @@ tbody tr:hover td { background: var(--glow2); }
   /* Hide table headers */
   .table-wrap table thead { display: none; }
 
-  /* Each row becomes a card */
-  .table-wrap table, .table-wrap tbody, .table-wrap tr, .table-wrap td {
-    display: block; width: 100%;
+  /* Each row becomes a card — 2 columns grid */
+  .table-wrap table { display: block; width: 100%; }
+  .table-wrap thead { display: none; }
+  .table-wrap tbody {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    width: 100%;
   }
   .table-wrap tr {
-    margin-bottom: 12px;
+    display: flex; flex-direction: column;
     background: var(--grad-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 12px 14px;
+    padding: 12px 12px;
   }
   .table-wrap td {
     padding: 4px 0 !important;
