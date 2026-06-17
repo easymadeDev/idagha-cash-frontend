@@ -158,8 +158,8 @@ export default function AdminMembers() {
         )}
 
         <div className="table-wrap">
-          <table style={{ tableLayout: 'fixed', width: '100%' }}>
-            <colgroup>
+          <table className="members-table">
+            <colgroup className="members-colgroup">
               <col style={{ width: 36 }} />
               <col style={{ width: 44 }} />
               <col style={{ width: '16%' }} />
