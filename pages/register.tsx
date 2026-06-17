@@ -50,11 +50,15 @@ export default function RegisterPage() {
       }
       const member = await res.json();
 
-      // Step 2: upload photo if provided
+      // Step 2: upload photo if provided (non-fatal — success screen still shows)
       if (photo && member._id) {
-        const fd = new FormData();
-        fd.append('photo', photo);
-        await fetch(`${BACKEND}/members/${member._id}/photo`, { method: 'POST', body: fd });
+        try {
+          const fd = new FormData();
+          fd.append('photo', photo);
+          await fetch(`${BACKEND}/members/${member._id}/photo`, { method: 'POST', body: fd });
+        } catch {
+          // photo upload failed but registration succeeded — ignore
+        }
       }
 
       setDone(true);
