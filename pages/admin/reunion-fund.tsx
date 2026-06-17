@@ -17,6 +17,13 @@ export default function AdminReunionFund() {
   const [error, setError] = useState('');
   const [notifying, setNotifying] = useState<string | null>(null); // member name or 'all'
   const [notifyResult, setNotifyResult] = useState<any>(null);
+  const [waNotifying, setWaNotifying] = useState<string | null>(null);
+  const [waResult, setWaResult] = useState<any>(null);
+  const [waStatus, setWaStatus] = useState<{ ready: boolean; hasQr: boolean } | null>(null);
+
+  useEffect(() => {
+    fetch('/api/whatsapp/status').then(r => r.json()).then(setWaStatus).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (fund) {
@@ -58,6 +65,17 @@ export default function AdminReunionFund() {
     } catch (err: any) {
       setNotifyResult({ error: err.response?.data?.message || 'Failed to send emails.' });
     } finally { setNotifying(null); }
+  };
+
+  const notifyWhatsapp = async (memberNames?: string[]) => {
+    const key = memberNames ? memberNames[0] + '_wa' : 'all_wa';
+    setWaNotifying(key); setWaResult(null);
+    try {
+      const res = await api.post('/reunion-fund/notify-whatsapp', memberNames ? { memberNames } : {});
+      setWaResult(res.data);
+    } catch (err: any) {
+      setWaResult({ error: err.response?.data?.message || 'Failed to send WhatsApp messages.' });
+    } finally { setWaNotifying(null); }
   };
 
   const rf = stats?.reunionFund;
@@ -139,18 +157,43 @@ export default function AdminReunionFund() {
                     {incompleteWithEmail.length} have email addresses on record
                   </div>
                 </div>
-                <button
-                  className="btn btn-primary btn-sm"
-                  disabled={notifying === 'all' || incompleteWithEmail.length === 0}
-                  onClick={() => notify()}
-                >
-                  {notifying === 'all' ? (
-                    <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
-                  ) : (
-                    <><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" /></svg>
-                      Notify All ({incompleteWithEmail.length})</>
-                  )}
-                </button>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button
+                    className="btn btn-primary btn-sm"
+                    disabled={notifying === 'all' || incompleteWithEmail.length === 0}
+                    onClick={() => notify()}
+                  >
+                    {notifying === 'all' ? (
+                      <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
+                    ) : (
+                      <><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" /></svg>
+                        Email All ({incompleteWithEmail.length})</>
+                    )}
+                  </button>
+                  <button
+                    className="btn btn-sm"
+                    style={{ background: '#25d366', color: '#fff', border: 'none' }}
+                    disabled={waNotifying === 'all_wa' || !waStatus?.ready}
+                    title={!waStatus?.ready ? 'WhatsApp not connected' : 'Send WhatsApp reminders'}
+                    onClick={() => notifyWhatsapp()}
+                  >
+                    {waNotifying === 'all_wa' ? (
+                      <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
+                    ) : (
+                      <>
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.852L0 24l6.336-1.503A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.003-1.368l-.36-.214-3.73.885.916-3.613-.235-.373A9.79 9.79 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+                        WhatsApp All
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* WhatsApp status */}
+            {waStatus && !waStatus.ready && (
+              <div style={{ marginBottom: 16, padding: '12px 16px', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 'var(--radius)', fontSize: '0.82rem', color: 'var(--yellow)' }}>
+                WhatsApp not connected. {waStatus.hasQr ? 'A QR code is waiting — check the server terminal to scan it.' : 'Start the backend to generate a QR code, then scan it on your phone.'}
               </div>
             )}
 
@@ -160,6 +203,16 @@ export default function AdminReunionFund() {
                 {notifyResult.error
                   ? notifyResult.error
                   : `Sent ${notifyResult.sent} email${notifyResult.sent !== 1 ? 's' : ''}.${notifyResult.noEmail?.length ? ` ${notifyResult.noEmail.length} member(s) have no email: ${notifyResult.noEmail.join(', ')}.` : ''}${notifyResult.failed?.length ? ` Failed: ${notifyResult.failed.join(', ')}.` : ''}`
+                }
+              </div>
+            )}
+
+            {/* WhatsApp result */}
+            {waResult && (
+              <div className={`alert ${waResult.error ? 'alert-error' : 'alert-success'}`} style={{ marginBottom: 16 }}>
+                {waResult.error
+                  ? waResult.error
+                  : `WhatsApp: sent ${waResult.sent} message${waResult.sent !== 1 ? 's' : ''}.${waResult.noWhatsapp?.length ? ` ${waResult.noWhatsapp.length} have no phone: ${waResult.noWhatsapp.join(', ')}.` : ''}${waResult.failed?.length ? ` Failed: ${waResult.failed.join(', ')}.` : ''}`
                 }
               </div>
             )}
@@ -179,7 +232,7 @@ export default function AdminReunionFund() {
                       Completed ({completed.length})
                     </div>
                     {completed.map((m: any) => (
-                      <MemberRow key={m.name} m={m} memberTarget={memberTarget} onNotify={notify} notifying={notifying} />
+                      <MemberRow key={m.name} m={m} memberTarget={memberTarget} onNotify={notify} notifying={notifying} onNotifyWa={notifyWhatsapp} waNotifying={waNotifying} waReady={!!waStatus?.ready} />
                     ))}
                   </div>
                 )}
@@ -191,7 +244,7 @@ export default function AdminReunionFund() {
                       Incomplete ({incomplete.length})
                     </div>
                     {incomplete.map((m: any) => (
-                      <MemberRow key={m.name} m={m} memberTarget={memberTarget} onNotify={notify} notifying={notifying} />
+                      <MemberRow key={m.name} m={m} memberTarget={memberTarget} onNotify={notify} notifying={notifying} onNotifyWa={notifyWhatsapp} waNotifying={waNotifying} waReady={!!waStatus?.ready} />
                     ))}
                   </div>
                 )}
@@ -247,9 +300,10 @@ export default function AdminReunionFund() {
   );
 }
 
-function MemberRow({ m, memberTarget, onNotify, notifying }: any) {
+function MemberRow({ m, memberTarget, onNotify, notifying, onNotifyWa, waNotifying, waReady }: any) {
   const [expanded, setExpanded] = useState(false);
   const isNotifying = notifying === m.name;
+  const isWaNotifying = waNotifying === m.name + '_wa';
 
   return (
     <div style={{
@@ -307,22 +361,38 @@ function MemberRow({ m, memberTarget, onNotify, notifying }: any) {
         {/* Actions */}
         <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
           {!m.completed && (
-            <button
-              className="btn btn-ghost btn-sm"
-              disabled={!m.email || isNotifying}
-              title={!m.email ? 'No email on record' : 'Send payment reminder'}
-              onClick={() => onNotify([m.name])}
-              style={{ opacity: !m.email ? 0.4 : 1 }}
-            >
-              {isNotifying ? (
-                <div style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
-              ) : (
-                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" />
-                </svg>
-              )}
-              Remind
-            </button>
+            <>
+              <button
+                className="btn btn-ghost btn-sm"
+                disabled={!m.email || isNotifying}
+                title={!m.email ? 'No email on record' : 'Send email reminder'}
+                onClick={() => onNotify([m.name])}
+                style={{ opacity: !m.email ? 0.4 : 1 }}
+              >
+                {isNotifying ? (
+                  <div style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                ) : (
+                  <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" />
+                  </svg>
+                )}
+                Email
+              </button>
+              <button
+                className="btn btn-sm"
+                style={{ background: waReady ? '#25d366' : 'rgba(37,211,102,0.2)', color: '#fff', border: 'none', opacity: !waReady ? 0.5 : 1 }}
+                disabled={!waReady || isWaNotifying}
+                title={!waReady ? 'WhatsApp not connected' : 'Send WhatsApp reminder'}
+                onClick={() => onNotifyWa([m.name])}
+              >
+                {isWaNotifying ? (
+                  <div style={{ width: 12, height: 12, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+                ) : (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.852L0 24l6.336-1.503A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.003-1.368l-.36-.214-3.73.885.916-3.613-.235-.373A9.79 9.79 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+                )}
+                WA
+              </button>
+            </>
           )}
           {m.payments?.length > 0 && (
             <button className="btn btn-ghost btn-sm" onClick={() => setExpanded(!expanded)}>
