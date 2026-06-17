@@ -3,6 +3,7 @@ import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { useGate } from '../lib/gate';
 
+
 type Step = 'pin' | 'question' | 'verify' | 'found' | 'notfound';
 
 // Set your group PIN in .env.local as NEXT_PUBLIC_GROUP_PIN=IDAGHA2018
@@ -10,7 +11,7 @@ const GROUP_PIN = process.env.NEXT_PUBLIC_GROUP_PIN || 'IDAGHA2018';
 
 export default function WelcomePopup() {
   const router = useRouter();
-  const { cleared, setCleared } = useGate();
+  const { cleared, setCleared, setMember } = useGate();
   const [visible, setVisible] = useState(false);
   const [animOut, setAnimOut] = useState(false);
   const [step, setStep] = useState<Step>('pin');
@@ -77,6 +78,13 @@ export default function WelcomePopup() {
       const data = await res.json();
       if (data.found) {
         setFoundMember(data.member);
+        setMember({
+          _id: data.member._id,
+          name: data.member.name,
+          nickname: data.member.nickname,
+          photo: data.member.photo,
+          position: data.member.position,
+        });
         setStep('found');
         // Auto-dismiss after a brief welcome flash — no button click needed
         setTimeout(() => dismiss(), 1800);

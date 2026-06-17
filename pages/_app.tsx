@@ -3,29 +3,31 @@ import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import '../styles/globals.css';
 import WelcomePopup from '../components/WelcomePopup';
-import { GateContext } from '../lib/gate';
+import { GateContext, SessionMember } from '../lib/gate';
 
 const SESSION_KEY = 'idagha_gate_cleared';
+const MEMBER_KEY  = 'idagha_member';
 
 const EXEMPT = (pathname: string) =>
   pathname === '/' ||
   pathname === '/home' ||
   pathname === '/test' ||
   pathname === '/register' ||
+  pathname === '/profile' ||
   pathname.startsWith('/admin');
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
-  // Read from sessionStorage on mount so navigation within same tab doesn't re-show popup
   const [cleared, setClearedState] = useState(false);
+  const [member, setMemberState] = useState<SessionMember | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const val = sessionStorage.getItem(SESSION_KEY);
-      if (val === '1') {
-        setClearedState(true);
-      }
-    }
+    if (typeof window === 'undefined') return;
+    if (sessionStorage.getItem(SESSION_KEY) === '1') setClearedState(true);
+    try {
+      const raw = sessionStorage.getItem(MEMBER_KEY);
+      if (raw) setMemberState(JSON.parse(raw));
+    } catch {}
   }, []);
 
   const setCleared = (v: boolean) => {
@@ -36,15 +38,21 @@ export default function App({ Component, pageProps }: AppProps) {
     setClearedState(v);
   };
 
+  const setMember = (m: SessionMember | null) => {
+    if (typeof window !== 'undefined') {
+      if (m) sessionStorage.setItem(MEMBER_KEY, JSON.stringify(m));
+      else sessionStorage.removeItem(MEMBER_KEY);
+    }
+    setMemberState(m);
+  };
+
   useEffect(() => {
     if (EXEMPT(router.pathname)) return;
-    if (!cleared) {
-      router.replace('/home');
-    }
+    if (!cleared) router.replace('/home');
   }, [router.pathname, cleared]);
 
   return (
-    <GateContext.Provider value={{ cleared, setCleared }}>
+    <GateContext.Provider value={{ cleared, setCleared, member, setMember }}>
       <WelcomePopup />
       <Component {...pageProps} />
     </GateContext.Provider>
