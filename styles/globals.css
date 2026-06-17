@@ -1019,30 +1019,29 @@ tbody tr:hover td { background: var(--glow2); }
 
 /* ─── ADMIN TABLE → CARD on mobile ─────────────── */
 @media (max-width: 768px) {
-  /* Hide table headers */
-  .table-wrap table thead { display: none; }
-
-  /* Each row becomes a card — 2 columns grid */
+  /* Convert table to block so rows become cards */
   .table-wrap table { display: block; width: 100%; }
   .table-wrap thead { display: none; }
   .table-wrap tbody {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
+    display: flex;
+    flex-direction: column;
     gap: 10px;
     width: 100%;
+    padding: 10px;
   }
   .table-wrap tr {
     display: flex; flex-direction: column;
     background: var(--grad-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 12px 12px;
+    padding: 14px;
+    width: 100%;
   }
   .table-wrap td {
     padding: 4px 0 !important;
-    font-size: 0.82rem !important;
+    font-size: 0.84rem !important;
     border: none !important;
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: flex-start; gap: 8px;
     flex-wrap: wrap;
   }
   /* Label each cell using data-label */
@@ -1053,18 +1052,30 @@ tbody tr:hover td { background: var(--glow2); }
     color: var(--text-3);
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    min-width: 80px;
+    min-width: 76px;
     flex-shrink: 0;
+    padding-top: 2px;
   }
   /* Hide index and photo columns on mobile */
   .table-wrap td.hide-mobile { display: none !important; }
   /* Action buttons row */
   .table-wrap td.actions-cell {
-    padding-top: 10px !important;
+    padding-top: 12px !important;
     border-top: 1px solid var(--border) !important;
-    margin-top: 6px;
-    justify-content: flex-start;
+    margin-top: 8px;
+    flex-wrap: wrap !important;
     gap: 8px;
+  }
+  .table-wrap td.actions-cell > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 6px;
+    width: 100%;
+  }
+  .table-wrap td.actions-cell .btn {
+    flex: 1;
+    min-width: 0;
+    justify-content: center;
   }
 }
 
@@ -1089,16 +1100,11 @@ tbody tr:hover td { background: var(--glow2); }
   .announce-actions .btn { flex: 1; justify-content: center; }
 }
 
-/* ── Single-col table override ── */
-@media (max-width: 768px) {
-  .table-wrap.table-single-col tbody {
-    grid-template-columns: 1fr !important;
-  }
+/* ── Actions cell desktop: keep on one line ── */
+@media (min-width: 769px) {
+  .table-wrap .actions-cell { white-space: nowrap; }
+  .table-wrap .actions-cell > div { flex-wrap: nowrap !important; }
 }
-
-/* ── Actions cell: never clip buttons ── */
-.table-wrap .actions-cell { white-space: nowrap; }
-.table-wrap .actions-cell > div { flex-wrap: nowrap; }
 
 /* ── Reunion fund settings form grid ── */
 .rf-settings-grid {
