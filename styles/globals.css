@@ -1096,6 +1096,14 @@ tbody tr:hover td { background: var(--glow2); }
   }
 }
 
+/* ── Reunion fund settings form grid ── */
+.rf-settings-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+@media (max-width: 560px) {
+  .rf-settings-grid { grid-template-columns: 1fr; }
+}
+
 /* ── Touch targets ── */
 @media (hover: none) and (pointer: coarse) {
   .btn            { min-height: 44px; }

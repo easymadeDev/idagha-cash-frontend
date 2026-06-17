@@ -212,7 +212,7 @@ export default function AdminReunionFund() {
                 <input className="form-input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. IDAGHA 2026 Reunion Fund" />
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+              <div className="rf-settings-grid">
                 <div className="form-group">
                   <label className="form-label">Overall Target (₦) *</label>
                   <input className="form-input" type="number" min="0" value={form.targetAmount} onChange={(e) => setForm({ ...form, targetAmount: e.target.value })} required />
