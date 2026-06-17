@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api, { formatNaira } from '../../lib/api';
@@ -20,9 +20,22 @@ export default function AdminReunionFund() {
   const [waNotifying, setWaNotifying] = useState<string | null>(null);
   const [waResult, setWaResult] = useState<any>(null);
   const [waStatus, setWaStatus] = useState<{ ready: boolean; hasQr: boolean } | null>(null);
+  const [waQr, setWaQr] = useState<string | null>(null);
 
   useEffect(() => {
-    fetch('/api/whatsapp/status').then(r => r.json()).then(setWaStatus).catch(() => {});
+    const check = () => {
+      fetch('/api/whatsapp/status').then(r => r.json()).then((s) => {
+        setWaStatus(s);
+        if (s.hasQr && !s.ready) {
+          fetch('/api/whatsapp/qr').then(r => r.json()).then(d => setWaQr(d.qr || null)).catch(() => {});
+        } else {
+          setWaQr(null);
+        }
+      }).catch(() => {});
+    };
+    check();
+    const t = setInterval(check, 5000);
+    return () => clearInterval(t);
   }, []);
 
   useEffect(() => {
@@ -190,10 +203,12 @@ export default function AdminReunionFund() {
               </div>
             )}
 
-            {/* WhatsApp status — only show if QR is available (i.e. WhatsApp is enabled but not yet scanned) */}
-            {waStatus && !waStatus.ready && waStatus.hasQr && (
-              <div style={{ marginBottom: 16, padding: '12px 16px', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 'var(--radius)', fontSize: '0.82rem', color: 'var(--yellow)' }}>
-                WhatsApp not connected. A QR code is waiting — check the server terminal to scan it.
+            {/* WhatsApp QR code */}
+            {waStatus && !waStatus.ready && waQr && (
+              <div style={{ marginBottom: 16, padding: '20px', background: 'rgba(37,211,102,0.06)', border: '1px solid rgba(37,211,102,0.2)', borderRadius: 'var(--radius)', textAlign: 'center' }}>
+                <div style={{ fontWeight: 700, marginBottom: 8, color: '#25d366' }}>Scan to connect WhatsApp</div>
+                <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginBottom: 16 }}>Open WhatsApp → Linked Devices → Link a Device</div>
+                <QrCanvas value={waQr} />
               </div>
             )}
 
@@ -426,4 +441,15 @@ function MemberRow({ m, memberTarget, onNotify, notifying, onNotifyWa, waNotifyi
       )}
     </div>
   );
+}
+
+function QrCanvas({ value }: { value: string }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (!value || !canvasRef.current) return;
+    import('qrcode').then((QRCode) => {
+      QRCode.toCanvas(canvasRef.current, value, { width: 220, margin: 2, color: { dark: '#000', light: '#fff' } });
+    });
+  }, [value]);
+  return <canvas ref={canvasRef} style={{ borderRadius: 8, display: 'block', margin: '0 auto' }} />;
 }
