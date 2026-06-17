@@ -190,10 +190,10 @@ export default function AdminReunionFund() {
               </div>
             )}
 
-            {/* WhatsApp status */}
-            {waStatus && !waStatus.ready && (
+            {/* WhatsApp status — only show if QR is available (i.e. WhatsApp is enabled but not yet scanned) */}
+            {waStatus && !waStatus.ready && waStatus.hasQr && (
               <div style={{ marginBottom: 16, padding: '12px 16px', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.2)', borderRadius: 'var(--radius)', fontSize: '0.82rem', color: 'var(--yellow)' }}>
-                WhatsApp not connected. {waStatus.hasQr ? 'A QR code is waiting — check the server terminal to scan it.' : 'Start the backend to generate a QR code, then scan it on your phone.'}
+                WhatsApp not connected. A QR code is waiting — check the server terminal to scan it.
               </div>
             )}
 
