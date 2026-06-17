@@ -158,52 +158,66 @@ export default function AdminMembers() {
         )}
 
         <div className="table-wrap">
-          <table>
+          <table style={{ tableLayout: 'fixed', width: '100%' }}>
+            <colgroup>
+              <col style={{ width: 36 }} />
+              <col style={{ width: 44 }} />
+              <col style={{ width: '18%' }} />
+              <col style={{ width: '12%' }} />
+              <col style={{ width: '14%' }} />
+              <col style={{ width: '16%' }} />
+              <col style={{ width: '14%' }} />
+              <col style={{ width: '13%' }} />
+              <col style={{ width: 120 }} />
+            </colgroup>
             <thead>
               <tr>
-                <th>#</th>
-                <th>Photo</th>
+                <th style={{ width: 36 }}>#</th>
+                <th style={{ width: 44 }}></th>
                 <th>Name</th>
                 <th>Nickname</th>
-                <th>Gender</th>
                 <th>Phone</th>
-                <th>Location</th>
-                <th>Occupation</th>
+                <th>Location · Occupation</th>
                 <th>Position</th>
                 <th>Status</th>
-                <th>Actions</th>
+                <th style={{ textAlign: 'right' }}>Actions</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
-                <tr><td colSpan={11} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>Loading…</td></tr>
+                <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>Loading…</td></tr>
               ) : list.length === 0 ? (
-                <tr><td colSpan={11} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>No members yet. Add one above.</td></tr>
+                <tr><td colSpan={9} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>No members yet. Add one above.</td></tr>
               ) : list.map((m: any, i: number) => (
                 <tr key={m._id} style={{ opacity: m.isActive ? 1 : 0.5 }}>
-                  <td className="hide-mobile" style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>{i + 1}</td>
-                  <td className="hide-mobile">
+                  <td className="hide-mobile" style={{ color: 'var(--text-3)', fontSize: '0.8rem', width: 36 }}>{i + 1}</td>
+                  <td className="hide-mobile" style={{ width: 44, paddingRight: 0 }}>
                     <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', background: 'rgba(34,197,94,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0 }}>
                       {m.photo ? <img src={m.photo} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} /> : <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--green-400)' }}>{m.name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()}</span>}
                     </div>
                   </td>
-                  <td data-label="Name" style={{ fontWeight: 700 }}>{m.name}</td>
-                  <td data-label="Nickname" style={{ color: 'var(--text-3)' }}>{m.nickname || '—'}</td>
-                  <td data-label="Gender" style={{ color: 'var(--text-3)' }}>{m.gender || '—'}</td>
-                  <td data-label="Phone" style={{ color: 'var(--text-3)' }}>{m.phone || '—'}</td>
-                  <td data-label="Location" style={{ color: 'var(--text-3)' }}>{m.location || '—'}</td>
-                  <td data-label="Occupation" style={{ color: 'var(--text-3)' }}>{m.occupation || '—'}</td>
+                  <td data-label="Name">
+                    <div style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.name}</div>
+                    {m.gender && <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 1 }}>{m.gender}</div>}
+                  </td>
+                  <td data-label="Nickname" style={{ color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.nickname || '—'}</td>
+                  <td data-label="Phone" style={{ color: 'var(--text-3)', fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.phone || '—'}</td>
+                  <td data-label="Location">
+                    {m.location && <div style={{ color: 'var(--text-2)', fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.location}</div>}
+                    {m.occupation && <div style={{ color: 'var(--text-3)', fontSize: '0.76rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.occupation}</div>}
+                    {!m.location && !m.occupation && <span style={{ color: 'var(--text-3)' }}>—</span>}
+                  </td>
                   <td data-label="Position">
-                    {m.position ? <span className="badge badge-green">{m.position}</span> : <span className="badge" style={{ background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)' }}>Member</span>}
+                    {m.position ? <span className="badge badge-green" style={{ whiteSpace: 'nowrap' }}>{m.position}</span> : <span className="badge" style={{ background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)', whiteSpace: 'nowrap' }}>Member</span>}
                   </td>
                   <td data-label="Status">
                     <span className={`badge ${m.isActive ? 'badge-green' : ''}`} style={!m.isActive ? { background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)' } : {}}>
                       {m.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td className="actions-cell">
-                    <button className="btn btn-ghost btn-sm" onClick={() => openEdit(m)}>Edit</button>
-                    <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(m)}>{m.isActive ? 'Deactivate' : 'Activate'}</button>
+                  <td className="actions-cell" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                    <button className="btn btn-ghost btn-sm" onClick={() => openEdit(m)} style={{ marginRight: 4 }}>Edit</button>
+                    <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(m)} style={{ marginRight: 4 }}>{m.isActive ? 'Deactivate' : 'Activate'}</button>
                     <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(m._id)}>Delete</button>
                   </td>
                 </tr>

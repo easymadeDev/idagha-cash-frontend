@@ -1096,6 +1096,14 @@ tbody tr:hover td { background: var(--glow2); }
   }
 }
 
+/* ── Members table desktop: prevent action button overflow ── */
+@media (min-width: 769px) {
+  .table-wrap table { table-layout: fixed; }
+  .table-wrap .actions-cell { white-space: nowrap; }
+  .table-wrap .actions-cell .btn { vertical-align: middle; }
+  .table-wrap td { overflow: hidden; text-overflow: ellipsis; }
+}
+
 /* ── Reunion fund settings form grid ── */
 .rf-settings-grid {
   display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
