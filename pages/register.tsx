@@ -38,17 +38,28 @@ export default function RegisterPage() {
     setSaving(true); setError('');
     try {
       // Step 1: create member record
-      const res = await fetch(`${BACKEND}/members/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
-      });
-      if (!res.ok) {
-        const data = await res.json();
-        const msg = data?.message;
-        throw new Error(Array.isArray(msg) ? msg.join(', ') : msg || 'Registration failed.');
+      let res: Response;
+      try {
+        res = await fetch(`${BACKEND}/members/register`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(form),
+        });
+      } catch (netErr: any) {
+        throw new Error('Network error — could not reach the server. Please check your connection.');
       }
-      const member = await res.json();
+
+      if (!res.ok) {
+        let msg = 'Registration failed.';
+        try {
+          const data = await res.json();
+          msg = Array.isArray(data?.message) ? data.message.join(', ') : data?.message || msg;
+        } catch {}
+        throw new Error(msg);
+      }
+
+      let member: any = {};
+      try { member = await res.json(); } catch {}
 
       // Step 2: upload photo if provided (non-fatal — success screen still shows)
       if (photo && member._id) {

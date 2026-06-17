@@ -11,6 +11,7 @@ const EXEMPT = (pathname: string) =>
   pathname === '/' ||
   pathname === '/home' ||
   pathname === '/test' ||
+  pathname === '/register' ||
   pathname.startsWith('/admin');
 
 export default function App({ Component, pageProps }: AppProps) {
