@@ -162,13 +162,13 @@ export default function AdminMembers() {
             <colgroup>
               <col style={{ width: 36 }} />
               <col style={{ width: 44 }} />
-              <col style={{ width: '18%' }} />
+              <col style={{ width: '16%' }} />
+              <col style={{ width: '10%' }} />
               <col style={{ width: '12%' }} />
               <col style={{ width: '14%' }} />
-              <col style={{ width: '16%' }} />
-              <col style={{ width: '14%' }} />
-              <col style={{ width: '13%' }} />
-              <col style={{ width: 120 }} />
+              <col style={{ width: '12%' }} />
+              <col style={{ width: '10%' }} />
+              <col style={{ width: 220 }} />
             </colgroup>
             <thead>
               <tr>
@@ -215,7 +215,7 @@ export default function AdminMembers() {
                       {m.isActive ? 'Active' : 'Inactive'}
                     </span>
                   </td>
-                  <td className="actions-cell" style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
+                  <td className="actions-cell" style={{ textAlign: 'right', whiteSpace: 'nowrap', overflow: 'visible' }}>
                     <button className="btn btn-ghost btn-sm" onClick={() => openEdit(m)} style={{ marginRight: 4 }}>Edit</button>
                     <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(m)} style={{ marginRight: 4 }}>{m.isActive ? 'Deactivate' : 'Activate'}</button>
                     <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(m._id)}>Delete</button>
