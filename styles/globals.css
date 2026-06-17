@@ -1096,17 +1096,9 @@ tbody tr:hover td { background: var(--glow2); }
   }
 }
 
-/* ── Members table desktop: fixed layout + visible actions ── */
-@media (min-width: 769px) {
-  .members-table { table-layout: fixed; width: 100%; }
-  .table-wrap .actions-cell { white-space: nowrap; overflow: visible; }
-  .table-wrap .actions-cell .btn { vertical-align: middle; }
-}
-/* ── Members table mobile: reset colgroup so card layout works ── */
-@media (max-width: 768px) {
-  .members-colgroup { display: none; }
-  .members-table { table-layout: auto; }
-}
+/* ── Actions cell: never clip buttons ── */
+.table-wrap .actions-cell { white-space: nowrap; }
+.table-wrap .actions-cell > div { flex-wrap: nowrap; }
 
 /* ── Reunion fund settings form grid ── */
 .rf-settings-grid {
