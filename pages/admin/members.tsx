@@ -26,6 +26,10 @@ export default function AdminMembers() {
   const [photoPreview, setPhotoPreview] = useState('');
   const [saving, setSaving] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [welcomeModal, setWelcomeModal] = useState(false);
+  const [welcomeSending, setWelcomeSending] = useState(false);
+  const [welcomeResult, setWelcomeResult] = useState<any>(null);
+  const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const allList = Array.isArray(members) ? members : [];
@@ -100,6 +104,19 @@ export default function AdminMembers() {
     catch { /* handled */ }
   };
 
+  const sendWelcomeAll = async () => {
+    setWelcomeSending(true);
+    try {
+      const res = await api.post('/members/welcome/all');
+      setWelcomeResult(res.data);
+    } catch (err: any) {
+      toast(err.response?.data?.message || 'Failed to send welcome messages.', 'error');
+      setWelcomeModal(false);
+    } finally {
+      setWelcomeSending(false);
+    }
+  };
+
   return (
     <AdminLayout>
       <div>
@@ -108,7 +125,13 @@ export default function AdminMembers() {
             <h1 style={{ fontFamily: 'var(--font-d)', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Members</h1>
             <p style={{ color: 'var(--text-3)', fontSize: '0.875rem', marginTop: 4 }}>Manage registered group members visible on the public directory.</p>
           </div>
-          <button className="btn btn-primary" onClick={openAdd}>+ Add Member</button>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button className="btn btn-ghost" onClick={() => { setWelcomeResult(null); setWelcomeModal(true); }}>
+              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Send Welcome
+            </button>
+            <button className="btn btn-primary" onClick={openAdd}>+ Add Member</button>
+          </div>
         </div>
 
         {/* Pending registrations */}
@@ -341,6 +364,67 @@ export default function AdminMembers() {
           </div>
         </div>
       )}
+
+      {/* Send Welcome Modal */}
+      {welcomeModal && (
+        <div className="modal-overlay" onClick={() => { if (!welcomeSending) { setWelcomeModal(false); setWelcomeResult(null); } }}>
+          <div className="modal" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+            <p className="modal-title">Send Welcome Messages</p>
+
+            {!welcomeResult ? (
+              <>
+                <p style={{ color: 'var(--text-3)', marginBottom: 20, fontSize: '0.9rem', lineHeight: 1.7 }}>
+                  This will send a <strong style={{ color: 'var(--text-1)' }}>welcome email + WhatsApp message</strong> to all <strong style={{ color: 'var(--text-1)' }}>{list.length} active members</strong> who never received one.
+                </p>
+                <div style={{ padding: '12px 16px', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.25)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--yellow)', marginBottom: 20 }}>
+                  WhatsApp messages will only send if WhatsApp is currently connected.
+                </div>
+                <div className="modal-actions">
+                  <button className="btn btn-ghost" onClick={() => setWelcomeModal(false)} disabled={welcomeSending}>Cancel</button>
+                  <button className="btn btn-primary" onClick={sendWelcomeAll} disabled={welcomeSending}>
+                    {welcomeSending ? (
+                      <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
+                    ) : 'Send to All'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="alert alert-success" style={{ marginBottom: 16 }}>Welcome messages sent successfully!</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                    <span style={{ color: 'var(--text-3)' }}>Total members</span>
+                    <strong>{welcomeResult.total}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                    <span style={{ color: 'var(--text-3)' }}>Emails sent</span>
+                    <strong style={{ color: 'var(--green-400)' }}>{welcomeResult.emailSent}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                    <span style={{ color: 'var(--text-3)' }}>WhatsApp sent</span>
+                    <strong style={{ color: 'var(--green-400)' }}>{welcomeResult.whatsappSent}</strong>
+                  </div>
+                  {welcomeResult.noEmail?.length > 0 && (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: 4 }}>
+                      No email: {welcomeResult.noEmail.join(', ')}
+                    </div>
+                  )}
+                  {welcomeResult.noPhone?.length > 0 && (
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>
+                      No phone: {welcomeResult.noPhone.join(', ')}
+                    </div>
+                  )}
+                </div>
+                <div className="modal-actions">
+                  <button className="btn btn-primary" onClick={() => { setWelcomeModal(false); setWelcomeResult(null); }}>Done</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </AdminLayout>
   );
 }
