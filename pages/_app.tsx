@@ -75,21 +75,16 @@ export default function App({ Component, pageProps }: AppProps) {
     if (FULLY_EXEMPT(router.pathname)) return;
     if (cleared) return; // already verified — no redirect needed
 
-    // Not yet verified — send back to / so the popup can show
-    // Small delay so the popup's own dismiss() navigation takes priority
-    const t = setTimeout(() => {
-      const memberToken = sessionStorage.getItem(MEMBER_TOKEN_KEY);
-      const registered  = sessionStorage.getItem(REGISTERED_KEY);
-      const gateToken   = sessionStorage.getItem(GATE_TOKEN_KEY);
+    const memberToken = sessionStorage.getItem(MEMBER_TOKEN_KEY);
+    const registered  = sessionStorage.getItem(REGISTERED_KEY);
+    const gateToken   = sessionStorage.getItem(GATE_TOKEN_KEY);
 
-      if (GATE_ONLY(router.pathname)) {
-        if (!isTokenValid(gateToken)) router.replace('/');
-        return;
-      }
+    if (GATE_ONLY(router.pathname)) {
+      if (!isTokenValid(gateToken)) router.replace('/');
+      return;
+    }
 
-      if (!isTokenValid(memberToken) && registered !== '1') router.replace('/');
-    }, 50);
-    return () => clearTimeout(t);
+    if (!isTokenValid(memberToken) && registered !== '1') router.replace('/');
   }, [router.pathname, ready, cleared]);
 
   return (
