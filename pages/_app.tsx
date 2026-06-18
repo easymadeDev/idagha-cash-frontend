@@ -37,9 +37,9 @@ export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const [cleared, setClearedState] = useState(false);
   const [member, setMemberState] = useState<SessionMember | null>(null);
+  const [ready, setReady] = useState(false); // true after sessionStorage is read
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
     const memberToken  = sessionStorage.getItem(MEMBER_TOKEN_KEY);
     const registered   = sessionStorage.getItem(REGISTERED_KEY);
     if (isTokenValid(memberToken) || registered === '1') setClearedState(true);
@@ -47,6 +47,7 @@ export default function App({ Component, pageProps }: AppProps) {
       const raw = sessionStorage.getItem(MEMBER_KEY);
       if (raw) setMemberState(JSON.parse(raw));
     } catch {}
+    setReady(true); // gate checks can now run safely
   }, []);
 
   const setCleared = (v: boolean) => {
@@ -70,26 +71,24 @@ export default function App({ Component, pageProps }: AppProps) {
   };
 
   useEffect(() => {
+    if (!ready) return; // wait until sessionStorage has been read
     if (FULLY_EXEMPT(router.pathname)) return;
-    if (typeof window === 'undefined') return;
 
     const gateToken   = sessionStorage.getItem(GATE_TOKEN_KEY);
     const memberToken = sessionStorage.getItem(MEMBER_TOKEN_KEY);
 
     if (GATE_ONLY(router.pathname)) {
-      // /register only needs a valid PIN token
       if (!isTokenValid(gateToken)) router.replace('/');
       return;
     }
 
-    // All other pages need a valid member token OR completed registration this session
     const registered = sessionStorage.getItem(REGISTERED_KEY);
     if (!isTokenValid(memberToken) && registered !== '1') router.replace('/');
-  }, [router.pathname, cleared]);
+  }, [router.pathname, cleared, ready]);
 
   return (
     <ToastProvider>
-      <GateContext.Provider value={{ cleared, setCleared, member, setMember }}>
+      <GateContext.Provider value={{ cleared, setCleared, member, setMember, ready }}>
         <WelcomePopup />
         <Component {...pageProps} />
       </GateContext.Provider>

@@ -10,7 +10,7 @@ const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function WelcomePopup() {
   const router = useRouter();
-  const { cleared, setCleared, setMember } = useGate();
+  const { cleared, setCleared, setMember, ready } = useGate();
   const [visible, setVisible] = useState(false);
   const [animOut, setAnimOut] = useState(false);
   const [step, setStep] = useState<Step>('pin');
@@ -26,13 +26,13 @@ export default function WelcomePopup() {
   const pinRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Show on any non-exempt page if not yet cleared
+    if (!ready) return; // wait until sessionStorage is read — prevents flash on already-verified users
     if (cleared) return;
-    const exempt = router.pathname === '/test' || router.pathname.startsWith('/admin');
+    const exempt = router.pathname === '/' || router.pathname === '/test' || router.pathname.startsWith('/admin');
     if (exempt) return;
     const t = setTimeout(() => setVisible(true), 300);
     return () => clearTimeout(t);
-  }, [router.pathname, cleared]);
+  }, [router.pathname, cleared, ready]);
 
   useEffect(() => {
     if (step === 'verify') setTimeout(() => inputRef.current?.focus(), 100);

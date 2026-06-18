@@ -13,6 +13,7 @@ export const GateContext = createContext<{
   setCleared: (v: boolean) => void;
   member: SessionMember | null;
   setMember: (m: SessionMember | null) => void;
-}>({ cleared: false, setCleared: () => {}, member: null, setMember: () => {} });
+  ready: boolean;
+}>({ cleared: false, setCleared: () => {}, member: null, setMember: () => {}, ready: false });
 
 export const useGate = () => useContext(GateContext);
