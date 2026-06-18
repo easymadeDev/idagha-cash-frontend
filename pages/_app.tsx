@@ -71,20 +71,26 @@ export default function App({ Component, pageProps }: AppProps) {
   };
 
   useEffect(() => {
-    if (!ready) return; // wait until sessionStorage has been read
+    if (!ready) return;
     if (FULLY_EXEMPT(router.pathname)) return;
+    if (cleared) return; // already verified — no redirect needed
 
-    const gateToken   = sessionStorage.getItem(GATE_TOKEN_KEY);
-    const memberToken = sessionStorage.getItem(MEMBER_TOKEN_KEY);
-    const registered  = sessionStorage.getItem(REGISTERED_KEY);
+    // Not yet verified — send back to / so the popup can show
+    // Small delay so the popup's own dismiss() navigation takes priority
+    const t = setTimeout(() => {
+      const memberToken = sessionStorage.getItem(MEMBER_TOKEN_KEY);
+      const registered  = sessionStorage.getItem(REGISTERED_KEY);
+      const gateToken   = sessionStorage.getItem(GATE_TOKEN_KEY);
 
-    if (GATE_ONLY(router.pathname)) {
-      if (!isTokenValid(gateToken)) router.replace('/');
-      return;
-    }
+      if (GATE_ONLY(router.pathname)) {
+        if (!isTokenValid(gateToken)) router.replace('/');
+        return;
+      }
 
-    if (!isTokenValid(memberToken) && registered !== '1') router.replace('/');
-  }, [router.pathname, ready]); // 'cleared' removed — we read sessionStorage directly
+      if (!isTokenValid(memberToken) && registered !== '1') router.replace('/');
+    }, 50);
+    return () => clearTimeout(t);
+  }, [router.pathname, ready, cleared]);
 
   return (
     <ToastProvider>
