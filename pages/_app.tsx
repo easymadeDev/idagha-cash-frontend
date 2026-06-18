@@ -76,15 +76,15 @@ export default function App({ Component, pageProps }: AppProps) {
 
     const gateToken   = sessionStorage.getItem(GATE_TOKEN_KEY);
     const memberToken = sessionStorage.getItem(MEMBER_TOKEN_KEY);
+    const registered  = sessionStorage.getItem(REGISTERED_KEY);
 
     if (GATE_ONLY(router.pathname)) {
       if (!isTokenValid(gateToken)) router.replace('/');
       return;
     }
 
-    const registered = sessionStorage.getItem(REGISTERED_KEY);
     if (!isTokenValid(memberToken) && registered !== '1') router.replace('/');
-  }, [router.pathname, cleared, ready]);
+  }, [router.pathname, ready]); // 'cleared' removed — we read sessionStorage directly
 
   return (
     <ToastProvider>
