@@ -68,7 +68,6 @@ export default function WelcomePopup() {
   };
 
   const dismiss = (destination?: string) => {
-    setCleared(true);
     setAnimOut(true);
     setTimeout(() => {
       setVisible(false);
