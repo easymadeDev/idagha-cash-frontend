@@ -6,16 +6,20 @@ import WelcomePopup from '../components/WelcomePopup';
 import { GateContext, SessionMember } from '../lib/gate';
 import { ToastProvider } from '../components/Toast';
 
-const GATE_TOKEN_KEY  = 'idagha_gate_token';
+const GATE_TOKEN_KEY   = 'idagha_gate_token';
 const MEMBER_TOKEN_KEY = 'idagha_member_token';
 const MEMBER_KEY       = 'idagha_member';
+const REGISTERED_KEY   = 'idagha_registered'; // set after self-registration (pending approval)
 
-const EXEMPT = (pathname: string) =>
+// Fully open — no token needed
+const FULLY_EXEMPT = (pathname: string) =>
   pathname === '/' ||
-  pathname === '/home' ||
   pathname === '/test' ||
-  pathname === '/register' ||
   pathname.startsWith('/admin');
+
+// Requires only gate token (PIN passed) — not full member verification
+const GATE_ONLY = (pathname: string) =>
+  pathname === '/register';
 
 function isTokenValid(token: string | null): boolean {
   if (!token) return false;
@@ -36,8 +40,9 @@ export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    const gateToken = sessionStorage.getItem(GATE_TOKEN_KEY);
-    if (isTokenValid(gateToken)) setClearedState(true);
+    const memberToken  = sessionStorage.getItem(MEMBER_TOKEN_KEY);
+    const registered   = sessionStorage.getItem(REGISTERED_KEY);
+    if (isTokenValid(memberToken) || registered === '1') setClearedState(true);
     try {
       const raw = sessionStorage.getItem(MEMBER_KEY);
       if (raw) setMemberState(JSON.parse(raw));
@@ -50,6 +55,7 @@ export default function App({ Component, pageProps }: AppProps) {
         sessionStorage.removeItem(GATE_TOKEN_KEY);
         sessionStorage.removeItem(MEMBER_TOKEN_KEY);
         sessionStorage.removeItem(MEMBER_KEY);
+        sessionStorage.removeItem(REGISTERED_KEY);
       }
     }
     setClearedState(v);
@@ -64,12 +70,21 @@ export default function App({ Component, pageProps }: AppProps) {
   };
 
   useEffect(() => {
-    if (EXEMPT(router.pathname)) return;
-    if (!cleared) {
-      // Re-check token in case it expired since last render
-      const gateToken = typeof window !== 'undefined' ? sessionStorage.getItem(GATE_TOKEN_KEY) : null;
+    if (FULLY_EXEMPT(router.pathname)) return;
+    if (typeof window === 'undefined') return;
+
+    const gateToken   = sessionStorage.getItem(GATE_TOKEN_KEY);
+    const memberToken = sessionStorage.getItem(MEMBER_TOKEN_KEY);
+
+    if (GATE_ONLY(router.pathname)) {
+      // /register only needs a valid PIN token
       if (!isTokenValid(gateToken)) router.replace('/');
+      return;
     }
+
+    // All other pages need a valid member token OR completed registration this session
+    const registered = sessionStorage.getItem(REGISTERED_KEY);
+    if (!isTokenValid(memberToken) && registered !== '1') router.replace('/');
   }, [router.pathname, cleared]);
 
   return (

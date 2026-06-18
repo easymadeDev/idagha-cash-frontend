@@ -77,8 +77,9 @@ export default function RegisterPage() {
       let member: any = {};
       try { member = await res.json(); } catch {}
 
+      // Mark as registered so they can access the portal (pending approval)
+      if (typeof window !== 'undefined') sessionStorage.setItem('idagha_registered', '1');
       setCleared(true);
-      // Save member to session so the app knows who they are
       if (member._id) {
         setMember({
           _id: member._id,
