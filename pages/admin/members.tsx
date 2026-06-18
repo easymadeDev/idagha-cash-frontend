@@ -29,7 +29,6 @@ export default function AdminMembers() {
   const [welcomeModal, setWelcomeModal] = useState(false);
   const [welcomeSending, setWelcomeSending] = useState(false);
   const [welcomeResult, setWelcomeResult] = useState<any>(null);
-  const { toast } = useToast();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const allList = Array.isArray(members) ? members : [];
