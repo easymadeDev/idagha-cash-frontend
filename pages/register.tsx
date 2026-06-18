@@ -14,7 +14,7 @@ const EMPTY = {
 
 export default function RegisterPage() {
   const { toast } = useToast();
-  const { setCleared } = useGate();
+  const { setCleared, setMember } = useGate();
   const router = useRouter();
   const [form, setForm] = useState(EMPTY);
   const [photo, setPhoto] = useState<File | null>(null);
@@ -75,6 +75,16 @@ export default function RegisterPage() {
       }
 
       setCleared(true);
+      // Save member to session so the app knows who they are
+      if (member._id) {
+        setMember({
+          _id: member._id,
+          name: member.name,
+          nickname: member.nickname || '',
+          photo: member.photo || '',
+          position: member.position || '',
+        });
+      }
       setDone(true);
     } catch (err: any) {
       toast(err.message || 'Something went wrong. Please try again.', 'error');
