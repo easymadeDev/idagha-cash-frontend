@@ -338,13 +338,13 @@ export default function WelcomePopup() {
         .wp-overlay-out { animation: fadeOut 0.3s ease forwards; }
 
         @keyframes wp-shake {
-          0%, 100% { transform: translateX(0); }
-          15%       { transform: translateX(-8px); }
-          30%       { transform: translateX(8px); }
-          45%       { transform: translateX(-6px); }
-          60%       { transform: translateX(6px); }
-          75%       { transform: translateX(-4px); }
-          90%       { transform: translateX(4px); }
+          0%, 100% { margin-left: 0; }
+          15%       { margin-left: -8px; }
+          30%       { margin-left: 8px; }
+          45%       { margin-left: -6px; }
+          60%       { margin-left: 6px; }
+          75%       { margin-left: -4px; }
+          90%       { margin-left: 4px; }
         }
         .wp-shake { animation: wp-shake 0.6s cubic-bezier(0.36,0.07,0.19,0.97) both; }
 
