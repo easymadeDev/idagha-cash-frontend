@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import api from '../../lib/api';
+import { useToast } from '../../components/Toast';
 
 export default function AdminLogin() {
+  const { toast } = useToast();
   const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [showPw, setShowPw] = useState(false);
 
@@ -19,14 +20,14 @@ export default function AdminLogin() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(''); setLoading(true);
+    setLoading(true);
     try {
       const { data } = await api.post('/auth/login', { username, password });
       localStorage.setItem('idagha_token', data.access_token);
       localStorage.setItem('idagha_user', data.username);
       router.push('/admin/dashboard');
     } catch {
-      setError('Invalid username or password. Please try again.');
+      toast('Invalid username or password. Please try again.', 'error');
     } finally { setLoading(false); }
   };
 
@@ -76,15 +77,6 @@ export default function AdminLogin() {
           boxShadow: '0 24px 64px rgba(0,0,0,0.5)',
         }}>
           <form onSubmit={handleLogin}>
-            {error && (
-              <div className="alert alert-error">
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0, marginTop: 1 }}>
-                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeLinecap="round"/>
-                </svg>
-                {error}
-              </div>
-            )}
-
             <div className="form-group">
               <label className="form-label" htmlFor="username">Username</label>
               <input

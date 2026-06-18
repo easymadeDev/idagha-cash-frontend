@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api, { formatNaira, formatDate } from '../../lib/api';
+import { useToast } from '../../components/Toast';
 
 const authFetcher = (url: string) =>
   fetch(url, { headers: { Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('idagha_token') || '' : ''}` } }).then((r) => r.json());
@@ -30,6 +31,7 @@ const CAT_META: Record<string, { label: string; color: string; bg: string }> = {
 };
 
 export default function AdminContributions() {
+  const { toast } = useToast();
   const { data: contributions, isLoading } = useSWR('/api/contributions/admin/all', authFetcher);
   const { data: members } = useSWR('/api/members/admin/all', authFetcher);
   const { data: wallets } = useSWR('/api/wallets', fetcher);
@@ -39,7 +41,6 @@ export default function AdminContributions() {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [filterCat, setFilterCat] = useState('all');
   const [activeTab, setActiveTab] = useState<'approved' | 'pending'>('approved');
@@ -108,7 +109,6 @@ export default function AdminContributions() {
     const groupWallet = walletList.find((w: any) => w.type === 'general');
     setEditing(null);
     setForm({ ...EMPTY, walletId: groupWallet?._id || '', category: 'monthly-dues' });
-    setError('');
     setModal(true);
   };
 
@@ -122,14 +122,12 @@ export default function AdminContributions() {
       category: c.category ?? 'general',
       walletId: c.walletId ?? '',
     });
-    setError('');
     setModal(true);
   };
 
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
     try {
       const payload = { ...form, amount: Number(form.amount) };
       if (editing) await api.put(`/contributions/${editing._id}`, payload);
@@ -140,7 +138,7 @@ export default function AdminContributions() {
       mutate('/api/stats/wallets');
       setModal(false);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save.');
+      toast(err.response?.data?.message || 'Failed to save.', 'error');
     } finally {
       setSaving(false);
     }
@@ -501,8 +499,6 @@ export default function AdminContributions() {
           <div className="modal" style={{ maxWidth: 500 }} onClick={(e) => e.stopPropagation()}>
             <p className="modal-title">{editing ? 'Edit Contribution' : 'Record Contribution'}</p>
             <form onSubmit={save}>
-              {error && <div className="alert alert-error">{error}</div>}
-
               {/* ── Category ── */}
               <div className="form-group">
                 <label className="form-label">Category *</label>

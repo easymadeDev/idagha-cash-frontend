@@ -2,6 +2,7 @@ import { useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api, { formatDate } from '../../lib/api';
+import { useToast } from '../../components/Toast';
 
 const fetcher = (url: string) =>
   fetch(url, {
@@ -11,25 +12,25 @@ const fetcher = (url: string) =>
 const EMPTY = { title: '', content: '', type: 'info', isActive: true };
 
 export default function AdminAnnouncements() {
+  const { toast } = useToast();
   const { data: announcements, isLoading } = useSWR('/api/announcements/admin/all', fetcher);
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState<any>(EMPTY);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const list = Array.isArray(announcements) ? announcements : [];
 
-  const openAdd = () => { setEditing(null); setForm(EMPTY); setError(''); setModal(true); };
+  const openAdd = () => { setEditing(null); setForm(EMPTY); setModal(true); };
   const openEdit = (a: any) => {
     setEditing(a);
     setForm({ title: a.title, content: a.content, type: a.type ?? 'info', isActive: a.isActive ?? true });
-    setError(''); setModal(true);
+    setModal(true);
   };
 
   const save = async (e: React.FormEvent) => {
-    e.preventDefault(); setSaving(true); setError('');
+    e.preventDefault(); setSaving(true);
     try {
       if (editing) await api.put(`/announcements/${editing._id}`, form);
       else await api.post('/announcements', form);
@@ -37,7 +38,7 @@ export default function AdminAnnouncements() {
       mutate('/api/announcements');
       setModal(false);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save. Check your connection.');
+      toast(err.response?.data?.message || 'Failed to save. Check your connection.', 'error');
     } finally { setSaving(false); }
   };
 
@@ -98,7 +99,6 @@ export default function AdminAnnouncements() {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <p className="modal-title">{editing ? 'Edit Announcement' : 'New Announcement'}</p>
             <form onSubmit={save}>
-              {error && <div className="alert alert-error">{error}</div>}
               <div className="form-group">
                 <label className="form-label">Title *</label>
                 <input className="form-input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} required />

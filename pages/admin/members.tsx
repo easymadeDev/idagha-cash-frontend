@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api from '../../lib/api';
+import { useToast } from '../../components/Toast';
 
 const fetcher = (url: string) =>
   fetch(url, {
@@ -16,6 +17,7 @@ const EMPTY = {
 const POSITIONS = ['Member', 'Secretary', 'President', 'Vice President', 'Treasurer', 'PRO', 'Welfare Officer', 'Financial Secretary'];
 
 export default function AdminMembers() {
+  const { toast } = useToast();
   const { data: members, isLoading } = useSWR('/api/members/admin/all', fetcher);
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -23,7 +25,6 @@ export default function AdminMembers() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState('');
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -43,7 +44,7 @@ export default function AdminMembers() {
 
   const openAdd = () => {
     setEditing(null); setForm(EMPTY); setPhoto(null); setPhotoPreview('');
-    setError(''); setModal(true);
+    setModal(true);
   };
   const openEdit = (m: any) => {
     setEditing(m);
@@ -55,11 +56,11 @@ export default function AdminMembers() {
     });
     setPhoto(null);
     setPhotoPreview(m.photo || '');
-    setError(''); setModal(true);
+    setModal(true);
   };
 
   const save = async (e: React.FormEvent) => {
-    e.preventDefault(); setSaving(true); setError('');
+    e.preventDefault(); setSaving(true);
     try {
       let saved: any;
       if (editing) {
@@ -79,7 +80,7 @@ export default function AdminMembers() {
       mutate('/api/members');
       setModal(false);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save. Check your connection and try again.');
+      toast(err.response?.data?.message || 'Failed to save. Check your connection and try again.', 'error');
     } finally { setSaving(false); }
   };
 
@@ -227,8 +228,6 @@ export default function AdminMembers() {
           <div className="modal" style={{ maxWidth: 580 }} onClick={(e) => e.stopPropagation()}>
             <p className="modal-title">{editing ? 'Edit Member' : 'Add New Member'}</p>
             <form onSubmit={save}>
-              {error && <div className="alert alert-error">{error}</div>}
-
               {/* Photo upload */}
               <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
                 <div style={{ textAlign: 'center' }}>

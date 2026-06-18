@@ -4,6 +4,7 @@ import { useRouter } from 'next/router';
 import '../styles/globals.css';
 import WelcomePopup from '../components/WelcomePopup';
 import { GateContext, SessionMember } from '../lib/gate';
+import { ToastProvider } from '../components/Toast';
 
 const SESSION_KEY = 'idagha_gate_cleared';
 const MEMBER_KEY  = 'idagha_member';
@@ -52,9 +53,11 @@ export default function App({ Component, pageProps }: AppProps) {
   }, [router.pathname, cleared]);
 
   return (
-    <GateContext.Provider value={{ cleared, setCleared, member, setMember }}>
-      <WelcomePopup />
-      <Component {...pageProps} />
-    </GateContext.Provider>
+    <ToastProvider>
+      <GateContext.Provider value={{ cleared, setCleared, member, setMember }}>
+        <WelcomePopup />
+        <Component {...pageProps} />
+      </GateContext.Provider>
+    </ToastProvider>
   );
 }

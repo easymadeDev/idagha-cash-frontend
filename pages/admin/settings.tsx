@@ -2,16 +2,16 @@ import { useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api from '../../lib/api';
+import { useToast } from '../../components/Toast';
 
 const authFetcher = (url: string) =>
   fetch(url, { headers: { Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('idagha_token') || '' : ''}` } }).then((r) => r.json());
 
 export default function AdminSettings() {
+  const { toast } = useToast();
   const { data: bankAccounts, isLoading } = useSWR('/api/settings/bank-accounts', authFetcher);
 
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
 
   const [accountsForm, setAccountsForm] = useState<any[]>([]);
   const [hasInit, setHasInit] = useState(false);
@@ -48,15 +48,12 @@ export default function AdminSettings() {
 
   const handleSave = async () => {
     setSaving(true);
-    setError('');
-    setSuccess('');
     try {
       await api.put('/settings/bank-accounts', accountsForm);
       mutate('/api/settings/bank-accounts');
-      setSuccess('Bank accounts updated successfully.');
-      setTimeout(() => setSuccess(''), 3000);
+      toast('Bank accounts updated successfully.', 'success');
     } catch (err: any) {
-      setError('Failed to save settings.');
+      toast('Failed to save settings.', 'error');
     } finally {
       setSaving(false);
     }
@@ -67,9 +64,6 @@ export default function AdminSettings() {
       <div style={{ maxWidth: 800 }}>
         <h1 style={{ fontFamily: 'var(--font-d)', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 4 }}>System Settings</h1>
         <p style={{ color: 'var(--text-3)', fontSize: '0.875rem', marginBottom: 32 }}>Manage public configurations, bank accounts, and platform parameters.</p>
-
-        {error && <div className="alert alert-error" style={{ marginBottom: 20 }}>{error}</div>}
-        {success && <div className="alert alert-success" style={{ marginBottom: 20 }}>{success}</div>}
 
         <div className="card" style={{ padding: 24, marginBottom: 32 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>

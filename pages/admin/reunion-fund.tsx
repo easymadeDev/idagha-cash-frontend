@@ -1,11 +1,13 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api, { formatNaira } from '../../lib/api';
+import { useToast } from '../../components/Toast';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 export default function AdminReunionFund() {
+  const { toast } = useToast();
   const { data: fund } = useSWR('/api/reunion-fund', fetcher);
   const { data: breakdown, isLoading: loadingBreakdown } = useSWR('/api/reunion-fund/members', fetcher);
   const { data: stats } = useSWR('/api/stats/summary', fetcher);
@@ -13,8 +15,6 @@ export default function AdminReunionFund() {
   const [tab, setTab] = useState<'tracker' | 'settings'>('tracker');
   const [form, setForm] = useState({ title: '', targetAmount: '', memberTarget: '10000', targetDate: '', description: '' });
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
   const [notifying, setNotifying] = useState<string | null>(null); // member name or 'all'
   const [notifyResult, setNotifyResult] = useState<any>(null);
   const [waNotifying, setWaNotifying] = useState<string | null>(null);
@@ -51,7 +51,7 @@ export default function AdminReunionFund() {
   }, [fund]);
 
   const saveFund = async (e: React.FormEvent) => {
-    e.preventDefault(); setSaving(true); setError(''); setSuccess('');
+    e.preventDefault(); setSaving(true);
     try {
       await api.put('/reunion-fund', {
         title: form.title,
@@ -61,11 +61,10 @@ export default function AdminReunionFund() {
         description: form.description,
       });
       mutate('/api/reunion-fund'); mutate('/api/stats/summary');
-      setSuccess('Reunion fund settings updated!');
-      setTimeout(() => setSuccess(''), 3000);
+      toast('Reunion fund settings updated!', 'success');
     } catch (err: any) {
       const msg = err.response?.data?.message;
-      setError(Array.isArray(msg) ? msg.join(', ') : msg || 'Failed to update.');
+      toast(Array.isArray(msg) ? msg.join(', ') : msg || 'Failed to update.', 'error');
     } finally { setSaving(false); }
   };
 
@@ -75,8 +74,15 @@ export default function AdminReunionFund() {
     try {
       const res = await api.post('/reunion-fund/notify', memberNames ? { memberNames } : {});
       setNotifyResult(res.data);
+      if (res.data?.error) {
+        toast(res.data.error, 'error');
+      } else {
+        toast(`Sent ${res.data.sent} email${res.data.sent !== 1 ? 's' : ''}.`, 'success');
+      }
     } catch (err: any) {
-      setNotifyResult({ error: err.response?.data?.message || 'Failed to send emails.' });
+      const errMsg = err.response?.data?.message || 'Failed to send emails.';
+      setNotifyResult({ error: errMsg });
+      toast(errMsg, 'error');
     } finally { setNotifying(null); }
   };
 
@@ -86,8 +92,15 @@ export default function AdminReunionFund() {
     try {
       const res = await api.post('/reunion-fund/notify-whatsapp', memberNames ? { memberNames } : {});
       setWaResult(res.data);
+      if (res.data?.error) {
+        toast(res.data.error, 'error');
+      } else {
+        toast(`WhatsApp: sent ${res.data.sent} message${res.data.sent !== 1 ? 's' : ''}.`, 'success');
+      }
     } catch (err: any) {
-      setWaResult({ error: err.response?.data?.message || 'Failed to send WhatsApp messages.' });
+      const errMsg = err.response?.data?.message || 'Failed to send WhatsApp messages.';
+      setWaResult({ error: errMsg });
+      toast(errMsg, 'error');
     } finally { setWaNotifying(null); }
   };
 
@@ -272,9 +285,6 @@ export default function AdminReunionFund() {
         {tab === 'settings' && (
           <div className="card" style={{ maxWidth: 560 }}>
             <form onSubmit={saveFund}>
-              {error && <div className="alert alert-error" style={{ marginBottom: 16 }}>{error}</div>}
-              {success && <div className="alert alert-success" style={{ marginBottom: 16 }}>{success}</div>}
-
               <div className="form-group">
                 <label className="form-label">Title</label>
                 <input className="form-input" value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="e.g. IDAGHA 2026 Reunion Fund" />
@@ -444,12 +454,6 @@ function MemberRow({ m, memberTarget, onNotify, notifying, onNotifyWa, waNotifyi
 }
 
 function QrCanvas({ value }: { value: string }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  useEffect(() => {
-    if (!value || !canvasRef.current) return;
-    import('qrcode').then((QRCode) => {
-      QRCode.toCanvas(canvasRef.current, value, { width: 220, margin: 2, color: { dark: '#000', light: '#fff' } });
-    });
-  }, [value]);
-  return <canvas ref={canvasRef} style={{ borderRadius: 8, display: 'block', margin: '0 auto' }} />;
+  // value is now a base64 data URL from the backend
+  return <img src={value} alt="WhatsApp QR Code" style={{ width: 220, height: 220, borderRadius: 8, display: 'block', margin: '0 auto', background: '#fff' }} />;
 }

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api, { formatNaira } from '../../lib/api';
+import { useToast } from '../../components/Toast';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -9,6 +10,7 @@ const EMPTY = { name: '', description: '', color: '#22c55e', type: 'general' };
 const TYPES = ['general', 'reunion', 'custom'];
 
 export default function AdminWallets() {
+  const { toast } = useToast();
   const { data: wallets, isLoading } = useSWR('/api/wallets', fetcher);
   const { data: walletStats } = useSWR('/api/stats/wallets', fetcher);
 
@@ -16,7 +18,6 @@ export default function AdminWallets() {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const list = Array.isArray(wallets) ? wallets : [];
@@ -25,15 +26,15 @@ export default function AdminWallets() {
   const getStats = (walletId: string) =>
     stats.find((s: any) => s.wallet?._id === walletId) || { income: 0, spent: 0, balance: 0 };
 
-  const openAdd = () => { setEditing(null); setForm(EMPTY); setError(''); setModal(true); };
+  const openAdd = () => { setEditing(null); setForm(EMPTY); setModal(true); };
   const openEdit = (w: any) => {
     setEditing(w);
     setForm({ name: w.name, description: w.description ?? '', color: w.color ?? '#22c55e', type: w.type ?? 'general' });
-    setError(''); setModal(true);
+    setModal(true);
   };
 
   const save = async (e: React.FormEvent) => {
-    e.preventDefault(); setSaving(true); setError('');
+    e.preventDefault(); setSaving(true);
     try {
       if (editing) await api.put(`/wallets/${editing._id}`, form);
       else await api.post('/wallets', form);
@@ -41,7 +42,7 @@ export default function AdminWallets() {
       mutate('/api/stats/wallets');
       setModal(false);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save.');
+      toast(err.response?.data?.message || 'Failed to save.', 'error');
     } finally { setSaving(false); }
   };
 
@@ -179,8 +180,6 @@ export default function AdminWallets() {
           <div className="modal" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
             <p className="modal-title">{editing ? 'Edit Wallet' : 'New Wallet'}</p>
             <form onSubmit={save}>
-              {error && <div className="alert alert-error">{error}</div>}
-
               <div className="form-group">
                 <label className="form-label">Wallet Name *</label>
                 <input className="form-input" value={form.name}

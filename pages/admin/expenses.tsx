@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api, { formatNaira, formatDate } from '../../lib/api';
+import { useToast } from '../../components/Toast';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -15,6 +16,7 @@ const CATEGORIES = ['general', 'food', 'transport', 'venue', 'printing', 'commun
 type SplitEntry = { walletId: string; amount: string };
 
 export default function AdminExpenses() {
+  const { toast } = useToast();
   const { data: expenses, isLoading } = useSWR('/api/expenses', fetcher);
   const { data: wallets } = useSWR('/api/wallets', fetcher);
   const { data: walletStats } = useSWR('/api/stats/wallets', fetcher);
@@ -23,7 +25,6 @@ export default function AdminExpenses() {
   const [editing, setEditing] = useState<any>(null);
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [deleteId, setDeleteId] = useState<string | null>(null);
 
   // Multi-wallet split state
@@ -65,7 +66,6 @@ export default function AdminExpenses() {
     setForm({ ...EMPTY, walletId: defaultWallet?._id || '', wallet: 'group' });
     setSplitMode(false);
     setSplits([{ walletId: defaultWallet?._id || '', amount: '' }]);
-    setError('');
     setModal(true);
   };
 
@@ -83,7 +83,6 @@ export default function AdminExpenses() {
     });
     setSplitMode(false);
     setSplits([{ walletId: e.walletId ?? '', amount: String(e.amount) }]);
-    setError('');
     setModal(true);
   };
 
@@ -123,15 +122,14 @@ export default function AdminExpenses() {
   const save = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    setError('');
 
     try {
       if (splitMode) {
         // Validate splits
         const validSplits = splits.filter((s) => s.walletId && Number(s.amount) > 0);
-        if (validSplits.length === 0) { setError('Add at least one wallet split with an amount.'); setSaving(false); return; }
+        if (validSplits.length === 0) { toast('Add at least one wallet split with an amount.', 'error'); setSaving(false); return; }
         const diff = Math.abs(splitTotal - totalAmount);
-        if (diff > 1) { setError(`Split amounts (${formatNaira(splitTotal)}) must equal total expense (${formatNaira(totalAmount)}).`); setSaving(false); return; }
+        if (diff > 1) { toast(`Split amounts (${formatNaira(splitTotal)}) must equal total expense (${formatNaira(totalAmount)}).`, 'error'); setSaving(false); return; }
 
         // Create one expense record per split
         for (const split of validSplits) {
@@ -165,7 +163,7 @@ export default function AdminExpenses() {
       mutate('/api/activity?limit=25');
       setModal(false);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Failed to save. Check your connection.');
+      toast(err.response?.data?.message || 'Failed to save. Check your connection.', 'error');
     } finally {
       setSaving(false);
     }
@@ -263,8 +261,6 @@ export default function AdminExpenses() {
           <div className="modal" style={{ maxWidth: 540 }} onClick={(ev) => ev.stopPropagation()}>
             <p className="modal-title">{editing ? 'Edit Expense' : 'Add Expense'}</p>
             <form onSubmit={save}>
-              {error && <div className="alert alert-error">{error}</div>}
-
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                 <div className="form-group" style={{ gridColumn: '1/-1' }}>
                   <label className="form-label">Title *</label>

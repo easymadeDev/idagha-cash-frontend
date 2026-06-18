@@ -2,6 +2,7 @@ import Layout from '../components/Layout';
 import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
+import { useToast } from '../components/Toast';
 
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
@@ -11,12 +12,12 @@ const EMPTY = {
 };
 
 export default function RegisterPage() {
+  const { toast } = useToast();
   const router = useRouter();
   const [form, setForm] = useState(EMPTY);
   const [photo, setPhoto] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState('');
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
   const [done, setDone] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -26,16 +27,15 @@ export default function RegisterPage() {
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 3 * 1024 * 1024) { setError('Photo must be under 3 MB.'); return; }
-    if (!file.type.startsWith('image/')) { setError('Please select an image file.'); return; }
+    if (file.size > 3 * 1024 * 1024) { toast('Photo must be under 3 MB.', 'error'); return; }
+    if (!file.type.startsWith('image/')) { toast('Please select an image file.', 'error'); return; }
     setPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
-    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSaving(true); setError('');
+    setSaving(true);
     try {
       // Step 1: create member record
       let res: Response;
@@ -74,7 +74,7 @@ export default function RegisterPage() {
 
       setDone(true);
     } catch (err: any) {
-      setError(err.message || 'Something went wrong. Please try again.');
+      toast(err.message || 'Something went wrong. Please try again.', 'error');
     } finally {
       setSaving(false);
     }
@@ -127,15 +127,6 @@ export default function RegisterPage() {
         {/* Form card */}
         <div className="card" style={{ padding: 'clamp(20px,5vw,36px) clamp(16px,5vw,32px)' }}>
           <form onSubmit={handleSubmit}>
-            {error && (
-              <div className="alert alert-error" style={{ marginBottom: 20 }}>
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-                  <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeLinecap="round"/>
-                </svg>
-                {error}
-              </div>
-            )}
-
             {/* Photo upload */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 28 }}>
               <div style={{ textAlign: 'center' }}>

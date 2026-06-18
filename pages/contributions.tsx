@@ -3,6 +3,7 @@ import Layout from '../components/Layout';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import api, { formatNaira, formatDate } from '../lib/api';
+import { useToast } from '../components/Toast';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -34,6 +35,7 @@ function getInitials(name: string) {
 }
 
 export default function ContributionsPage() {
+  const { toast } = useToast();
   const [search, setSearch] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -53,7 +55,6 @@ export default function ContributionsPage() {
   const [receiptPreview, setReceiptPreview] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState('');
 
   const { data: accountsData } = useSWR('/api/settings/bank-accounts', (url) => api.get(url).then(r => r.data));
   const bankAccounts = Array.isArray(accountsData) ? accountsData : [];
@@ -87,7 +88,6 @@ export default function ContributionsPage() {
     e.preventDefault();
     if (!form.name.trim() || !form.amount) return;
     setSubmitting(true);
-    setError('');
     try {
       const fd = new FormData();
       fd.append('contributorName', form.name.trim());
@@ -109,7 +109,7 @@ export default function ContributionsPage() {
       }
       setSubmitted(true);
     } catch (err: any) {
-      setError(err.message);
+      toast(err.message, 'error');
     } finally {
       setSubmitting(false);
     }
@@ -245,7 +245,6 @@ export default function ContributionsPage() {
                   <p style={{ fontSize: '0.82rem', color: 'var(--text-3)', marginBottom: 22, lineHeight: 1.6 }}>
                     After transferring, fill this form so your payment can be confirmed and recorded publicly.
                   </p>
-                  {error && <div className="alert alert-error" style={{ marginBottom: 16 }}>{error}</div>}
                   <form onSubmit={handleSubmit}>
                     <div className="form-group">
                       <label className="form-label">Contribution Category *</label>

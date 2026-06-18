@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from 'react';
 import Layout from '../components/Layout';
 import { useGate } from '../lib/gate';
 import { useRouter } from 'next/router';
+import { useToast } from '../components/Toast';
 
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function ProfilePage() {
+  const { toast } = useToast();
   const router = useRouter();
   const { member, setMember, cleared } = useGate();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -16,8 +18,6 @@ export default function ProfilePage() {
   const [photoPreview, setPhotoPreview] = useState('');
   const [photo, setPhoto] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!cleared) { router.replace('/home'); return; }
@@ -46,16 +46,15 @@ export default function ProfilePage() {
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 3 * 1024 * 1024) { setError('Photo must be under 3 MB.'); return; }
+    if (file.size > 3 * 1024 * 1024) { toast('Photo must be under 3 MB.', 'error'); return; }
     setPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
-    setError('');
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!member) return;
-    setSaving(true); setError(''); setSuccess('');
+    setSaving(true);
     try {
       // Update profile fields
       const res = await fetch(`${BACKEND}/members/${member._id}/self-update`, {
@@ -81,10 +80,9 @@ export default function ProfilePage() {
 
       // Update session member name display
       setMember({ ...member, nickname: form.nickname });
-      setSuccess('Profile updated successfully!');
-      setTimeout(() => setSuccess(''), 3000);
+      toast('Profile updated successfully!', 'success');
     } catch (err: any) {
-      setError(err.message || 'Something went wrong.');
+      toast(err.message || 'Something went wrong.', 'error');
     } finally {
       setSaving(false);
     }
@@ -130,9 +128,6 @@ export default function ProfilePage() {
 
         <div className="card" style={{ padding: 'clamp(20px,5vw,32px)' }}>
           <form onSubmit={handleSubmit}>
-            {error && <div className="alert alert-error" style={{ marginBottom: 16 }}>{error}</div>}
-            {success && <div className="alert alert-success" style={{ marginBottom: 16 }}>{success}</div>}
-
             {/* Photo */}
             <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
               <div style={{ textAlign: 'center' }}>
