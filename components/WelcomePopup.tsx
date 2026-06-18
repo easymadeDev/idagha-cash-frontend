@@ -26,11 +26,11 @@ export default function WelcomePopup() {
   const pinRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    // Show on /home or / (index redirects to /home) only if not yet cleared
-    const onHome = router.pathname === '/home' || router.pathname === '/';
-    if (!onHome || cleared) return;
-    // Delay slightly to let router settle on iOS
-    const t = setTimeout(() => setVisible(true), 600);
+    // Show on any non-exempt page if not yet cleared
+    if (cleared) return;
+    const exempt = router.pathname === '/register' || router.pathname === '/test' || router.pathname.startsWith('/admin');
+    if (exempt) return;
+    const t = setTimeout(() => setVisible(true), 300);
     return () => clearTimeout(t);
   }, [router.pathname, cleared]);
 

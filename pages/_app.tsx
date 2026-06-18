@@ -11,10 +11,8 @@ const MEMBER_KEY  = 'idagha_member';
 
 const EXEMPT = (pathname: string) =>
   pathname === '/' ||
-  pathname === '/home' ||
   pathname === '/test' ||
   pathname === '/register' ||
-  pathname === '/profile' ||
   pathname.startsWith('/admin');
 
 export default function App({ Component, pageProps }: AppProps) {
@@ -49,7 +47,7 @@ export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     if (EXEMPT(router.pathname)) return;
-    if (!cleared) router.replace('/home');
+    if (!cleared) router.replace('/');
   }, [router.pathname, cleared]);
 
   return (
