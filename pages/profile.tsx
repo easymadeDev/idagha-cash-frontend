@@ -22,8 +22,10 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!cleared) { router.replace('/home'); return; }
     if (!member) { router.replace('/home'); return; }
-    // Load full member data
-    fetch(`${BACKEND}/members/${member._id}/profile`)
+    const memberToken = sessionStorage.getItem('idagha_member_token') || '';
+    fetch(`${BACKEND}/members/${member._id}/profile`, {
+      headers: { 'x-member-token': memberToken },
+    })
       .then(r => r.json())
       .then(data => {
         setForm({
@@ -55,11 +57,12 @@ export default function ProfilePage() {
     e.preventDefault();
     if (!member) return;
     setSaving(true);
+    const memberToken = sessionStorage.getItem('idagha_member_token') || '';
     try {
       // Update profile fields
       const res = await fetch(`${BACKEND}/members/${member._id}/self-update`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'x-member-token': memberToken },
         body: JSON.stringify(form),
       });
       if (!res.ok) throw new Error('Failed to update profile.');
@@ -69,7 +72,11 @@ export default function ProfilePage() {
         try {
           const fd = new FormData();
           fd.append('photo', photo);
-          const pr = await fetch(`${BACKEND}/members/${member._id}/photo`, { method: 'POST', body: fd });
+          const pr = await fetch(`${BACKEND}/members/${member._id}/photo`, {
+            method: 'POST',
+            headers: { 'x-member-token': memberToken },
+            body: fd,
+          });
           if (pr.ok) {
             const updated = await pr.json();
             setPhotoPreview(updated.photo || photoPreview);

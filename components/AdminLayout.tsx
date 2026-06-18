@@ -22,10 +22,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [authChecked, setAuthChecked] = useState(false);
 
   // Live pending registrations count — polls every 30s
-  const token = typeof window !== 'undefined' ? localStorage.getItem('idagha_token') || '' : '';
   const { data: allMembers } = useSWR(
     authChecked ? '/api/members/admin/all' : null,
-    (url: string) => fetch(url, { headers: { Authorization: `Bearer ${token}` } }).then(r => r.json()),
+    (url: string) => {
+      const tok = typeof window !== 'undefined' ? localStorage.getItem('idagha_token') || '' : '';
+      return fetch(url, { headers: { Authorization: `Bearer ${tok}` } }).then(r => r.json());
+    },
     { refreshInterval: 30000 }
   );
   const pendingCount = Array.isArray(allMembers) ? allMembers.filter((m: any) => m.status === 'pending').length : 0;

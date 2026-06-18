@@ -39,13 +39,27 @@ export default function RegisterPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      // Step 1: create member record
+      // Convert photo to base64 and include it in the registration payload
+      let photoBase64: string | undefined;
+      if (photo) {
+        try {
+          photoBase64 = await new Promise<string>((resolve, reject) => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(photo);
+          });
+        } catch {
+          // Photo encoding failed — proceed without it
+        }
+      }
+
       let res: Response;
       try {
         res = await fetch(`${BACKEND}/members/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(form),
+          body: JSON.stringify({ ...form, ...(photoBase64 ? { photo: photoBase64 } : {}) }),
         });
       } catch (netErr: any) {
         throw new Error('Network error — could not reach the server. Please check your connection.');
@@ -62,17 +76,6 @@ export default function RegisterPage() {
 
       let member: any = {};
       try { member = await res.json(); } catch {}
-
-      // Step 2: upload photo if provided (non-fatal — success screen still shows)
-      if (photo && member._id) {
-        try {
-          const fd = new FormData();
-          fd.append('photo', photo);
-          await fetch(`${BACKEND}/members/${member._id}/photo`, { method: 'POST', body: fd });
-        } catch {
-          // photo upload failed but registration succeeded — ignore
-        }
-      }
 
       setCleared(true);
       // Save member to session so the app knows who they are
