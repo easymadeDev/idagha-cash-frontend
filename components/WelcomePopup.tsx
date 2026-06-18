@@ -6,8 +6,7 @@ import { useGate } from '../lib/gate';
 
 type Step = 'pin' | 'question' | 'verify' | 'found' | 'notfound';
 
-// Set your group PIN in .env.local as NEXT_PUBLIC_GROUP_PIN=IDAGHA2018
-const GROUP_PIN = process.env.NEXT_PUBLIC_GROUP_PIN || 'IDAGHA2018';
+const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function WelcomePopup() {
   const router = useRouter();
@@ -18,6 +17,7 @@ export default function WelcomePopup() {
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState('');
   const [pinShake, setPinShake] = useState(false);
+  const [pinChecking, setPinChecking] = useState(false);
   const [query, setQuery] = useState('');
   const [checking, setChecking] = useState(false);
   const [foundMember, setFoundMember] = useState<any>(null);
@@ -39,16 +39,31 @@ export default function WelcomePopup() {
     if (step === 'pin') setTimeout(() => pinRef.current?.focus(), 100);
   }, [step]);
 
-  const handlePin = (e: React.FormEvent) => {
+  const handlePin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (pin.trim().toUpperCase() === GROUP_PIN.toUpperCase()) {
-      setPinError('');
-      setStep('question');
-    } else {
-      setPinError('Incorrect PIN. Please check with the group admin.');
-      setPinShake(true);
-      setTimeout(() => setPinShake(false), 600);
-      setPin('');
+    if (!pin.trim()) return;
+    setPinChecking(true);
+    setPinError('');
+    try {
+      const res = await fetch(`${BACKEND}/auth/verify-pin`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: pin.trim() }),
+      });
+      if (res.ok) {
+        const data = await res.json();
+        if (typeof window !== 'undefined') sessionStorage.setItem('idagha_gate_token', data.gate_token);
+        setStep('question');
+      } else {
+        setPinError('Incorrect PIN. Please check with the group admin.');
+        setPinShake(true);
+        setTimeout(() => setPinShake(false), 600);
+        setPin('');
+      }
+    } catch {
+      setPinError('Could not reach the server. Please try again.');
+    } finally {
+      setPinChecking(false);
     }
   };
 
@@ -74,9 +89,14 @@ export default function WelcomePopup() {
     setChecking(true);
     setVerifyError('');
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api'}/members/verify?q=${encodeURIComponent(query.trim())}`);
+      const res = await fetch(`${BACKEND}/auth/verify-member`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: query.trim() }),
+      });
       const data = await res.json();
       if (data.found) {
+        if (typeof window !== 'undefined') sessionStorage.setItem('idagha_member_token', data.member_token);
         setFoundMember(data.member);
         setMember({
           _id: data.member._id,
@@ -86,7 +106,6 @@ export default function WelcomePopup() {
           position: data.member.position,
         });
         setStep('found');
-        // Auto-dismiss after a brief welcome flash — no button click needed
         setTimeout(() => dismiss(), 1800);
       } else {
         setStep('notfound');
@@ -148,11 +167,17 @@ export default function WelcomePopup() {
                 <p style={{ color: 'var(--red)', fontSize: '0.8rem', marginTop: 8, marginBottom: 0 }}>{pinError}</p>
               )}
               <div className="wp-actions" style={{ marginTop: 16 }}>
-                <button type="submit" className="wp-btn-yes" disabled={!pin.trim()}>
-                  <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" strokeLinecap="round" />
-                  </svg>
-                  Unlock Portal
+                <button type="submit" className="wp-btn-yes" disabled={!pin.trim() || pinChecking}>
+                  {pinChecking ? (
+                    <><div className="wp-spinner" /> Checking…</>
+                  ) : (
+                    <>
+                      <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                        <path d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" strokeLinecap="round" />
+                      </svg>
+                      Unlock Portal
+                    </>
+                  )}
                 </button>
               </div>
             </form>

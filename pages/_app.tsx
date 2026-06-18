@@ -6,13 +6,28 @@ import WelcomePopup from '../components/WelcomePopup';
 import { GateContext, SessionMember } from '../lib/gate';
 import { ToastProvider } from '../components/Toast';
 
-const SESSION_KEY = 'idagha_gate_cleared';
-const MEMBER_KEY  = 'idagha_member';
+const GATE_TOKEN_KEY  = 'idagha_gate_token';
+const MEMBER_TOKEN_KEY = 'idagha_member_token';
+const MEMBER_KEY       = 'idagha_member';
 
 const EXEMPT = (pathname: string) =>
   pathname === '/' ||
+  pathname === '/home' ||
   pathname === '/test' ||
+  pathname === '/register' ||
   pathname.startsWith('/admin');
+
+function isTokenValid(token: string | null): boolean {
+  if (!token) return false;
+  try {
+    const parts = token.split('.');
+    if (parts.length !== 3) return false;
+    const payload = JSON.parse(atob(parts[1]));
+    return typeof payload.exp === 'number' && payload.exp * 1000 > Date.now();
+  } catch {
+    return false;
+  }
+}
 
 export default function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
@@ -21,7 +36,8 @@ export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
-    if (sessionStorage.getItem(SESSION_KEY) === '1') setClearedState(true);
+    const gateToken = sessionStorage.getItem(GATE_TOKEN_KEY);
+    if (isTokenValid(gateToken)) setClearedState(true);
     try {
       const raw = sessionStorage.getItem(MEMBER_KEY);
       if (raw) setMemberState(JSON.parse(raw));
@@ -30,8 +46,11 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const setCleared = (v: boolean) => {
     if (typeof window !== 'undefined') {
-      if (v) sessionStorage.setItem(SESSION_KEY, '1');
-      else sessionStorage.removeItem(SESSION_KEY);
+      if (!v) {
+        sessionStorage.removeItem(GATE_TOKEN_KEY);
+        sessionStorage.removeItem(MEMBER_TOKEN_KEY);
+        sessionStorage.removeItem(MEMBER_KEY);
+      }
     }
     setClearedState(v);
   };
@@ -46,7 +65,11 @@ export default function App({ Component, pageProps }: AppProps) {
 
   useEffect(() => {
     if (EXEMPT(router.pathname)) return;
-    if (!cleared) router.replace('/');
+    if (!cleared) {
+      // Re-check token in case it expired since last render
+      const gateToken = typeof window !== 'undefined' ? sessionStorage.getItem(GATE_TOKEN_KEY) : null;
+      if (!isTokenValid(gateToken)) router.replace('/');
+    }
   }, [router.pathname, cleared]);
 
   return (
