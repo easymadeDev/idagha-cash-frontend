@@ -4,12 +4,15 @@ import useSWR, { mutate } from 'swr';
 import api from '../../lib/api';
 import { useToast } from '../../components/Toast';
 
+const fetcher = (url: string) =>
+  fetch(url).then((r) => r.json());
+
 const authFetcher = (url: string) =>
   fetch(url, { headers: { Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('idagha_token') || '' : ''}` } }).then((r) => r.json());
 
 export default function AdminSettings() {
   const { toast } = useToast();
-  const { data: bankAccounts, isLoading } = useSWR('/api/settings/bank-accounts', authFetcher);
+  const { data: bankAccounts, isLoading } = useSWR('/api/settings/bank-accounts', fetcher);
 
   const [saving, setSaving] = useState(false);
 
