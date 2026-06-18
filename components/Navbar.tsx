@@ -16,11 +16,10 @@ const links = [
 export default function Navbar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { cleared, member } = useGate();
+  const { cleared, member, ready } = useGate();
 
   const navigate = (href: string) => {
     setOpen(false);
-    if (!cleared) { router.push('/home'); return; }
     router.push(href);
   };
 
@@ -30,7 +29,7 @@ export default function Navbar() {
     <nav className="navbar">
       <div className="navbar-glow" />
       <div className="nav-inner">
-        <div className="nav-logo" onClick={() => navigate('/home')}>
+        <div className="nav-logo" onClick={() => { if (ready) navigate('/home'); }}>
           <div className="nav-logo-img">
             <Image src="/logo.png" alt="IDAGHA Alumni Logo" width={44} height={44}
               style={{ objectFit: 'contain', borderRadius: 6 }} priority />
@@ -42,7 +41,7 @@ export default function Navbar() {
         </div>
 
         <ul className={`nav-links ${open ? 'mobile-open' : ''}`}>
-          {links.map((l) => (
+          {cleared && links.map((l) => (
             <li key={l.href}>
               <a className={router.pathname === l.href ? 'active' : ''}
                 onClick={() => navigate(l.href)} style={{ cursor: 'pointer' }}>
