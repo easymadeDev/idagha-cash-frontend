@@ -158,9 +158,16 @@ export default function WelcomePopup() {
                   className="wp-input"
                   placeholder="Enter group PIN…"
                   value={pin}
-                  type="password"
-                  onChange={(e) => { setPin(e.target.value); setPinError(''); }}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  onChange={(e) => {
+                    const numOnly = e.target.value.replace(/\D/g, '');
+                    setPin(numOnly);
+                    setPinError('');
+                  }}
                   autoComplete="off"
+                  maxLength={20}
                 />
               </div>
               {pinError && (
