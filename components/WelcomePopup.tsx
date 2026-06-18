@@ -28,7 +28,7 @@ export default function WelcomePopup() {
   useEffect(() => {
     // Show on any non-exempt page if not yet cleared
     if (cleared) return;
-    const exempt = router.pathname === '/register' || router.pathname === '/test' || router.pathname.startsWith('/admin');
+    const exempt = router.pathname === '/test' || router.pathname.startsWith('/admin');
     if (exempt) return;
     const t = setTimeout(() => setVisible(true), 300);
     return () => clearTimeout(t);

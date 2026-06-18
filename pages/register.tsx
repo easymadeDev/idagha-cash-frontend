@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useToast } from '../components/Toast';
+import { useGate } from '../lib/gate';
 
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
@@ -13,6 +14,7 @@ const EMPTY = {
 
 export default function RegisterPage() {
   const { toast } = useToast();
+  const { setCleared } = useGate();
   const router = useRouter();
   const [form, setForm] = useState(EMPTY);
   const [photo, setPhoto] = useState<File | null>(null);
@@ -72,6 +74,7 @@ export default function RegisterPage() {
         }
       }
 
+      setCleared(true);
       setDone(true);
     } catch (err: any) {
       toast(err.message || 'Something went wrong. Please try again.', 'error');
