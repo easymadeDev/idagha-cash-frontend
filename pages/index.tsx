@@ -9,8 +9,9 @@ export default function Index() {
   useEffect(() => {
     if (!ready) return;
     if (cleared) router.replace('/home');
-    // If not cleared, WelcomePopup handles the gate — stay on /
+    // If not cleared, WelcomePopup shows the PIN gate on this page
   }, [ready, cleared]);
 
-  return null;
+  // Dark background while popup loads — matches the popup overlay colour
+  return <div style={{ minHeight: '100vh', background: '#030906' }} />;
 }

@@ -28,7 +28,7 @@ export default function WelcomePopup() {
   useEffect(() => {
     if (!ready) return; // wait until sessionStorage is read — prevents flash on already-verified users
     if (cleared) return;
-    const exempt = router.pathname === '/' || router.pathname === '/test' || router.pathname.startsWith('/admin');
+    const exempt = router.pathname === '/test' || router.pathname.startsWith('/admin');
     if (exempt) return;
     const t = setTimeout(() => setVisible(true), 300);
     return () => clearTimeout(t);
