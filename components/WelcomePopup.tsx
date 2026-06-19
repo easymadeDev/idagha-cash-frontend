@@ -23,6 +23,7 @@ export default function WelcomePopup() {
   const [foundMember, setFoundMember] = useState<any>(null);
   const [verifyError, setVerifyError] = useState('');
   const [isPending, setIsPending] = useState(false);
+  const [isDeactivated, setIsDeactivated] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const pinRef = useRef<HTMLInputElement>(null);
 
@@ -85,6 +86,8 @@ export default function WelcomePopup() {
       setQuery('');
       setFoundMember(null);
       setVerifyError('');
+      setIsPending(false);
+      setIsDeactivated(false);
       if (destination) router.push(destination);
     }, 300);
   };
@@ -114,12 +117,17 @@ export default function WelcomePopup() {
         setCleared(true);
         setStep('found');
         setTimeout(() => dismiss('/home'), 1800);
+      } else if (data.deactivated) {
+        setIsDeactivated(true);
+        setVerifyError(data.message);
+        setStep('notfound');
       } else if (data.pending) {
         setIsPending(true);
         setVerifyError(data.message);
         setStep('notfound');
       } else {
         setIsPending(false);
+        setIsDeactivated(false);
         setStep('notfound');
       }
     } catch {
@@ -315,10 +323,28 @@ export default function WelcomePopup() {
           </>
         )}
 
-        {/* ── STEP 4: Not Found / Pending ── */}
+        {/* ── STEP 4: Not Found / Pending / Deactivated ── */}
         {step === 'notfound' && (
           <>
-            {isPending ? (
+            {isDeactivated ? (
+              <>
+                <div className="wp-avatar" style={{ background: 'rgba(248,113,113,0.1)', border: '2px solid rgba(248,113,113,0.3)' }}>
+                  <svg width="32" height="32" fill="none" stroke="var(--red)" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M12 9v2m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <h2 className="wp-title" style={{ marginTop: 8, color: 'var(--red)' }}>Account Deactivated</h2>
+                <p className="wp-sub">{verifyError}</p>
+                <p className="wp-sub" style={{ fontSize: '0.78rem', marginTop: 12, marginBottom: 16 }}>
+                  If you believe this is an error or would like to reactivate your account, please reach out to the admin or the Secretary.
+                </p>
+                <div className="wp-actions">
+                  <button className="wp-btn-back" onClick={() => { setStep('verify'); setVerifyError(''); setIsDeactivated(false); }}>
+                    ← Back
+                  </button>
+                </div>
+              </>
+            ) : isPending ? (
               <>
                 <div className="wp-avatar" style={{ background: 'rgba(251,191,36,0.1)', border: '2px solid rgba(251,191,36,0.3)' }}>
                   <svg width="32" height="32" fill="none" stroke="rgba(251,191,36,1)" strokeWidth="2" viewBox="0 0 24 24">
