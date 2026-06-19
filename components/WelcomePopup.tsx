@@ -31,11 +31,14 @@ export default function WelcomePopup() {
       setVisible(false);
       return;
     }
-    const exempt = router.pathname === '/test' || router.pathname.startsWith('/admin');
-    if (exempt) return;
+    // Only show popup on / when not cleared
+    if (router.pathname !== '/') {
+      setVisible(false);
+      return;
+    }
     const t = setTimeout(() => setVisible(true), 300);
     return () => clearTimeout(t);
-  }, [router.pathname, cleared, ready]);
+  }, [router.pathname, cleared, ready];
 
   useEffect(() => {
     if (step === 'verify') setTimeout(() => inputRef.current?.focus(), 100);
