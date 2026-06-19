@@ -56,7 +56,7 @@ export default function ContributionsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
 
-  const { data: accountsData } = useSWR('/api/settings/bank-accounts', (url) => api.get(url).then(r => r.data));
+  const { data: accountsData } = useSWR('/api/settings/bank-accounts', fetcher);
   const bankAccounts = Array.isArray(accountsData) ? accountsData : [];
 
   const params = new URLSearchParams();
