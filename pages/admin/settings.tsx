@@ -4,6 +4,8 @@ import useSWR, { mutate } from 'swr';
 import api from '../../lib/api';
 import { useToast } from '../../components/Toast';
 
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
 const fetcher = (url: string) =>
   fetch(url).then((r) => r.json());
 
@@ -164,96 +166,173 @@ export default function AdminSettings() {
           </div>
         </div>
 
-        <div className="card" style={{ padding: 24, marginBottom: 32 }}>
-          <h2 style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 8 }}>Automated Schedulers</h2>
-          <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginBottom: 24 }}>Configure when birthday wishes and reunion fund reminders are sent.</p>
+        <div className="card" style={{ padding: 0, marginBottom: 32, overflow: 'hidden', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+          {/* Header */}
+          <div style={{ background: 'linear-gradient(135deg, rgba(34,197,94,0.1) 0%, rgba(96,165,250,0.1) 100%)', padding: '28px 24px', borderBottom: '1px solid var(--border)' }}>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, marginBottom: 6, letterSpacing: '-0.02em' }}>⏰ Automated Schedulers</h2>
+            <p style={{ fontSize: '0.85rem', color: 'var(--text-3)' }}>Configure when birthday wishes and reunion fund reminders are automatically sent to members.</p>
+          </div>
 
           {cronForm && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-              {/* Birthday Settings */}
-              <div style={{ padding: 20, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--bg-base)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                  <label style={{ flex: 1, fontWeight: 600 }}>🎂 Birthday Wishes</label>
-                  <input
-                    type="checkbox"
-                    checked={cronForm.birthdayEnabled}
-                    onChange={(e) => handleCronChange('birthdayEnabled', e.target.checked)}
-                    style={{ cursor: 'pointer' }}
-                  />
-                </div>
-                {cronForm.birthdayEnabled && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Hour (0-23)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="23"
-                        className="form-input"
-                        value={parseCronTime(cronForm.birthdayTime).hour}
-                        onChange={(e) => handleCronChange('birthdayTime', buildCronExpr(e.target.value, parseCronTime(cronForm.birthdayTime).minute))}
-                      />
+            <div style={{ padding: 24 }}>
+              {/* Birthday Scheduler */}
+              <div style={{ marginBottom: 28, paddingBottom: 28, borderBottom: '1px solid var(--border)' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                      <span style={{ fontSize: '1.4rem' }}>🎂</span>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Birthday Wishes</h3>
+                      <span style={{
+                        display: 'inline-block', fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: 99,
+                        background: cronForm.birthdayEnabled ? 'rgba(34,197,94,0.15)' : 'rgba(155,155,155,0.15)',
+                        color: cronForm.birthdayEnabled ? 'var(--green-400)' : 'var(--text-3)',
+                      }}>
+                        {cronForm.birthdayEnabled ? 'ENABLED' : 'DISABLED'}
+                      </span>
                     </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Minute (0-59)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="59"
-                        className="form-input"
-                        value={parseCronTime(cronForm.birthdayTime).minute}
-                        onChange={(e) => handleCronChange('birthdayTime', buildCronExpr(parseCronTime(cronForm.birthdayTime).hour, e.target.value))}
-                      />
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>Automatic greetings sent daily at your configured time</p>
+                  </div>
+                  <button
+                    onClick={() => handleCronChange('birthdayEnabled', !cronForm.birthdayEnabled)}
+                    style={{
+                      width: 56, height: 28, borderRadius: 99, border: 'none', cursor: 'pointer',
+                      background: cronForm.birthdayEnabled ? 'var(--green-400)' : 'rgba(155,155,155,0.3)',
+                      transition: 'all 0.2s', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', padding: '2px',
+                    }}
+                  >
+                    <div style={{
+                      width: 24, height: 24, borderRadius: '50%', background: 'white',
+                      transition: 'transform 0.2s',
+                      transform: cronForm.birthdayEnabled ? 'translateX(28px)' : 'translateX(0)',
+                    }} />
+                  </button>
+                </div>
+
+                {cronForm.birthdayEnabled && (
+                  <div style={{ background: 'var(--bg-base)', padding: 20, borderRadius: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Hour</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input
+                          type="number"
+                          min="0"
+                          max="23"
+                          className="form-input"
+                          value={parseCronTime(cronForm.birthdayTime).hour}
+                          onChange={(e) => handleCronChange('birthdayTime', buildCronExpr(e.target.value, parseCronTime(cronForm.birthdayTime).minute))}
+                          style={{ fontSize: '1.2rem', fontWeight: 700, textAlign: 'center' }}
+                        />
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-3)' }}>00-23</span>
+                      </div>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Minute</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input
+                          type="number"
+                          min="0"
+                          max="59"
+                          className="form-input"
+                          value={parseCronTime(cronForm.birthdayTime).minute}
+                          onChange={(e) => handleCronChange('birthdayTime', buildCronExpr(parseCronTime(cronForm.birthdayTime).hour, e.target.value))}
+                          style={{ fontSize: '1.2rem', fontWeight: 700, textAlign: 'center' }}
+                        />
+                        <span style={{ fontSize: '0.85rem', color: 'var(--text-3)' }}>00-59</span>
+                      </div>
+                    </div>
+                    <div style={{ gridColumn: '1 / -1', padding: 12, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8 }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginBottom: 4 }}>NEXT SEND</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--green-400)' }}>
+                        Daily at {String(parseCronTime(cronForm.birthdayTime).hour).padStart(2, '0')}:{String(parseCronTime(cronForm.birthdayTime).minute).padStart(2, '0')}
+                      </div>
                     </div>
                   </div>
                 )}
               </div>
 
-              {/* Reunion Reminder Settings */}
-              <div style={{ padding: 20, border: '1px solid var(--border)', borderRadius: 12, background: 'var(--bg-base)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                  <label style={{ flex: 1, fontWeight: 600 }}>💰 Reunion Fund Reminder</label>
-                  <input
-                    type="checkbox"
-                    checked={cronForm.reunionReminderEnabled}
-                    onChange={(e) => handleCronChange('reunionReminderEnabled', e.target.checked)}
-                    style={{ cursor: 'pointer' }}
-                  />
+              {/* Reunion Reminder Scheduler */}
+              <div>
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20 }}>
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                      <span style={{ fontSize: '1.4rem' }}>💰</span>
+                      <h3 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Reunion Fund Reminder</h3>
+                      <span style={{
+                        display: 'inline-block', fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: 99,
+                        background: cronForm.reunionReminderEnabled ? 'rgba(96,165,250,0.15)' : 'rgba(155,155,155,0.15)',
+                        color: cronForm.reunionReminderEnabled ? 'var(--blue)' : 'var(--text-3)',
+                      }}>
+                        {cronForm.reunionReminderEnabled ? 'ENABLED' : 'DISABLED'}
+                      </span>
+                    </div>
+                    <p style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>Weekly payment reminders sent on your chosen day and time</p>
+                  </div>
+                  <button
+                    onClick={() => handleCronChange('reunionReminderEnabled', !cronForm.reunionReminderEnabled)}
+                    style={{
+                      width: 56, height: 28, borderRadius: 99, border: 'none', cursor: 'pointer',
+                      background: cronForm.reunionReminderEnabled ? 'var(--blue)' : 'rgba(155,155,155,0.3)',
+                      transition: 'all 0.2s', flexShrink: 0,
+                      display: 'flex', alignItems: 'center', padding: '2px',
+                    }}
+                  >
+                    <div style={{
+                      width: 24, height: 24, borderRadius: '50%', background: 'white',
+                      transition: 'transform 0.2s',
+                      transform: cronForm.reunionReminderEnabled ? 'translateX(28px)' : 'translateX(0)',
+                    }} />
+                  </button>
                 </div>
+
                 {cronForm.reunionReminderEnabled && (
-                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Day (0=Sun, 1=Mon, ...)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="6"
-                        className="form-input"
+                  <div style={{ background: 'var(--bg-base)', padding: 20, borderRadius: 12, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Day</label>
+                      <select
                         value={parseCronDay(cronForm.reunionReminderTime)}
                         onChange={(e) => handleCronChange('reunionReminderTime', buildCronExpr(parseCronTime(cronForm.reunionReminderTime).hour, parseCronTime(cronForm.reunionReminderTime).minute, e.target.value))}
-                      />
-                    </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Hour (0-23)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="23"
                         className="form-input"
-                        value={parseCronTime(cronForm.reunionReminderTime).hour}
-                        onChange={(e) => handleCronChange('reunionReminderTime', buildCronExpr(e.target.value, parseCronTime(cronForm.reunionReminderTime).minute, parseCronDay(cronForm.reunionReminderTime)))}
-                      />
+                        style={{ fontSize: '0.95rem', fontWeight: 600 }}
+                      >
+                        {DAYS.map((day, i) => (
+                          <option key={i} value={i}>{day}</option>
+                        ))}
+                      </select>
                     </div>
-                    <div className="form-group" style={{ marginBottom: 0 }}>
-                      <label className="form-label">Minute (0-59)</label>
-                      <input
-                        type="number"
-                        min="0"
-                        max="59"
-                        className="form-input"
-                        value={parseCronTime(cronForm.reunionReminderTime).minute}
-                        onChange={(e) => handleCronChange('reunionReminderTime', buildCronExpr(parseCronTime(cronForm.reunionReminderTime).hour, e.target.value, parseCronDay(cronForm.reunionReminderTime)))}
-                      />
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Hour</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input
+                          type="number"
+                          min="0"
+                          max="23"
+                          className="form-input"
+                          value={parseCronTime(cronForm.reunionReminderTime).hour}
+                          onChange={(e) => handleCronChange('reunionReminderTime', buildCronExpr(e.target.value, parseCronTime(cronForm.reunionReminderTime).minute, parseCronDay(cronForm.reunionReminderTime)))}
+                          style={{ fontSize: '1.2rem', fontWeight: 700, textAlign: 'center' }}
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Minute</label>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input
+                          type="number"
+                          min="0"
+                          max="59"
+                          className="form-input"
+                          value={parseCronTime(cronForm.reunionReminderTime).minute}
+                          onChange={(e) => handleCronChange('reunionReminderTime', buildCronExpr(parseCronTime(cronForm.reunionReminderTime).hour, e.target.value, parseCronDay(cronForm.reunionReminderTime)))}
+                          style={{ fontSize: '1.2rem', fontWeight: 700, textAlign: 'center' }}
+                        />
+                      </div>
+                    </div>
+                    <div style={{ gridColumn: '1 / -1', padding: 12, background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 8 }}>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginBottom: 4 }}>NEXT SEND</div>
+                      <div style={{ fontSize: '0.95rem', fontWeight: 700, color: 'var(--blue)' }}>
+                        {DAYS[parseInt(parseCronDay(cronForm.reunionReminderTime))]} at {String(parseCronTime(cronForm.reunionReminderTime).hour).padStart(2, '0')}:{String(parseCronTime(cronForm.reunionReminderTime).minute).padStart(2, '0')}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -261,9 +340,11 @@ export default function AdminSettings() {
             </div>
           )}
 
-          <div style={{ marginTop: 24, display: 'flex', justifyContent: 'flex-end' }}>
+          {/* Footer */}
+          <div style={{ padding: '20px 24px', background: 'var(--bg-base)', borderTop: '1px solid var(--border)', display: 'flex', justifyContent: 'flex-end', gap: 12 }}>
+            <button className="btn btn-ghost" onClick={() => location.reload()}>Cancel</button>
             <button className="btn btn-primary" onClick={handleSaveCron} disabled={savingCron}>
-              {savingCron ? 'Saving...' : 'Save Scheduler Settings'}
+              {savingCron ? '💾 Saving...' : '✓ Save Changes'}
             </button>
           </div>
         </div>
