@@ -111,6 +111,7 @@ export default function WelcomePopup() {
           photo: data.member.photo,
           position: data.member.position,
         });
+        setCleared(true);
         setStep('found');
         setTimeout(() => dismiss('/home'), 1800);
       } else if (data.pending) {

@@ -41,7 +41,7 @@ export default function Navbar() {
         </div>
 
         <ul className={`nav-links ${open ? 'mobile-open' : ''}`}>
-          {ready && cleared && links.map((l) => (
+          {cleared && links.map((l) => (
             <li key={l.href}>
               <a className={router.pathname === l.href ? 'active' : ''}
                 onClick={() => navigate(l.href)} style={{ cursor: 'pointer' }}>
