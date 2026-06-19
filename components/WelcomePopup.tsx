@@ -22,6 +22,7 @@ export default function WelcomePopup() {
   const [checking, setChecking] = useState(false);
   const [foundMember, setFoundMember] = useState<any>(null);
   const [verifyError, setVerifyError] = useState('');
+  const [isPending, setIsPending] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const pinRef = useRef<HTMLInputElement>(null);
 
@@ -113,9 +114,11 @@ export default function WelcomePopup() {
         setStep('found');
         setTimeout(() => dismiss('/home'), 1800);
       } else if (data.pending) {
+        setIsPending(true);
         setVerifyError(data.message);
         setStep('notfound');
       } else {
+        setIsPending(false);
         setStep('notfound');
       }
     } catch {
@@ -311,32 +314,52 @@ export default function WelcomePopup() {
           </>
         )}
 
-        {/* ── STEP 4: Not Found ── */}
+        {/* ── STEP 4: Not Found / Pending ── */}
         {step === 'notfound' && (
           <>
-            <div className="wp-avatar" style={{ background: 'rgba(248,113,113,0.1)', border: '2px solid rgba(248,113,113,0.3)' }}>
-              <svg width="32" height="32" fill="none" stroke="var(--red)" strokeWidth="2" viewBox="0 0 24 24">
-                <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeLinecap="round" />
-              </svg>
-            </div>
-            <h2 className="wp-title" style={{ marginTop: 8 }}>Not Found</h2>
-            <p className="wp-sub">
-              We could not find an active member matching <strong style={{ color: 'var(--text-2)' }}>"{query}"</strong>.
-              <br /><br />
-              This could mean you are not yet registered, or your details are slightly different in our records.
-            </p>
-            <div className="wp-actions">
-              <button className="wp-btn-yes" onClick={() => dismiss('/register')}>
-                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                Register to Join
-              </button>
-              <button className="wp-btn-back" onClick={() => { setStep('verify'); setVerifyError(''); }}>
-                ← Try Again
-              </button>
-            </div>
-            <p className="wp-note">Contact the Secretary if your name is already registered.</p>
+            {isPending ? (
+              <>
+                <div className="wp-avatar" style={{ background: 'rgba(251,191,36,0.1)', border: '2px solid rgba(251,191,36,0.3)' }}>
+                  <svg width="32" height="32" fill="none" stroke="rgba(251,191,36,1)" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <h2 className="wp-title" style={{ marginTop: 8, color: 'rgba(251,191,36,1)' }}>Pending Approval</h2>
+                <p className="wp-sub">{verifyError}</p>
+                <div className="wp-actions">
+                  <button className="wp-btn-back" onClick={() => { setStep('verify'); setVerifyError(''); setIsPending(false); }}>
+                    ← Try Different Details
+                  </button>
+                </div>
+                <p className="wp-note">You'll receive a welcome email once approved.</p>
+              </>
+            ) : (
+              <>
+                <div className="wp-avatar" style={{ background: 'rgba(248,113,113,0.1)', border: '2px solid rgba(248,113,113,0.3)' }}>
+                  <svg width="32" height="32" fill="none" stroke="var(--red)" strokeWidth="2" viewBox="0 0 24 24">
+                    <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" strokeLinecap="round" />
+                  </svg>
+                </div>
+                <h2 className="wp-title" style={{ marginTop: 8 }}>Not Found</h2>
+                <p className="wp-sub">
+                  We could not find a member matching <strong style={{ color: 'var(--text-2)' }}>"{query}"</strong>.
+                  <br /><br />
+                  You may not be registered yet, or your details are slightly different in our records.
+                </p>
+                <div className="wp-actions">
+                  <button className="wp-btn-yes" onClick={() => dismiss('/register')}>
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                      <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Register to Join
+                  </button>
+                  <button className="wp-btn-back" onClick={() => { setStep('verify'); setVerifyError(''); }}>
+                    ← Try Again
+                  </button>
+                </div>
+                <p className="wp-note">Contact the Secretary if your name is already registered.</p>
+              </>
+            )}
           </>
         )}
       </div>
