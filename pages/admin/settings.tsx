@@ -213,33 +213,29 @@ export default function AdminSettings() {
                   <div style={{ background: 'var(--bg-base)', padding: 20, borderRadius: 12, display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                     <div>
                       <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Hour</label>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <input
-                          type="number"
-                          min="0"
-                          max="23"
-                          className="form-input"
-                          value={parseCronTime(cronForm.birthdayTime).hour}
-                          onChange={(e) => handleCronChange('birthdayTime', buildCronExpr(e.target.value, parseCronTime(cronForm.birthdayTime).minute))}
-                          style={{ fontSize: '1.2rem', fontWeight: 700, textAlign: 'center' }}
-                        />
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-3)' }}>00-23</span>
-                      </div>
+                      <select
+                        value={parseCronTime(cronForm.birthdayTime).hour}
+                        onChange={(e) => handleCronChange('birthdayTime', buildCronExpr(e.target.value, parseCronTime(cronForm.birthdayTime).minute))}
+                        className="form-input"
+                        style={{ fontSize: '0.95rem', fontWeight: 600 }}
+                      >
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Minute</label>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <input
-                          type="number"
-                          min="0"
-                          max="59"
-                          className="form-input"
-                          value={parseCronTime(cronForm.birthdayTime).minute}
-                          onChange={(e) => handleCronChange('birthdayTime', buildCronExpr(parseCronTime(cronForm.birthdayTime).hour, e.target.value))}
-                          style={{ fontSize: '1.2rem', fontWeight: 700, textAlign: 'center' }}
-                        />
-                        <span style={{ fontSize: '0.85rem', color: 'var(--text-3)' }}>00-59</span>
-                      </div>
+                      <select
+                        value={parseCronTime(cronForm.birthdayTime).minute}
+                        onChange={(e) => handleCronChange('birthdayTime', buildCronExpr(parseCronTime(cronForm.birthdayTime).hour, e.target.value))}
+                        className="form-input"
+                        style={{ fontSize: '0.95rem', fontWeight: 600 }}
+                      >
+                        {Array.from({ length: 60 }, (_, i) => (
+                          <option key={i} value={i}>{String(i).padStart(2, '0')}</option>
+                        ))}
+                      </select>
                     </div>
                     <div style={{ gridColumn: '1 / -1', padding: 12, background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8 }}>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginBottom: 4 }}>NEXT SEND</div>
@@ -288,7 +284,7 @@ export default function AdminSettings() {
                 {cronForm.reunionReminderEnabled && (
                   <div style={{ background: 'var(--bg-base)', padding: 20, borderRadius: 12, display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16 }}>
                     <div>
-                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Day</label>
+                      <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Day of Week</label>
                       <select
                         value={parseCronDay(cronForm.reunionReminderTime)}
                         onChange={(e) => handleCronChange('reunionReminderTime', buildCronExpr(parseCronTime(cronForm.reunionReminderTime).hour, parseCronTime(cronForm.reunionReminderTime).minute, e.target.value))}
@@ -302,31 +298,29 @@ export default function AdminSettings() {
                     </div>
                     <div>
                       <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Hour</label>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <input
-                          type="number"
-                          min="0"
-                          max="23"
-                          className="form-input"
-                          value={parseCronTime(cronForm.reunionReminderTime).hour}
-                          onChange={(e) => handleCronChange('reunionReminderTime', buildCronExpr(e.target.value, parseCronTime(cronForm.reunionReminderTime).minute, parseCronDay(cronForm.reunionReminderTime)))}
-                          style={{ fontSize: '1.2rem', fontWeight: 700, textAlign: 'center' }}
-                        />
-                      </div>
+                      <select
+                        value={parseCronTime(cronForm.reunionReminderTime).hour}
+                        onChange={(e) => handleCronChange('reunionReminderTime', buildCronExpr(e.target.value, parseCronTime(cronForm.reunionReminderTime).minute, parseCronDay(cronForm.reunionReminderTime)))}
+                        className="form-input"
+                        style={{ fontSize: '0.95rem', fontWeight: 600 }}
+                      >
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>
+                        ))}
+                      </select>
                     </div>
                     <div>
                       <label style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.05em', display: 'block', marginBottom: 8 }}>Minute</label>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <input
-                          type="number"
-                          min="0"
-                          max="59"
-                          className="form-input"
-                          value={parseCronTime(cronForm.reunionReminderTime).minute}
-                          onChange={(e) => handleCronChange('reunionReminderTime', buildCronExpr(parseCronTime(cronForm.reunionReminderTime).hour, e.target.value, parseCronDay(cronForm.reunionReminderTime)))}
-                          style={{ fontSize: '1.2rem', fontWeight: 700, textAlign: 'center' }}
-                        />
-                      </div>
+                      <select
+                        value={parseCronTime(cronForm.reunionReminderTime).minute}
+                        onChange={(e) => handleCronChange('reunionReminderTime', buildCronExpr(parseCronTime(cronForm.reunionReminderTime).hour, e.target.value, parseCronDay(cronForm.reunionReminderTime)))}
+                        className="form-input"
+                        style={{ fontSize: '0.95rem', fontWeight: 600 }}
+                      >
+                        {Array.from({ length: 60 }, (_, i) => (
+                          <option key={i} value={i}>{String(i).padStart(2, '0')}</option>
+                        ))}
+                      </select>
                     </div>
                     <div style={{ gridColumn: '1 / -1', padding: 12, background: 'rgba(96,165,250,0.08)', border: '1px solid rgba(96,165,250,0.2)', borderRadius: 8 }}>
                       <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginBottom: 4 }}>NEXT SEND</div>
