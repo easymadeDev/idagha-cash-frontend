@@ -112,6 +112,9 @@ export default function WelcomePopup() {
         });
         setStep('found');
         setTimeout(() => dismiss('/home'), 1800);
+      } else if (data.pending) {
+        setVerifyError(data.message);
+        setStep('notfound');
       } else {
         setStep('notfound');
       }
