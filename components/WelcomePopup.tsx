@@ -38,7 +38,7 @@ export default function WelcomePopup() {
     }
     const t = setTimeout(() => setVisible(true), 300);
     return () => clearTimeout(t);
-  }, [router.pathname, cleared, ready];
+  }, [router.pathname, cleared, ready]);
 
   useEffect(() => {
     if (step === 'verify') setTimeout(() => inputRef.current?.focus(), 100);
