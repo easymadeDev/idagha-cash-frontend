@@ -29,8 +29,15 @@ export default function RegisterPage() {
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    if (file.size > 3 * 1024 * 1024) { toast('Photo must be under 3 MB.', 'error'); return; }
-    if (!file.type.startsWith('image/')) { toast('Please select an image file.', 'error'); return; }
+    if (!file.type.startsWith('image/')) {
+      toast('Please select an image file.', 'error');
+      return;
+    }
+    if (file.size > 3 * 1024 * 1024) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+      toast(`Photo is ${sizeMB}MB. Maximum size is 3MB. Please compress or select a smaller photo.`, 'error');
+      return;
+    }
     setPhoto(file);
     setPhotoPreview(URL.createObjectURL(file));
   };
