@@ -326,12 +326,14 @@ export default function WelcomePopup() {
                 </div>
                 <h2 className="wp-title" style={{ marginTop: 8, color: 'rgba(251,191,36,1)' }}>Pending Approval</h2>
                 <p className="wp-sub">{verifyError}</p>
+                <p className="wp-sub" style={{ fontSize: '0.78rem', marginTop: 12, marginBottom: 16 }}>
+                  Please contact the Secretary to check on your application status or if you have any questions.
+                </p>
                 <div className="wp-actions">
-                  <button className="wp-btn-yes" onClick={() => dismiss()}>
-                    Continue to Portal
+                  <button className="wp-btn-back" onClick={() => { setStep('verify'); setVerifyError(''); setIsPending(false); }}>
+                    ← Back
                   </button>
                 </div>
-                <p className="wp-note">You'll receive a welcome email once approved.</p>
               </>
             ) : (
               <>
