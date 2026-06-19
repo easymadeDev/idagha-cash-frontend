@@ -105,7 +105,7 @@ export default function WelcomePopup() {
           position: data.member.position,
         });
         setStep('found');
-        setTimeout(() => dismiss(), 1800);
+        setTimeout(() => dismiss('/home'), 1800);
       } else {
         setStep('notfound');
       }
