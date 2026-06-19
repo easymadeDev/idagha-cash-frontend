@@ -2,6 +2,7 @@ import AdminLayout from '../../components/AdminLayout';
 import useSWR from 'swr';
 import { useRouter } from 'next/router';
 import { formatNaira, formatDate } from '../../lib/api';
+import { useState } from 'react';
 
 const authedFetcher = (url: string) =>
   fetch(url, { headers: { Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('idagha_token') || '' : ''}` } }).then((r) => r.json());
@@ -29,9 +30,26 @@ export default function AdminDashboard() {
   const { data: stats } = useSWR('/api/stats/summary', authedFetcher);
   const { data: contributions } = useSWR('/api/contributions', authedFetcher);
   const { data: expenses } = useSWR('/api/expenses', authedFetcher);
+  const [testingBirthday, setTestingBirthday] = useState(false);
+  const [birthdayResult, setBirthdayResult] = useState('');
 
   const recentContribs = Array.isArray(contributions) ? contributions.slice(0, 6) : [];
   const recentExpenses = Array.isArray(expenses) ? expenses.slice(0, 5) : [];
+
+  const testBirthday = async () => {
+    setTestingBirthday(true);
+    try {
+      const res = await fetch('/api/members/birthday/test', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${localStorage.getItem('idagha_token') || ''}` },
+      });
+      const data = await res.json();
+      setBirthdayResult(JSON.stringify(data, null, 2));
+    } catch (err: any) {
+      setBirthdayResult(`Error: ${err.message}`);
+    }
+    setTestingBirthday(false);
+  };
 
   return (
     <AdminLayout>
@@ -70,8 +88,16 @@ export default function AdminDashboard() {
             <QuickAction label="Add Member" desc="Register a new member" color="var(--blue)" onClick={() => router.push('/admin/members')} />
             <QuickAction label="Update Reunion Fund" desc="Edit fund target/amount" color="var(--yellow)" onClick={() => router.push('/admin/reunion-fund')} />
             <QuickAction label="Post Announcement" desc="Notify group members" color="var(--blue)" onClick={() => router.push('/admin/announcements')} />
+            <QuickAction label="Test Birthday" desc={testingBirthday ? "Testing..." : "Send birthday wishes now"} color="var(--purple)" onClick={testBirthday} />
           </div>
         </div>
+
+        {birthdayResult && (
+          <div style={{ marginBottom: 32, padding: 16, background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: 8 }}>Birthday Test Result:</div>
+            <pre style={{ fontSize: '0.75rem', overflow: 'auto', maxHeight: '200px', color: 'var(--text-3)' }}>{birthdayResult}</pre>
+          </div>
+        )}
 
         {/* Recent activity */}
         <div className="admin-dash-grid">
