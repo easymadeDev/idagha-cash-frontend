@@ -29,6 +29,7 @@ export default function AdminMembers() {
   const [welcomeModal, setWelcomeModal] = useState(false);
   const [welcomeSending, setWelcomeSending] = useState(false);
   const [welcomeResult, setWelcomeResult] = useState<any>(null);
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const allList = Array.isArray(members) ? members : [];
@@ -107,6 +108,23 @@ export default function AdminMembers() {
     setWelcomeSending(true);
     try {
       const res = await api.post('/members/welcome/all');
+      setWelcomeResult(res.data);
+    } catch (err: any) {
+      toast(err.response?.data?.message || 'Failed to send welcome messages.', 'error');
+      setWelcomeModal(false);
+    } finally {
+      setWelcomeSending(false);
+    }
+  };
+
+  const sendWelcomeSelected = async () => {
+    if (selectedMembers.length === 0) {
+      toast('Please select at least one member.', 'error');
+      return;
+    }
+    setWelcomeSending(true);
+    try {
+      const res = await api.post('/members/welcome/selected', { memberIds: selectedMembers });
       setWelcomeResult(res.data);
     } catch (err: any) {
       toast(err.response?.data?.message || 'Failed to send welcome messages.', 'error');
@@ -366,24 +384,67 @@ export default function AdminMembers() {
 
       {/* Send Welcome Modal */}
       {welcomeModal && (
-        <div className="modal-overlay" onClick={() => { if (!welcomeSending) { setWelcomeModal(false); setWelcomeResult(null); } }}>
-          <div className="modal" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={() => { if (!welcomeSending) { setWelcomeModal(false); setWelcomeResult(null); setSelectedMembers([]); } }}>
+          <div className="modal" style={{ maxWidth: 520, maxHeight: '80vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
             <p className="modal-title">Send Welcome Messages</p>
 
             {!welcomeResult ? (
               <>
-                <p style={{ color: 'var(--text-3)', marginBottom: 20, fontSize: '0.9rem', lineHeight: 1.7 }}>
-                  This will send a <strong style={{ color: 'var(--text-1)' }}>welcome email + WhatsApp message</strong> to all <strong style={{ color: 'var(--text-1)' }}>{list.length} active members</strong> who never received one.
+                <p style={{ color: 'var(--text-3)', marginBottom: 16, fontSize: '0.9rem' }}>
+                  Select members to send <strong>welcome email + WhatsApp</strong> to:
                 </p>
-                <div style={{ padding: '12px 16px', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.25)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--yellow)', marginBottom: 20 }}>
-                  WhatsApp messages will only send if WhatsApp is currently connected.
+
+                <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setSelectedMembers(list.map((m: any) => m._id))}
+                  >
+                    Select All
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => setSelectedMembers([])}
+                  >
+                    Clear
+                  </button>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }}>
+                    {selectedMembers.length}/{list.length} selected
+                  </span>
                 </div>
+
+                <div style={{ maxHeight: 300, overflow: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: 16, background: 'var(--bg-base)' }}>
+                  {list.map((m: any) => (
+                    <div key={m._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
+                      onClick={() => setSelectedMembers(selectedMembers.includes(m._id) ? selectedMembers.filter(id => id !== m._id) : [...selectedMembers, m._id])}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={selectedMembers.includes(m._id)}
+                        onChange={() => {}}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{m.name}</div>
+                        <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>
+                          {[m.email && '✉️ Email', m.phone && '📱 Phone'].filter(Boolean).join(' · ')}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+
+                <div style={{ padding: '12px 14px', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.25)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--yellow)', marginBottom: 16 }}>
+                  WhatsApp messages will only send if WhatsApp is connected.
+                </div>
+
                 <div className="modal-actions">
-                  <button className="btn btn-ghost" onClick={() => setWelcomeModal(false)} disabled={welcomeSending}>Cancel</button>
-                  <button className="btn btn-primary" onClick={sendWelcomeAll} disabled={welcomeSending}>
+                  <button className="btn btn-ghost" onClick={() => { setWelcomeModal(false); setSelectedMembers([]); }} disabled={welcomeSending}>Cancel</button>
+                  <button className="btn btn-primary" onClick={sendWelcomeSelected} disabled={welcomeSending || selectedMembers.length === 0}>
                     {welcomeSending ? (
                       <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
-                    ) : 'Send to All'}
+                    ) : `Send to ${selectedMembers.length}`}
                   </button>
                 </div>
               </>
@@ -415,7 +476,7 @@ export default function AdminMembers() {
                   )}
                 </div>
                 <div className="modal-actions">
-                  <button className="btn btn-primary" onClick={() => { setWelcomeModal(false); setWelcomeResult(null); }}>Done</button>
+                  <button className="btn btn-primary" onClick={() => { setWelcomeModal(false); setWelcomeResult(null); setSelectedMembers([]); }}>Done</button>
                 </div>
               </>
             )}
