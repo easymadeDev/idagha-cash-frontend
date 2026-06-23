@@ -9,6 +9,7 @@ const links = [
   { label: 'Contributions', href: '/contributions' },
   { label: 'Expenses',      href: '/expenses' },
   { label: 'Reunion Fund',  href: '/reunion-fund' },
+  { label: 'Pledges',       href: '/pledges' },
   { label: 'Reports',       href: '/reports' },
   { label: 'About',         href: '/about' },
 ];
