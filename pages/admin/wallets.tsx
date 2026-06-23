@@ -5,14 +5,17 @@ import api, { formatNaira } from '../../lib/api';
 import { useToast } from '../../components/Toast';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
+const authFetcher = (url: string) =>
+  fetch(url, { headers: { Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('idagha_token') || '' : ''}` } }).then((r) => r.json());
 
 const EMPTY = { name: '', description: '', color: '#22c55e', type: 'general' };
-const TYPES = ['general', 'reunion', 'custom'];
+const TYPES = ['general', 'reunion', 'pledge', 'custom'];
 
 export default function AdminWallets() {
   const { toast } = useToast();
   const { data: wallets, isLoading } = useSWR('/api/wallets', fetcher);
   const { data: walletStats } = useSWR('/api/stats/wallets', fetcher);
+  const { data: pledgeStats } = useSWR('/api/pledges/stats', authFetcher);
 
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -98,6 +101,9 @@ export default function AdminWallets() {
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 6 }}>
+                    {w.type === 'pledge' && (
+                      <button className="btn btn-ghost btn-sm" onClick={() => window.location.href = '/admin/pledges'} style={{ color: '#a855f7', borderColor: '#a855f7' }}>View</button>
+                    )}
                     <button className="btn btn-ghost btn-sm" onClick={() => openEdit(w)}>Edit</button>
                     <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(w._id)}>Del</button>
                   </div>
@@ -107,18 +113,33 @@ export default function AdminWallets() {
                   <p style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginBottom: 16, lineHeight: 1.5 }}>{w.description}</p>
                 )}
 
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
-                  {[
-                    { label: 'Income', value: formatNaira(s.income), color: 'var(--green-400)' },
-                    { label: 'Spent', value: formatNaira(s.spent), color: 'var(--red)' },
-                    { label: 'Balance', value: formatNaira(s.balance), color: s.balance >= 0 ? 'var(--green-400)' : 'var(--red)' },
-                  ].map((stat) => (
-                    <div key={stat.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '10px 12px', border: '1px solid var(--border)' }}>
-                      <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
-                      <div style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: '0.82rem', color: stat.color }}>{stat.value}</div>
-                    </div>
-                  ))}
-                </div>
+                {w.type === 'pledge' ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                    {[
+                      { label: 'Total Pledged', value: formatNaira(pledgeStats?.totalPledged ?? 0), color: '#a855f7' },
+                      { label: 'Fulfilled', value: formatNaira(pledgeStats?.totalFulfilled ?? 0), color: 'var(--green-400)' },
+                      { label: 'Pending', value: formatNaira(pledgeStats?.totalPending ?? 0), color: 'var(--yellow)' },
+                    ].map((stat) => (
+                      <div key={stat.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '10px 12px', border: '1px solid var(--border)' }}>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+                        <div style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: '0.82rem', color: stat.color }}>{stat.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                    {[
+                      { label: 'Income', value: formatNaira(s.income), color: 'var(--green-400)' },
+                      { label: 'Spent', value: formatNaira(s.spent), color: 'var(--red)' },
+                      { label: 'Balance', value: formatNaira(s.balance), color: s.balance >= 0 ? 'var(--green-400)' : 'var(--red)' },
+                    ].map((stat) => (
+                      <div key={stat.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '10px 12px', border: '1px solid var(--border)' }}>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
+                        <div style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: '0.82rem', color: stat.color }}>{stat.value}</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             );
           })}
