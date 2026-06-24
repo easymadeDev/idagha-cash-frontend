@@ -89,15 +89,18 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
 
           {/* Balance row — always 3 columns, text shrinks */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
-            {(isPledgeWallet ? [
-              { label: 'Total Pledged', val: formatNaira(ws.pledgeStats?.totalPledged ?? 0), col: color },
-              { label: 'Fulfilled',     val: formatNaira(ws.pledgeStats?.totalFulfilled ?? 0), col: 'var(--green-400)' },
-              { label: 'Pending',       val: formatNaira(ws.pledgeStats?.totalPending ?? 0), col: 'var(--yellow)' },
-            ] : [
-              { label: 'Balance', val: formatNaira(ws.balance), col: ws.balance >= 0 ? color : 'var(--red)' },
-              { label: 'Income',  val: formatNaira(ws.income),  col: 'var(--green-400)' },
-              { label: 'Spent',   val: formatNaira(ws.spent),   col: 'var(--red)' },
-            ]).map(s => (
+            {(isPledgeWallet
+              ? (() => { const ps = ws.pledgeStats ?? pledgeStatsRaw; return [
+                  { label: 'Total Pledged', val: formatNaira(ps?.totalPledged ?? 0), col: color },
+                  { label: 'Fulfilled',     val: formatNaira(ps?.totalFulfilled ?? 0), col: 'var(--green-400)' },
+                  { label: 'Pending',       val: formatNaira(ps?.totalPending ?? 0), col: 'var(--yellow)' },
+                ]; })()
+              : [
+                  { label: 'Balance', val: formatNaira(ws.balance), col: ws.balance >= 0 ? color : 'var(--red)' },
+                  { label: 'Income',  val: formatNaira(ws.income),  col: 'var(--green-400)' },
+                  { label: 'Spent',   val: formatNaira(ws.spent),   col: 'var(--red)' },
+                ]
+            ).map(s => (
               <div key={s.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 9, padding: '9px 10px', border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: '0.6rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>{s.label}</div>
                 <div style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: 'clamp(0.72rem,2.5vw,0.95rem)', color: s.col, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.val}</div>
@@ -302,6 +305,7 @@ export default function HomePage() {
   const router = useRouter();
   const { data: stats }       = useSWR('/api/stats/summary', fetcher);
   const { data: walletStats } = useSWR('/api/stats/wallets', fetcher, { refreshInterval: 15000, revalidateOnFocus: true });
+  const { data: pledgeStatsRaw } = useSWR('/api/pledges/stats', fetcher, { refreshInterval: 15000, revalidateOnFocus: true });
   const { data: contributions } = useSWR('/api/contributions', fetcher);
   const { data: announcements } = useSWR('/api/announcements', fetcher);
   const { data: activityRaw } = useSWR('/api/activity?limit=25', fetcher, { refreshInterval: 30000 });
@@ -436,26 +440,29 @@ export default function HomePage() {
                     </div>
 
                     {/* Balance / Pledge summary */}
-                    {w?.type === 'pledge' ? (
+                    {w?.type === 'pledge' ? (() => {
+                      const ps = ws.pledgeStats ?? pledgeStatsRaw;
+                      return (
                       <>
                         <div style={{ marginBottom: 12 }}>
                           <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Total Pledged</div>
                           <div className="wallet-card-balance" style={{ color, textShadow: `0 0 24px ${color}33` }}>
-                            <AnimatedNaira amount={ws.pledgeStats?.totalPledged ?? 0} />
+                            <AnimatedNaira amount={ps?.totalPledged ?? 0} />
                           </div>
                         </div>
                         <div className="wallet-card-sub">
                           <div className="wallet-card-sub-item" style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.12)' }}>
                             <div className="wallet-card-sub-label">Fulfilled</div>
-                            <div className="wallet-card-sub-value" style={{ color: 'var(--green-400)' }}>{formatNaira(ws.pledgeStats?.totalFulfilled ?? 0)}</div>
+                            <div className="wallet-card-sub-value" style={{ color: 'var(--green-400)' }}>{formatNaira(ps?.totalFulfilled ?? 0)}</div>
                           </div>
                           <div className="wallet-card-sub-item" style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.12)' }}>
                             <div className="wallet-card-sub-label">Pending</div>
-                            <div className="wallet-card-sub-value" style={{ color: 'var(--yellow)' }}>{formatNaira(ws.pledgeStats?.totalPending ?? 0)}</div>
+                            <div className="wallet-card-sub-value" style={{ color: 'var(--yellow)' }}>{formatNaira(ps?.totalPending ?? 0)}</div>
                           </div>
                         </div>
                       </>
-                    ) : (
+                      );
+                    })() : (
                       <>
                         <div style={{ marginBottom: 12 }}>
                           <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Balance</div>
