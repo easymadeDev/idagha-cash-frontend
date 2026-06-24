@@ -116,7 +116,9 @@ export default function WelcomePopup() {
         });
         setCleared(true);
         setStep('found');
-        setTimeout(() => dismiss('/home'), 1800);
+        const intended = sessionStorage.getItem('idagha_redirect_after_login');
+        sessionStorage.removeItem('idagha_redirect_after_login');
+        setTimeout(() => dismiss(intended && intended !== '/' ? intended : '/home'), 1800);
       } else if (data.deactivated) {
         setIsDeactivated(true);
         setVerifyError(data.message);

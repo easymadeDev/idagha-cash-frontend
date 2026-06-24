@@ -84,7 +84,11 @@ export default function App({ Component, pageProps }: AppProps) {
       return;
     }
 
-    if (!isTokenValid(memberToken) && registered !== '1') router.replace('/');
+    if (!isTokenValid(memberToken) && registered !== '1') {
+      // Save intended destination so login can redirect back to it
+      sessionStorage.setItem('idagha_redirect_after_login', router.asPath);
+      router.replace('/');
+    }
   }, [router.pathname, ready, cleared]);
 
   return (
