@@ -13,7 +13,7 @@ const financeLinks = [
   { label: 'Contributions',   href: '/contributions' },
   { label: 'Expenses',        href: '/expenses' },
   { label: 'Reunion Fund',    href: '/reunion-fund' },
-  { label: 'Reunion Support', href: '/pledges' },
+  { label: 'Reunion Support', href: '/reunion-support' },
   { label: 'Reports',         href: '/reports' },
 ];
 
