@@ -145,10 +145,10 @@ export default function PledgesPage() {
         <div style={overlay} onClick={() => setModal(false)}>
           <div style={modalBox} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>Make a Reunion Pledge</h2>
+              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#f9fafb' }}>Make a Reunion Pledge</h2>
               <button onClick={() => setModal(false)} style={closeBtn}>✕</button>
             </div>
-            <p style={{ color: 'var(--text-3)', fontSize: '.88rem', margin: '0 0 20px' }}>
+            <p style={{ color: '#9ca3af', fontSize: '.88rem', margin: '0 0 20px' }}>
               A pledge is a promise to contribute to the 2026 Reunion Fund. Once your payment is received, the admin will mark your pledge as fulfilled.
             </p>
 
@@ -181,7 +181,7 @@ export default function PledgesPage() {
 
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', margin: '4px 0 20px' }}>
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} style={{ marginTop: 3, accentColor: '#7c3aed' }} />
-              <span style={{ fontSize: '.85rem', color: 'var(--text-2)', lineHeight: 1.5 }}>
+              <span style={{ fontSize: '.85rem', color: '#d1d5db', lineHeight: 1.5 }}>
                 I commit to fulfilling this pledge for the 2026 IDAGHA Reunion Fund and understand the admin will follow up for payment.
               </span>
             </label>
@@ -276,13 +276,17 @@ function PledgeStat({ label, value, color }: { label: string; value: string; col
 // ── shared styles ─────────────────────────────────────────────────────────────
 
 const overlay: React.CSSProperties = {
-  position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)',
-  display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: 16,
+  position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)',
+  display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 9999, padding: 16,
+  backdropFilter: 'blur(4px)',
 };
 
 const modalBox: React.CSSProperties = {
-  background: 'var(--surface-1)', borderRadius: 14, padding: 28,
+  background: '#111827',
+  border: '1px solid rgba(168,85,247,0.25)',
+  borderRadius: 14, padding: 28,
   width: '100%', maxWidth: 520, maxHeight: '90vh', overflowY: 'auto',
+  boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
 };
 
 const closeBtn: React.CSSProperties = {
@@ -292,12 +296,12 @@ const closeBtn: React.CSSProperties = {
 const fw: React.CSSProperties = { marginBottom: 14 };
 
 const lbl: React.CSSProperties = {
-  display: 'block', fontSize: '.82rem', fontWeight: 600, color: 'var(--text-2)', marginBottom: 5,
+  display: 'block', fontSize: '.82rem', fontWeight: 600, color: '#d1d5db', marginBottom: 5,
 };
 
 const inp: React.CSSProperties = {
-  width: '100%', padding: '9px 12px', border: '1px solid var(--border)',
-  borderRadius: 8, background: 'var(--surface-2)', color: 'var(--text-1)',
+  width: '100%', padding: '9px 12px', border: '1px solid rgba(255,255,255,0.12)',
+  borderRadius: 8, background: '#1f2937', color: '#f9fafb',
   fontSize: '.9rem', boxSizing: 'border-box',
 };
 
