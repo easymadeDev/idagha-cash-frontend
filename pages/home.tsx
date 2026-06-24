@@ -199,7 +199,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
                 ))}
               </div>
             )}
-          </div>
+          </div>}
 
           {/* Transactions — only for non-pledge wallets */}
           {!isPledgeWallet && <div>
