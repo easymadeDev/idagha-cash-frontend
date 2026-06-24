@@ -108,7 +108,7 @@ export default function AdminPledges() {
         toast('Pledge updated', 'success');
       } else {
         await pledgeApi.adminCreate(payload);
-        toast('Pledge added — member notified', 'success');
+        toast('Promise added — member notified', 'success');
       }
       setModal(false);
       mutate();
@@ -125,7 +125,7 @@ export default function AdminPledges() {
     setFulfilling(true);
     try {
       await pledgeApi.fulfill(fulfillId);
-      toast('Pledge fulfilled — moved to Reunion Wallet', 'success');
+      toast('Promise fulfilled — automatically added to Reunion Fund Wallet', 'success');
       setFulfillId(null);
       mutate();
       mutateStats();
@@ -174,12 +174,12 @@ export default function AdminPledges() {
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--text-1)' }}>Reunion Pledges</h1>
-            <p style={{ color: 'var(--text-3)', margin: '4px 0 0', fontSize: '.9rem' }}>Track and manage member pledges for the 2026 Reunion Fund</p>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--text-1)' }}>Reunion Promises</h1>
+            <p style={{ color: 'var(--text-3)', margin: '4px 0 0', fontSize: '.9rem' }}>Track and manage member promises for the 2026 Reunion Fund</p>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={() => openReminderModal()} style={btnOutline}>Send Reminders</button>
-            <button onClick={openAdd} style={btnPrimary}>+ Add Pledge</button>
+            <button onClick={openAdd} style={btnPrimary}>+ Add Promise</button>
           </div>
         </div>
 
@@ -287,7 +287,7 @@ export default function AdminPledges() {
         <div style={overlay} onClick={() => setModal(false)}>
           <div style={modalBox} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>{editing ? 'Edit Pledge' : 'Add Pledge for Member'}</h2>
+              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>{editing ? 'Edit Pledge' : 'Add Promise for Member'}</h2>
               <button onClick={() => setModal(false)} style={closeBtn}>✕</button>
             </div>
 
@@ -345,7 +345,7 @@ export default function AdminPledges() {
           <div style={{ ...modalBox, maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
             <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Mark as Fulfilled?</h2>
             <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>
-              This will mark the pledge as fulfilled and move the amount to the <strong>Reunion Wallet</strong>. This action cannot be undone.
+              This will mark the promise as fulfilled and <strong>automatically add the amount as a contribution to the Reunion Fund Wallet</strong>. This action cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setFulfillId(null)} style={btnOutline}>Cancel</button>
@@ -359,8 +359,8 @@ export default function AdminPledges() {
       {deleteId && (
         <div style={overlay} onClick={() => setDeleteId(null)}>
           <div style={{ ...modalBox, maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Delete Pledge?</h2>
-            <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>This pledge will be permanently removed.</p>
+            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Delete Promise?</h2>
+            <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>This promise will be permanently removed.</p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setDeleteId(null)} style={btnOutline}>Cancel</button>
               <button onClick={handleDelete} style={{ ...btnPrimary, background: '#dc2626' }}>Delete</button>
@@ -373,11 +373,11 @@ export default function AdminPledges() {
       {reminderModal && (
         <div style={overlay} onClick={() => setReminderModal(false)}>
           <div style={{ ...modalBox, maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Send Pledge Reminders</h2>
+            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Send Promise Reminders</h2>
             <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>
               {reminderTargets.length > 0
-                ? 'Send a reminder to this member about their pending pledge via email and WhatsApp.'
-                : `Send reminders to all ${pendingList.length} members with pending pledges via email and WhatsApp.`}
+                ? 'Send a reminder to this member about their pending promise via email and WhatsApp.'
+                : `Send reminders to all ${pendingList.length} members with pending promises via email and WhatsApp.`}
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setReminderModal(false)} style={btnOutline}>Cancel</button>

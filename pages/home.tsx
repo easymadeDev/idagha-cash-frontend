@@ -91,7 +91,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
             {(isPledgeWallet
               ? (() => { const ps = ws.pledgeStats ?? pledgeStatsRaw; return [
-                  { label: 'Total Pledged', val: formatNaira(ps?.totalPledged ?? 0), col: color },
+                  { label: 'Total Promised', val: formatNaira(ps?.totalPledged ?? 0), col: color },
                   { label: 'Fulfilled',     val: formatNaira(ps?.totalFulfilled ?? 0), col: 'var(--green-400)' },
                   { label: 'Pending',       val: formatNaira(ps?.totalPending ?? 0), col: 'var(--yellow)' },
                 ]; })()
@@ -445,7 +445,7 @@ export default function HomePage() {
                       return (
                       <>
                         <div style={{ marginBottom: 12 }}>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Total Pledged</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Total Promised</div>
                           <div className="wallet-card-balance" style={{ color, textShadow: `0 0 24px ${color}33` }}>
                             <AnimatedNaira amount={ps?.totalPledged ?? 0} />
                           </div>
