@@ -497,17 +497,17 @@ const labelStyle: React.CSSProperties = {
   display: 'block',
   fontSize: '.82rem',
   fontWeight: 600,
-  color: 'var(--text-2)',
+  color: '#d1d5db',
   marginBottom: 5,
 };
 
 const inputStyle: React.CSSProperties = {
   width: '100%',
   padding: '9px 12px',
-  border: '1px solid var(--border)',
+  border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 8,
-  background: 'var(--surface-2)',
-  color: 'var(--text-1)',
+  background: '#1f2937',
+  color: '#f9fafb',
   fontSize: '.9rem',
   boxSizing: 'border-box',
 };
