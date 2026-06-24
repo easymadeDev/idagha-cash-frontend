@@ -10,6 +10,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
   const { data: allContribs } = useSWR('/api/contributions', fetcher);
   const { data: allExpenses } = useSWR('/api/expenses', fetcher);
   const { data: allPledges } = useSWR(ws.wallet?.type === 'pledge' ? '/api/pledges' : null, fetcher);
+  const { data: pledgeStatsRaw } = useSWR(ws.wallet?.type === 'pledge' ? '/api/pledges/stats' : null, fetcher, { refreshInterval: 15000 });
 
   const w = ws.wallet;
   const color = w?.color || '#22c55e';
