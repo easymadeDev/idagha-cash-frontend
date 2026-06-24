@@ -11,20 +11,20 @@ const EMPTY = { nickname: '', phone: '', whatsapp: '', email: '', location: '', 
 export default function ProfilePage() {
   const { toast } = useToast();
   const router = useRouter();
-  const { member, setMember, cleared } = useGate();
+  const { member, setMember, cleared, ready } = useGate();
   const fileRef = useRef<HTMLInputElement>(null);
 
   const [form, setForm] = useState(EMPTY);
   const [original, setOriginal] = useState(EMPTY);
-  const [photoPreview, setPhotoPreview] = useState('');
+  const [photoPreview, setPhotoPreview] = useState(member?.photo || '');
   const [photo, setPhoto] = useState<File | null>(null);
   const [saving, setSaving] = useState(false);
   const [editing, setEditing] = useState(false);
   const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
-    if (!cleared) { router.replace('/home'); return; }
-    if (!member) { router.replace('/home'); return; }
+    if (!ready) return;
+    if (!cleared || !member) { router.replace('/home'); return; }
     const tok = sessionStorage.getItem('idagha_member_token') || '';
     fetch(`${BACKEND}/members/${member._id}/profile`, { headers: { 'x-member-token': tok } })
       .then(r => r.json())
@@ -44,7 +44,7 @@ export default function ProfilePage() {
         setLoaded(true);
       })
       .catch(() => setLoaded(true));
-  }, [member, cleared]);
+  }, [member, cleared, ready]);
 
   const f = (field: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
     setForm(prev => ({ ...prev, [field]: e.target.value }));
@@ -105,7 +105,7 @@ export default function ProfilePage() {
     }
   };
 
-  if (!member || !loaded) return (
+  if (!ready || !member || !loaded) return (
     <Layout>
       <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
         <div style={{ width: 36, height: 36, border: '3px solid rgba(34,197,94,0.2)', borderTopColor: 'var(--green-400)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
