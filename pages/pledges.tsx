@@ -27,9 +27,8 @@ export default function PledgesPage() {
   const [form, setForm] = useState(EMPTY);
   const [saving, setSaving] = useState(false);
   const [agreed, setAgreed] = useState(false);
-  const [profileLoaded, setProfileLoaded] = useState(false);
 
-  // Auto-fill form from member session + profile when logged in
+  // Auto-fill form from member session + profile
   useEffect(() => {
     if (!member) return;
     const memberToken = typeof window !== 'undefined' ? sessionStorage.getItem('idagha_member_token') || '' : '';
@@ -44,11 +43,9 @@ export default function PledgesPage() {
           memberEmail: data.email || '',
           memberPhone: data.whatsapp || data.phone || '',
         }));
-        setProfileLoaded(true);
       })
       .catch(() => {
         setForm((f) => ({ ...f, memberName: member.name || '' }));
-        setProfileLoaded(true);
       });
   }, [member]);
 
@@ -178,30 +175,13 @@ export default function PledgesPage() {
               A pledge is a promise to contribute to the 2026 Reunion Fund. Once your payment is received, the admin will mark your pledge as fulfilled.
             </p>
 
-            {/* Member identity — read-only if logged in, editable if guest */}
-            {member ? (
-              <div style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 18 }}>
-                <div style={{ fontSize: '.75rem', color: '#a855f7', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.05em' }}>Pledging as</div>
-                <div style={{ fontWeight: 700, color: '#f9fafb', fontSize: '.95rem' }}>{form.memberName}</div>
-                {form.memberEmail && <div style={{ fontSize: '.8rem', color: '#9ca3af', marginTop: 2 }}>{form.memberEmail}</div>}
-                {form.memberPhone && <div style={{ fontSize: '.8rem', color: '#9ca3af' }}>{form.memberPhone}</div>}
-              </div>
-            ) : (
-              <>
-                <div style={fw}>
-                  <label style={lbl}>Your Full Name *</label>
-                  <input style={inp} value={form.memberName} onChange={(e) => setForm((f) => ({ ...f, memberName: e.target.value }))} placeholder="As it appears on our records" />
-                </div>
-                <div style={fw}>
-                  <label style={lbl}>Email Address</label>
-                  <input style={inp} type="email" value={form.memberEmail} onChange={(e) => setForm((f) => ({ ...f, memberEmail: e.target.value }))} placeholder="To receive confirmation" />
-                </div>
-                <div style={fw}>
-                  <label style={lbl}>WhatsApp / Phone</label>
-                  <input style={inp} value={form.memberPhone} onChange={(e) => setForm((f) => ({ ...f, memberPhone: e.target.value }))} placeholder="+234..." />
-                </div>
-              </>
-            )}
+            {/* Member identity — always from session, never re-entered */}
+            <div style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 18 }}>
+              <div style={{ fontSize: '.75rem', color: '#a855f7', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.05em' }}>Pledging as</div>
+              <div style={{ fontWeight: 700, color: '#f9fafb', fontSize: '.95rem' }}>{form.memberName}</div>
+              {form.memberEmail && <div style={{ fontSize: '.8rem', color: '#9ca3af', marginTop: 2 }}>{form.memberEmail}</div>}
+              {form.memberPhone && <div style={{ fontSize: '.8rem', color: '#9ca3af' }}>{form.memberPhone}</div>}
+            </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               <div style={fw}>
