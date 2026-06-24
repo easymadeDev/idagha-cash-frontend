@@ -461,7 +461,8 @@ const btnSmRed: React.CSSProperties = {
 const overlay: React.CSSProperties = {
   position: 'fixed',
   inset: 0,
-  background: 'rgba(0,0,0,0.5)',
+  background: 'rgba(0,0,0,0.75)',
+  backdropFilter: 'blur(4px)',
   display: 'flex',
   alignItems: 'center',
   justifyContent: 'center',
@@ -470,13 +471,15 @@ const overlay: React.CSSProperties = {
 };
 
 const modalBox: React.CSSProperties = {
-  background: 'var(--surface-1)',
+  background: '#111827',
+  border: '1px solid rgba(168,85,247,0.2)',
   borderRadius: 14,
   padding: 28,
   width: '100%',
   maxWidth: 560,
   maxHeight: '90vh',
   overflowY: 'auto',
+  boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
 };
 
 const closeBtn: React.CSSProperties = {
