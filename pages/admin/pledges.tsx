@@ -105,16 +105,16 @@ export default function AdminPledges() {
       };
       if (editing) {
         await pledgeApi.update(editing._id, payload);
-        toast('Pledge updated', 'success');
+        toast('Reunion support updated', 'success');
       } else {
         await pledgeApi.adminCreate(payload);
-        toast('Promise added — member notified', 'success');
+        toast('Reunion support added — member notified', 'success');
       }
       setModal(false);
       mutate();
       mutateStats();
     } catch {
-      toast('Failed to save pledge', 'error');
+      toast('Failed to save reunion support', 'error');
     } finally {
       setSaving(false);
     }
@@ -125,12 +125,12 @@ export default function AdminPledges() {
     setFulfilling(true);
     try {
       await pledgeApi.fulfill(fulfillId);
-      toast('Promise fulfilled — automatically added to Reunion Fund Wallet', 'success');
+      toast('Reunion support fulfilled — automatically added to Reunion Fund Wallet', 'success');
       setFulfillId(null);
       mutate();
       mutateStats();
     } catch {
-      toast('Failed to fulfill pledge', 'error');
+      toast('Failed to fulfill reunion support', 'error');
     } finally {
       setFulfilling(false);
     }
@@ -140,12 +140,12 @@ export default function AdminPledges() {
     if (!deleteId) return;
     try {
       await pledgeApi.remove(deleteId);
-      toast('Pledge deleted', 'success');
+      toast('Reunion support deleted', 'success');
       setDeleteId(null);
       mutate();
       mutateStats();
     } catch {
-      toast('Failed to delete pledge', 'error');
+      toast('Failed to delete reunion support', 'error');
     }
   };
 
@@ -174,22 +174,22 @@ export default function AdminPledges() {
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--text-1)' }}>Reunion Promises</h1>
-            <p style={{ color: 'var(--text-3)', margin: '4px 0 0', fontSize: '.9rem' }}>Track and manage member promises for the 2026 Reunion Fund</p>
+            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--text-1)' }}>Reunion Support</h1>
+            <p style={{ color: 'var(--text-3)', margin: '4px 0 0', fontSize: '.9rem' }}>Track and manage member support for the 2026 Reunion Fund</p>
           </div>
           <div style={{ display: 'flex', gap: 10 }}>
             <button onClick={() => openReminderModal()} style={btnOutline}>Send Reminders</button>
-            <button onClick={openAdd} style={btnPrimary}>+ Add Promise</button>
+            <button onClick={openAdd} style={btnPrimary}>+ Add Support</button>
           </div>
         </div>
 
         {/* Stats */}
         {stats && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 14, marginBottom: 28 }}>
-            <StatCard label="Total Pledged" value={formatNaira(stats.totalPledged)} color="#a855f7" />
+            <StatCard label="Total Support" value={formatNaira(stats.totalPledged)} color="#a855f7" />
             <StatCard label="Fulfilled" value={formatNaira(stats.totalFulfilled)} color="#22c55e" />
             <StatCard label="Pending" value={formatNaira(stats.totalPending)} color="#fbbf24" />
-            <StatCard label="Total Pledges" value={String(stats.count)} color="#60a5fa" />
+            <StatCard label="Total Count" value={String(stats.count)} color="#60a5fa" />
             <StatCard label="Fulfilled Count" value={String(stats.fulfilledCount)} color="#22c55e" />
             <StatCard label="Pending Count" value={String(stats.pendingCount)} color="#fbbf24" />
           </div>
@@ -225,9 +225,9 @@ export default function AdminPledges() {
 
         {/* Table */}
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-3)' }}>Loading pledges…</div>
+          <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-3)' }}>Loading…</div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-3)' }}>No pledges found</div>
+          <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-3)' }}>No reunion support records found</div>
         ) : (
           <div style={{ overflowX: 'auto' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.9rem' }}>
@@ -287,7 +287,7 @@ export default function AdminPledges() {
         <div style={overlay} onClick={() => setModal(false)}>
           <div style={modalBox} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>{editing ? 'Edit Pledge' : 'Add Promise for Member'}</h2>
+              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>{editing ? 'Edit Reunion Support' : 'Add Reunion Support for Member'}</h2>
               <button onClick={() => setModal(false)} style={closeBtn}>✕</button>
             </div>
 
@@ -318,7 +318,7 @@ export default function AdminPledges() {
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               <div style={fieldWrap}>
-                <label style={labelStyle}>Pledge Amount (₦) *</label>
+                <label style={labelStyle}>Support Amount (₦) *</label>
                 <input style={inputStyle} type="number" min={1} value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} placeholder="e.g. 10000" />
               </div>
               <div style={fieldWrap}>
@@ -333,7 +333,7 @@ export default function AdminPledges() {
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
               <button onClick={() => setModal(false)} style={btnOutline}>Cancel</button>
-              <button onClick={handleSave} disabled={saving} style={btnPrimary}>{saving ? 'Saving…' : editing ? 'Save Changes' : 'Add Pledge'}</button>
+              <button onClick={handleSave} disabled={saving} style={btnPrimary}>{saving ? 'Saving…' : editing ? 'Save Changes' : 'Add Support'}</button>
             </div>
           </div>
         </div>
@@ -345,7 +345,7 @@ export default function AdminPledges() {
           <div style={{ ...modalBox, maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
             <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Mark as Fulfilled?</h2>
             <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>
-              This will mark the promise as fulfilled and <strong>automatically add the amount as a contribution to the Reunion Fund Wallet</strong>. This action cannot be undone.
+              This will mark the reunion support as fulfilled and <strong>automatically add the amount as a contribution to the Reunion Fund Wallet</strong>. This action cannot be undone.
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setFulfillId(null)} style={btnOutline}>Cancel</button>
@@ -359,8 +359,8 @@ export default function AdminPledges() {
       {deleteId && (
         <div style={overlay} onClick={() => setDeleteId(null)}>
           <div style={{ ...modalBox, maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Delete Promise?</h2>
-            <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>This promise will be permanently removed.</p>
+            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Delete Reunion Support?</h2>
+            <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>This reunion support record will be permanently removed.</p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setDeleteId(null)} style={btnOutline}>Cancel</button>
               <button onClick={handleDelete} style={{ ...btnPrimary, background: '#dc2626' }}>Delete</button>
@@ -373,11 +373,11 @@ export default function AdminPledges() {
       {reminderModal && (
         <div style={overlay} onClick={() => setReminderModal(false)}>
           <div style={{ ...modalBox, maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Send Promise Reminders</h2>
+            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Send Reunion Support Reminders</h2>
             <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>
               {reminderTargets.length > 0
-                ? 'Send a reminder to this member about their pending promise via email and WhatsApp.'
-                : `Send reminders to all ${pendingList.length} members with pending promises via email and WhatsApp.`}
+                ? 'Send a reminder to this member about their pending reunion support via email and WhatsApp.'
+                : `Send reminders to all ${pendingList.length} members with pending reunion support via email and WhatsApp.`}
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setReminderModal(false)} style={btnOutline}>Cancel</button>

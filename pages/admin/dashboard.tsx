@@ -32,6 +32,8 @@ export default function AdminDashboard() {
   const { data: expenses } = useSWR('/api/expenses', authedFetcher);
   const [testingBirthday, setTestingBirthday] = useState(false);
   const [birthdayResult, setBirthdayResult] = useState('');
+  const [testingReunion, setTestingReunion] = useState(false);
+  const [reunionResult, setReunionResult] = useState('');
 
   const recentContribs = Array.isArray(contributions) ? contributions.slice(0, 6) : [];
   const recentExpenses = Array.isArray(expenses) ? expenses.slice(0, 5) : [];
@@ -49,6 +51,25 @@ export default function AdminDashboard() {
       setBirthdayResult(`Error: ${err.message}`);
     }
     setTestingBirthday(false);
+  };
+
+  const testReunionReminder = async () => {
+    setTestingReunion(true);
+    try {
+      const res = await fetch('/api/reunion-fund/notify', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('idagha_token') || ''}`
+        },
+        body: JSON.stringify({ memberNames: ['udoh'] }),
+      });
+      const data = await res.json();
+      setReunionResult(JSON.stringify(data, null, 2));
+    } catch (err: any) {
+      setReunionResult(`Error: ${err.message}`);
+    }
+    setTestingReunion(false);
   };
 
   return (
@@ -89,6 +110,7 @@ export default function AdminDashboard() {
             <QuickAction label="Update Reunion Fund" desc="Edit fund target/amount" color="var(--yellow)" onClick={() => router.push('/admin/reunion-fund')} />
             <QuickAction label="Post Announcement" desc="Notify group members" color="var(--blue)" onClick={() => router.push('/admin/announcements')} />
             <QuickAction label="Test Birthday" desc={testingBirthday ? "Testing..." : "Send birthday wishes now"} color="var(--purple)" onClick={testBirthday} />
+            <QuickAction label="Test Reunion Reminder" desc={testingReunion ? "Testing..." : "Send reminder to udoh"} color="var(--yellow)" onClick={testReunionReminder} />
           </div>
         </div>
 
@@ -96,6 +118,13 @@ export default function AdminDashboard() {
           <div style={{ marginBottom: 32, padding: 16, background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
             <div style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: 8 }}>Birthday Test Result:</div>
             <pre style={{ fontSize: '0.75rem', overflow: 'auto', maxHeight: '200px', color: 'var(--text-3)' }}>{birthdayResult}</pre>
+          </div>
+        )}
+
+        {reunionResult && (
+          <div style={{ marginBottom: 32, padding: 16, background: 'var(--bg-card2)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)' }}>
+            <div style={{ fontSize: '0.875rem', fontWeight: 600, marginBottom: 8 }}>Reunion Reminder Test Result:</div>
+            <pre style={{ fontSize: '0.75rem', overflow: 'auto', maxHeight: '200px', color: 'var(--text-3)' }}>{reunionResult}</pre>
           </div>
         )}
 

@@ -91,7 +91,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
             {(isPledgeWallet
               ? (() => { const ps = ws.pledgeStats ?? pledgeStatsRaw; return [
-                  { label: 'Total Promised', val: formatNaira(ps?.totalPledged ?? 0), col: color },
+                  { label: 'Total Support', val: formatNaira(ps?.totalPledged ?? 0), col: color },
                   { label: 'Fulfilled',     val: formatNaira(ps?.totalFulfilled ?? 0), col: 'var(--green-400)' },
                   { label: 'Pending',       val: formatNaira(ps?.totalPending ?? 0), col: 'var(--yellow)' },
                 ]; })()
@@ -116,10 +116,10 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
           {isPledgeWallet && (
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontWeight: 700, fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-                Pledges ({pledges.length})
+                Reunion Support ({pledges.length})
               </div>
               {pledges.length === 0 ? (
-                <p style={{ color: 'var(--text-3)', fontSize: '0.84rem' }}>No pledges yet.</p>
+                <p style={{ color: 'var(--text-3)', fontSize: '0.84rem' }}>No reunion support yet.</p>
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
                   {pledges.map((p: any) => (
@@ -445,7 +445,7 @@ export default function HomePage() {
                       return (
                       <>
                         <div style={{ marginBottom: 12 }}>
-                          <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Total Promised</div>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Total Support</div>
                           <div className="wallet-card-balance" style={{ color, textShadow: `0 0 24px ${color}33` }}>
                             <AnimatedNaira amount={ps?.totalPledged ?? 0} />
                           </div>

@@ -56,7 +56,7 @@ export default function PledgesPage() {
   const handleSubmit = async () => {
     if (!form.memberName.trim()) return toast('Please enter your name', 'error');
     if (!form.amount || Number(form.amount) < 1) return toast('Please enter a valid amount', 'error');
-    if (!agreed) return toast('Please confirm your pledge commitment', 'error');
+    if (!agreed) return toast('Please confirm your support commitment', 'error');
 
     setSaving(true);
     try {
@@ -68,14 +68,14 @@ export default function PledgesPage() {
         note: form.note.trim() || undefined,
         dueDate: form.dueDate || undefined,
       });
-      toast('Your promise has been recorded! You will receive a confirmation.', 'success');
+      toast('Your support has been recorded! You will receive a confirmation.', 'success');
       setForm(EMPTY);
       setAgreed(false);
       setModal(false);
       mutate();
       mutateStats();
     } catch {
-      toast('Failed to submit pledge. Please try again.', 'error');
+      toast('Failed to submit support. Please try again.', 'error');
     } finally {
       setSaving(false);
     }
@@ -97,9 +97,9 @@ export default function PledgesPage() {
           <div style={{ position: 'absolute', inset: 0, background: 'url("data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.04\'%3E%3Ccircle cx=\'30\' cy=\'30\' r=\'2\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")', opacity: 0.5 }} />
           <div style={{ position: 'relative' }}>
             <div style={{ fontSize: '2.2rem', marginBottom: 8 }}>🤝</div>
-            <h1 style={{ color: '#fff', fontSize: '1.7rem', fontWeight: 800, margin: '0 0 8px' }}>Reunion Fund Promises</h1>
+            <h1 style={{ color: '#fff', fontSize: '1.7rem', fontWeight: 800, margin: '0 0 8px' }}>Reunion Support</h1>
             <p style={{ color: 'rgba(255,255,255,0.8)', margin: '0 0 24px', fontSize: '.95rem' }}>
-              Commit to supporting the 2026 Reunion Fund. Your pledge will be recorded and fulfilled when payment is confirmed.
+              Commit to supporting the 2026 Reunion Fund. Your support will be recorded and fulfilled when payment is confirmed.
             </p>
             <button onClick={() => setModal(true)} style={{
               background: '#fff',
@@ -111,7 +111,7 @@ export default function PledgesPage() {
               fontSize: '1rem',
               cursor: 'pointer',
             }}>
-              Make a Promise
+              Make a Support
             </button>
           </div>
         </div>
@@ -119,15 +119,15 @@ export default function PledgesPage() {
         {/* Stats row */}
         {stats && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 14, marginBottom: 32 }}>
-            <PledgeStat label="Total Pledged" value={formatNaira(stats.totalPledged)} color="#a855f7" />
+            <PledgeStat label="Total Support" value={formatNaira(stats.totalPledged)} color="#a855f7" />
             <PledgeStat label="Fulfilled" value={formatNaira(stats.totalFulfilled)} color="#22c55e" />
             <PledgeStat label="Pending" value={formatNaira(stats.totalPending)} color="#fbbf24" />
-            <PledgeStat label="Members Pledged" value={String(stats.count)} color="#60a5fa" />
+            <PledgeStat label="Members" value={String(stats.count)} color="#60a5fa" />
           </div>
         )}
 
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-3)' }}>Loading pledges…</div>
+          <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-3)' }}>Loading support records…</div>
         ) : (
           <>
             {/* Fulfilled pledges */}
@@ -135,7 +135,7 @@ export default function PledgesPage() {
               <section style={{ marginBottom: 32 }}>
                 <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-1)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                   <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
-                  Fulfilled Promises ({fulfilledList.length})
+                  Fulfilled Support ({fulfilledList.length})
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>
                   {fulfilledList.map((p: any) => <PledgeCard key={p._id} pledge={p} />)}
@@ -147,11 +147,11 @@ export default function PledgesPage() {
             <section>
               <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-1)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
                 <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#fbbf24', display: 'inline-block' }} />
-                Pending Promises ({pendingList.length})
+                Pending Support ({pendingList.length})
               </h2>
               {pendingList.length === 0 ? (
                 <div style={{ textAlign: 'center', padding: '36px 0', color: 'var(--text-3)', fontSize: '.9rem' }}>
-                  No pending promises yet. Be the first to make a promise!
+                  No pending support yet. Be the first to make a support!
                 </div>
               ) : (
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>
@@ -168,16 +168,16 @@ export default function PledgesPage() {
         <div style={overlay} onClick={() => setModal(false)}>
           <div style={modalBox} onClick={(e) => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#f9fafb' }}>Make a Reunion Promise</h2>
+              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700, color: '#f9fafb' }}>Make a Reunion Support</h2>
               <button onClick={() => setModal(false)} style={closeBtn}>✕</button>
             </div>
             <p style={{ color: '#9ca3af', fontSize: '.88rem', margin: '0 0 20px' }}>
-              A promise is your commitment to contribute to the 2026 Reunion Fund. Once your payment is received, the admin will mark it as fulfilled and it moves to the Reunion Fund automatically.
+              Your reunion support is a commitment to contribute to the 2026 Reunion Fund. Once your payment is received, the admin will mark it as fulfilled and it moves to the Reunion Fund automatically.
             </p>
 
             {/* Member identity — always from session, never re-entered */}
             <div style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 18 }}>
-              <div style={{ fontSize: '.75rem', color: '#a855f7', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.05em' }}>Pledging as</div>
+              <div style={{ fontSize: '.75rem', color: '#a855f7', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.05em' }}>Supporting as</div>
               <div style={{ fontWeight: 700, color: '#f9fafb', fontSize: '.95rem' }}>{form.memberName}</div>
               {form.memberEmail && <div style={{ fontSize: '.8rem', color: '#9ca3af', marginTop: 2 }}>{form.memberEmail}</div>}
               {form.memberPhone && <div style={{ fontSize: '.8rem', color: '#9ca3af' }}>{form.memberPhone}</div>}
@@ -185,7 +185,7 @@ export default function PledgesPage() {
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
               <div style={fw}>
-                <label style={lbl}>Pledge Amount (₦) *</label>
+                <label style={lbl}>Support Amount (₦) *</label>
                 <input style={inp} type="number" min={1} value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} placeholder="e.g. 10000" />
               </div>
               <div style={fw}>
@@ -201,14 +201,14 @@ export default function PledgesPage() {
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', margin: '4px 0 20px' }}>
               <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} style={{ marginTop: 3, accentColor: '#7c3aed' }} />
               <span style={{ fontSize: '.85rem', color: '#d1d5db', lineHeight: 1.5 }}>
-                I promise to fulfil this commitment for the 2026 IDAGHA Reunion Fund and understand the admin will follow up for payment.
+                I commit to fulfil this support for the 2026 IDAGHA Reunion Fund and understand the admin will follow up for payment.
               </span>
             </label>
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setModal(false)} style={btnOutline}>Cancel</button>
               <button onClick={handleSubmit} disabled={saving} style={btnPrimary}>
-                {saving ? 'Submitting…' : 'Submit Pledge'}
+                {saving ? 'Submitting…' : 'Submit Support'}
               </button>
             </div>
           </div>

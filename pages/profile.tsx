@@ -37,8 +37,7 @@ export default function ProfilePage() {
           occupation: data.occupation || '',
           birthday: data.birthday?.slice(0, 10) || '',
         });
-        if (data.photo) setPhotoPreview(data.photo);
-        else setPhotoPreview(member.photo || '');
+        setPhotoPreview(data.photo || member.photo || '');
       })
       .catch(() => {});
   }, [member, cleared]);
