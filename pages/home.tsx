@@ -301,7 +301,7 @@ function ActivityIcon({ type }: { type: string }) {
 export default function HomePage() {
   const router = useRouter();
   const { data: stats }       = useSWR('/api/stats/summary', fetcher);
-  const { data: walletStats } = useSWR('/api/stats/wallets', fetcher, { refreshInterval: 60000 });
+  const { data: walletStats } = useSWR('/api/stats/wallets', fetcher, { refreshInterval: 15000, revalidateOnFocus: true });
   const { data: contributions } = useSWR('/api/contributions', fetcher);
   const { data: announcements } = useSWR('/api/announcements', fetcher);
   const { data: activityRaw } = useSWR('/api/activity?limit=25', fetcher, { refreshInterval: 30000 });

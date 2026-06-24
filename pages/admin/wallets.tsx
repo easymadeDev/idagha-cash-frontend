@@ -5,8 +5,6 @@ import api, { formatNaira } from '../../lib/api';
 import { useToast } from '../../components/Toast';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
-const authFetcher = (url: string) =>
-  fetch(url, { headers: { Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('idagha_token') || '' : ''}` } }).then((r) => r.json());
 
 const EMPTY = { name: '', description: '', color: '#22c55e', type: 'general' };
 const TYPES = ['general', 'reunion', 'pledge', 'custom'];
@@ -14,8 +12,7 @@ const TYPES = ['general', 'reunion', 'pledge', 'custom'];
 export default function AdminWallets() {
   const { toast } = useToast();
   const { data: wallets, isLoading } = useSWR('/api/wallets', fetcher);
-  const { data: walletStats } = useSWR('/api/stats/wallets', fetcher);
-  const { data: pledgeStats } = useSWR('/api/pledges/stats', authFetcher);
+  const { data: walletStats } = useSWR('/api/stats/wallets', fetcher, { refreshInterval: 15000, revalidateOnFocus: true });
 
   const [modal, setModal] = useState(false);
   const [editing, setEditing] = useState<any>(null);
@@ -116,9 +113,9 @@ export default function AdminWallets() {
                 {w.type === 'pledge' ? (
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
                     {[
-                      { label: 'Total Pledged', value: formatNaira(pledgeStats?.totalPledged ?? 0), color: '#a855f7' },
-                      { label: 'Fulfilled', value: formatNaira(pledgeStats?.totalFulfilled ?? 0), color: 'var(--green-400)' },
-                      { label: 'Pending', value: formatNaira(pledgeStats?.totalPending ?? 0), color: 'var(--yellow)' },
+                      { label: 'Total Pledged', value: formatNaira(s.pledgeStats?.totalPledged ?? 0), color: '#a855f7' },
+                      { label: 'Fulfilled', value: formatNaira(s.pledgeStats?.totalFulfilled ?? 0), color: 'var(--green-400)' },
+                      { label: 'Pending', value: formatNaira(s.pledgeStats?.totalPending ?? 0), color: 'var(--yellow)' },
                     ].map((stat) => (
                       <div key={stat.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 8, padding: '10px 12px', border: '1px solid var(--border)' }}>
                         <div style={{ fontSize: '0.65rem', color: 'var(--text-3)', marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{stat.label}</div>
