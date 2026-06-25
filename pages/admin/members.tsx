@@ -365,23 +365,25 @@ export default function AdminMembers() {
 
                   {/* Actions */}
                   <div className="admin-member-card-actions">
-                    <button className="btn btn-ghost btn-sm" style={{ flex: 1 }} onClick={() => openEdit(m)}>Edit</button>
-                    <button
-                      className="btn btn-sm"
-                      style={{ flex: 1, background: 'rgba(59,130,246,0.1)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}
-                      onClick={() => openNotify(m)}
-                    >
+                    <button className="amca-btn amca-edit" onClick={() => openEdit(m)} title="Edit">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      Edit
+                    </button>
+                    <button className="amca-btn amca-notify" onClick={() => openNotify(m)} title="Notify by email">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       Notify
                     </button>
                     <button
-                      className="btn btn-sm"
-                      style={{ flex: 1, background: m.isActive ? 'rgba(107,114,128,0.1)' : 'rgba(34,197,94,0.1)', color: m.isActive ? 'var(--text-3)' : 'var(--green-400)', border: '1px solid var(--border)' }}
+                      className={`amca-btn ${m.isActive ? 'amca-deactivate' : 'amca-activate'}`}
                       onClick={() => toggleActive(m)}
+                      title={m.isActive ? 'Deactivate' : 'Activate'}
                     >
-                      {m.isActive ? 'Deactivate' : 'Activate'}
+                      {m.isActive
+                        ? <><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/></svg> Off</>
+                        : <><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" strokeLinecap="round"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round"/></svg> On</>}
                     </button>
-                    <button className="btn btn-danger btn-sm" style={{ flexShrink: 0 }} onClick={() => setDeleteId(m._id)}>
-                      <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <button className="amca-btn amca-delete" onClick={() => setDeleteId(m._id)} title="Delete member">
+                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </button>
                   </div>
                 </div>
@@ -649,16 +651,19 @@ export default function AdminMembers() {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* Grid: 3-col on wide desktop, 2-col on medium, 1-col on narrow mobile */
         .admin-members-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          grid-template-columns: repeat(3, 1fr);
           gap: 12px;
         }
+
         .admin-member-card {
           background: var(--grad-card);
           border: 1px solid var(--border);
           border-radius: var(--radius);
           overflow: hidden;
+          display: flex; flex-direction: column;
           transition: border-color 0.2s, box-shadow 0.2s;
         }
         .admin-member-card:hover {
@@ -667,34 +672,67 @@ export default function AdminMembers() {
         }
         .admin-member-card-top {
           display: flex; gap: 11px; align-items: flex-start;
-          padding: 14px 14px 10px;
+          padding: 14px 14px 8px;
         }
         .admin-member-card-details {
           padding: 0 14px 10px;
           display: flex; flex-direction: column; gap: 4px;
+          flex: 1;
         }
         .admin-member-detail-row {
           display: flex; align-items: center; gap: 6px;
-          font-size: 0.76rem; color: var(--text-3);
+          font-size: 0.75rem; color: var(--text-3);
+          overflow: hidden;
+        }
+        .admin-member-detail-row span {
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .admin-member-card-actions {
-          display: flex; gap: 6px; align-items: center;
-          padding: 10px 12px;
+          display: flex; gap: 5px; align-items: center;
+          padding: 9px 11px;
           border-top: 1px solid var(--border);
           background: rgba(6,13,8,0.4);
         }
 
-        @media (max-width: 768px) {
-          .admin-members-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+        /* Action buttons */
+        .amca-btn {
+          display: flex; align-items: center; justify-content: center; gap: 5px;
+          padding: 5px 10px; border-radius: 6px; font-size: 0.73rem; font-weight: 600;
+          cursor: pointer; border: 1px solid transparent; transition: all 0.15s; white-space: nowrap;
+          font-family: var(--font); line-height: 1;
         }
-        @media (max-width: 480px) {
-          .admin-members-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+        .amca-edit    { flex: 1; background: rgba(255,255,255,0.04); color: var(--text-2); border-color: var(--border); }
+        .amca-edit:hover { background: rgba(255,255,255,0.08); color: var(--text-1); }
+        .amca-notify  { flex: 1; background: rgba(59,130,246,0.1); color: #93c5fd; border-color: rgba(59,130,246,0.25); }
+        .amca-notify:hover { background: rgba(59,130,246,0.18); }
+        .amca-deactivate { flex: 1; background: rgba(107,114,128,0.1); color: var(--text-3); border-color: var(--border); }
+        .amca-deactivate:hover { background: rgba(248,113,113,0.1); color: var(--red); border-color: rgba(248,113,113,0.3); }
+        .amca-activate   { flex: 1; background: rgba(34,197,94,0.1); color: var(--green-400); border-color: rgba(34,197,94,0.25); }
+        .amca-activate:hover { background: rgba(34,197,94,0.18); }
+        .amca-delete  { flex-shrink: 0; width: 30px; padding: 5px; background: rgba(248,113,113,0.08); color: var(--red); border-color: rgba(248,113,113,0.2); border-radius: 6px; }
+        .amca-delete:hover { background: rgba(248,113,113,0.18); }
+
+        /* Responsive breakpoints */
+        @media (max-width: 1100px) {
+          .admin-members-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        }
+        @media (max-width: 768px) {
+          .admin-members-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
           .admin-member-card-top { padding: 11px 11px 8px; gap: 9px; }
           .admin-member-card-details { padding: 0 11px 8px; }
-          .admin-member-card-actions { padding: 8px 10px; gap: 5px; }
-          .admin-member-card-actions .btn { font-size: 0.7rem; padding: 5px 8px; }
+          .admin-member-card-actions { padding: 8px 9px; gap: 4px; }
+          .amca-btn { font-size: 0.69rem; padding: 5px 7px; gap: 4px; }
+          .amca-delete { width: 27px; padding: 5px 4px; }
         }
-        @media (max-width: 380px) {
+        @media (max-width: 480px) {
+          .admin-members-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+          .admin-member-card-top { padding: 10px 10px 7px; gap: 8px; }
+          .admin-member-card-details { padding: 0 10px 7px; }
+          .admin-member-card-actions { padding: 7px 8px; gap: 4px; }
+          .amca-btn { font-size: 0.65rem; padding: 4px 6px; }
+          .amca-delete { width: 26px; padding: 4px; }
+        }
+        @media (max-width: 360px) {
           .admin-members-grid { grid-template-columns: 1fr; }
         }
       `}</style>
