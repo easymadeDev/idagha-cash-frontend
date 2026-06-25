@@ -47,7 +47,7 @@ export default function AdminMembers() {
   const [notifySubject, setNotifySubject] = useState('');
   const [notifyMessage, setNotifyMessage] = useState('');
   const [notifySending, setNotifySending] = useState(false);
-  const [notifyDone, setNotifyDone] = useState<{ sent: boolean; error?: string } | null>(null);
+  const [notifyDone, setNotifyDone] = useState<{ sent: boolean; channels?: string[]; errors?: string[] } | null>(null);
   const [search, setSearch] = useState('');
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -99,9 +99,9 @@ export default function AdminMembers() {
         subject: notifySubject,
         message: notifyMessage,
       });
-      setNotifyDone({ sent: res.data.sent, error: res.data.error });
+      setNotifyDone({ sent: res.data.sent, channels: res.data.channels, errors: res.data.errors });
     } catch (err: any) {
-      setNotifyDone({ sent: false, error: err.response?.data?.message || 'Failed to send' });
+      setNotifyDone({ sent: false, channels: [], errors: [err.response?.data?.message || 'Failed to send'] });
     } finally {
       setNotifySending(false);
     }
@@ -627,18 +627,36 @@ export default function AdminMembers() {
                 {notifyDone.sent ? (
                   <>
                     <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(34,197,94,0.1)', border: '2px solid rgba(34,197,94,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                      <svg width="24" height="24" fill="none" stroke="var(--green-400)" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <svg width="24" height="24" fill="none" stroke="#4ade80" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
-                    <p style={{ color: 'var(--green-400)', fontWeight: 700, margin: '0 0 5px' }}>Email sent!</p>
-                    <p style={{ color: 'var(--text-3)', fontSize: '0.82rem', margin: 0 }}>Delivered to {notifyTarget.email}</p>
+                    <p style={{ color: '#4ade80', fontWeight: 700, margin: '0 0 10px', fontSize: '1.05rem' }}>Message sent!</p>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
+                      {notifyDone.channels?.includes('email') && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 99, background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', color: '#93c5fd', fontSize: '0.78rem', fontWeight: 600 }}>
+                          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          Email
+                        </span>
+                      )}
+                      {notifyDone.channels?.includes('whatsapp') && (
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 99, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#4ade80', fontSize: '0.78rem', fontWeight: 600 }}>
+                          <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          WhatsApp
+                        </span>
+                      )}
+                    </div>
+                    {notifyDone.errors && notifyDone.errors.length > 0 && (
+                      <p style={{ color: '#9ca3af', fontSize: '0.75rem', margin: '0 0 4px' }}>
+                        {notifyDone.errors.join(' · ')}
+                      </p>
+                    )}
                   </>
                 ) : (
                   <>
                     <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(248,113,113,0.1)', border: '2px solid rgba(248,113,113,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                      <svg width="24" height="24" fill="none" stroke="var(--red)" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <svg width="24" height="24" fill="none" stroke="#f87171" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
-                    <p style={{ color: 'var(--red)', fontWeight: 700, margin: '0 0 5px' }}>Failed to send</p>
-                    <p style={{ color: 'var(--text-3)', fontSize: '0.82rem', margin: 0 }}>{notifyDone.error || 'Unknown error'}</p>
+                    <p style={{ color: '#f87171', fontWeight: 700, margin: '0 0 5px' }}>Failed to send</p>
+                    <p style={{ color: '#9ca3af', fontSize: '0.82rem', margin: 0 }}>{notifyDone.errors?.join(' · ') || 'Unknown error'}</p>
                   </>
                 )}
                 <button className="btn btn-ghost" style={{ marginTop: 18 }} onClick={() => { setNotifyTarget(null); setNotifyDone(null); }}>Close</button>
