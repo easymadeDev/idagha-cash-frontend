@@ -19,9 +19,11 @@ export default function WhatsAppPrompt() {
 
     const check = async () => {
       try {
-        const res = await fetch(`/api/members/${member._id}/profile`);
+        const memberToken = sessionStorage.getItem('idagha_member_token') || '';
+        const res = await fetch(`/api/members/${member._id}/profile`, {
+          headers: { 'x-member-token': memberToken },
+        });
         if (!res.ok) {
-          // Can't verify — show popup only if session says not subscribed
           if (!member.whatsappSubscribed) setVisible(true);
           return;
         }
@@ -73,7 +75,10 @@ export default function WhatsAppPrompt() {
     if (!member) return;
     pollRef.current = setInterval(async () => {
       try {
-        const res = await fetch(`/api/members/${member._id}/profile`);
+        const memberToken = sessionStorage.getItem('idagha_member_token') || '';
+        const res = await fetch(`/api/members/${member._id}/profile`, {
+          headers: { 'x-member-token': memberToken },
+        });
         if (!res.ok) return;
         const data = await res.json();
         if (data?.whatsappSubscribed) {
