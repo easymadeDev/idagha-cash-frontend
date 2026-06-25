@@ -58,7 +58,7 @@ export default function AdminSettings() {
   const [savingCron, setSavingCron] = useState(false);
   const [accountsForm, setAccountsForm] = useState<any[]>([]);
   const [hasInit, setHasInit] = useState(false);
-  const [cronForm, setCronForm] = useState<any>({ birthdayTime: '0 8 * * *', reunionReminderTime: '0 8 * * 1', birthdayEnabled: true, reunionReminderEnabled: true });
+  const [cronForm, setCronForm] = useState<any>({ birthdayTime: '0 8 * * *', reunionReminderTime: '0 8 * * 1', birthdayEnabled: true, reunionReminderEnabled: true, birthdayChannels: ['email', 'whatsapp'], reunionReminderChannels: ['email', 'whatsapp'] });
   const [cronInit, setCronInit] = useState(false);
 
   if (Array.isArray(bankAccounts) && !hasInit && !isLoading) {
@@ -108,6 +108,14 @@ export default function AdminSettings() {
   };
 
   const handleCronChange = (field: string, value: any) => setCronForm({ ...cronForm, [field]: value });
+
+  const toggleChannel = (channelField: 'birthdayChannels' | 'reunionReminderChannels', ch: string) => {
+    const current: string[] = cronForm[channelField] || ['email', 'whatsapp'];
+    const next = current.includes(ch) ? current.filter((c: string) => c !== ch) : [...current, ch];
+    // Must keep at least one channel
+    if (next.length === 0) return;
+    handleCronChange(channelField, next);
+  };
 
   const upcomingBirthdays = useMemo(() => {
     if (!Array.isArray(members)) return [];
@@ -253,6 +261,13 @@ export default function AdminSettings() {
                       </div>
                     </div>
 
+                    {/* Birthday Channels */}
+                    <ChannelPicker
+                      channels={cronForm.birthdayChannels || ['email', 'whatsapp']}
+                      onToggle={(ch) => toggleChannel('birthdayChannels', ch)}
+                      waReady={waStatus?.ready}
+                    />
+
                     {/* Upcoming Birthdays */}
                     <div style={{ background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
                       <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
@@ -315,6 +330,7 @@ export default function AdminSettings() {
                 </div>
 
                 {cronForm.reunionReminderEnabled && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                   <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
                     <div style={{ flex: 1.2 }}>
                       <label style={labelStyle}>Day</label>
@@ -346,6 +362,12 @@ export default function AdminSettings() {
                         {DAYS[parseInt(parseCronDay(cronForm.reunionReminderTime))]} {String(parseCronTime(cronForm.reunionReminderTime).hour).padStart(2, '0')}:{String(parseCronTime(cronForm.reunionReminderTime).minute).padStart(2, '0')}
                       </span>
                     </div>
+                  </div>
+                  <ChannelPicker
+                    channels={cronForm.reunionReminderChannels || ['email', 'whatsapp']}
+                    onToggle={(ch) => toggleChannel('reunionReminderChannels', ch)}
+                    waReady={waStatus?.ready}
+                  />
                   </div>
                 )}
               </div>
@@ -435,6 +457,46 @@ const labelStyle: React.CSSProperties = {
 const inputStyle: React.CSSProperties = {
   fontSize: '0.8rem', padding: '6px 8px', height: 'auto',
 };
+
+function ChannelPicker({ channels, onToggle, waReady }: { channels: string[]; onToggle: (ch: string) => void; waReady?: boolean }) {
+  const emailOn = channels.includes('email');
+  const waOn = channels.includes('whatsapp');
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 10px', background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8 }}>
+      <span style={{ fontSize: '0.7rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.04em', marginRight: 4 }}>Send via</span>
+      <button
+        onClick={() => onToggle('email')}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
+          background: emailOn ? 'rgba(96,165,250,0.15)' : 'rgba(155,155,155,0.08)',
+          color: emailOn ? 'var(--blue)' : 'var(--text-3)', fontWeight: 700, fontSize: '0.75rem',
+          outline: emailOn ? '1.5px solid rgba(96,165,250,0.4)' : '1px solid var(--border)',
+          transition: 'all 0.15s',
+        }}
+      >
+        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Email
+      </button>
+      <button
+        onClick={() => onToggle('whatsapp')}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 6, border: 'none', cursor: 'pointer',
+          background: waOn ? 'rgba(37,211,102,0.12)' : 'rgba(155,155,155,0.08)',
+          color: waOn ? '#25d366' : 'var(--text-3)', fontWeight: 700, fontSize: '0.75rem',
+          outline: waOn ? '1.5px solid rgba(37,211,102,0.35)' : '1px solid var(--border)',
+          transition: 'all 0.15s',
+        }}
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+        WhatsApp
+        {waOn && !waReady && <span style={{ fontSize: '0.6rem', color: '#f59e0b', marginLeft: 2 }}>⚠</span>}
+      </button>
+      {waOn && !waReady && (
+        <span style={{ fontSize: '0.68rem', color: '#f59e0b' }}>WhatsApp not connected</span>
+      )}
+    </div>
+  );
+}
 
 function Toggle({ on, color, onToggle }: { on: boolean; color: string; onToggle: () => void }) {
   return (
