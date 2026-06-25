@@ -37,21 +37,23 @@ export default function AdminMembers() {
   const [notifyDone, setNotifyDone] = useState<{ sent: boolean; error?: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const PROFILE_URL = 'https://idagha2018alumni-beta.vercel.app/profile';
+
   const NOTIFY_TEMPLATES = [
     {
       label: 'Update Profile Photo',
       subject: 'Action Required: Please Update Your Profile Photo',
-      message: `We noticed your profile on the IDAGHA Alumni portal does not have a profile photo yet.\n\nKindly log in and upload a recent photo so your fellow alumni can recognise you on the Members directory.\n\nThank you for keeping your profile complete.`,
+      message: `We noticed your profile on the IDAGHA Alumni portal does not have a profile photo yet.\n\nKindly upload a recent photo so your fellow alumni can recognise you on the Members directory. Use the button below to go directly to your profile:\n\n${PROFILE_URL}\n\nThank you for keeping your profile complete.`,
     },
     {
       label: 'Update Contact Details',
       subject: 'Action Required: Please Update Your Contact Information',
-      message: `Your contact information on the IDAGHA Alumni portal appears to be incomplete or out of date.\n\nKindly log in and update your phone number, WhatsApp, email address, and location so we can reach you and keep our records accurate.\n\nThank you!`,
+      message: `Your contact information on the IDAGHA Alumni portal appears to be incomplete or out of date.\n\nKindly update your phone number, WhatsApp, email address, and location so we can reach you and keep our records accurate. Click the button below to edit your profile:\n\n${PROFILE_URL}\n\nThank you!`,
     },
     {
       label: 'Complete Your Profile',
       subject: 'Action Required: Complete Your IDAGHA Alumni Profile',
-      message: `Your IDAGHA Alumni profile is missing some important details.\n\nPlease log in and fill in your nickname, occupation, location, and any other information you haven't provided yet. A complete profile helps your classmates find and reconnect with you.\n\nThank you for your cooperation.`,
+      message: `Your IDAGHA Alumni profile is missing some important details.\n\nPlease fill in your nickname, occupation, location, and any other information you haven't provided yet. A complete profile helps your classmates find and reconnect with you.\n\n${PROFILE_URL}\n\nThank you for your cooperation.`,
     },
     {
       label: 'Pay Outstanding Contribution',
