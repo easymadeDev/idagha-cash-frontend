@@ -113,6 +113,7 @@ export default function WelcomePopup() {
           nickname: data.member.nickname,
           photo: data.member.photo,
           position: data.member.position,
+          whatsappSubscribed: data.member.whatsappSubscribed || false,
         });
         setCleared(true);
         setStep('found');

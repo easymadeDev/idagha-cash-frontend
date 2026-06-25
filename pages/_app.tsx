@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import '../styles/globals.css';
 import WelcomePopup from '../components/WelcomePopup';
+import WhatsAppPrompt from '../components/WhatsAppPrompt';
 import { GateContext, SessionMember } from '../lib/gate';
 import { ToastProvider } from '../components/Toast';
 
@@ -95,6 +96,7 @@ export default function App({ Component, pageProps }: AppProps) {
     <ToastProvider>
       <GateContext.Provider value={{ cleared, setCleared, member, setMember, ready }}>
         <WelcomePopup />
+        <WhatsAppPrompt />
         <Component {...pageProps} />
       </GateContext.Provider>
     </ToastProvider>

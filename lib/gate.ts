@@ -6,6 +6,7 @@ export type SessionMember = {
   nickname?: string;
   photo?: string;
   position?: string;
+  whatsappSubscribed?: boolean;
 };
 
 export const GateContext = createContext<{
