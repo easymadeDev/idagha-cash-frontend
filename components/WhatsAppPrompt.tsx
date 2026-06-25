@@ -15,11 +15,34 @@ export default function WhatsAppPrompt() {
 
   useEffect(() => {
     if (!ready || !cleared || !member) return;
-    if (member.whatsappSubscribed) return;
     if (sessionStorage.getItem(DISMISSED_KEY)) return;
-    const t = setTimeout(() => setVisible(true), 2200);
+
+    const check = async () => {
+      try {
+        const token = sessionStorage.getItem('idagha_member_token') || localStorage.getItem('idagha_token') || '';
+        const res = await fetch(`/api/members/${member._id}`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.whatsappSubscribed) {
+          // Already subscribed — update session silently, never show popup
+          setMember({ ...member, whatsappSubscribed: true });
+          try {
+            const stored = sessionStorage.getItem(MEMBER_KEY);
+            if (stored) sessionStorage.setItem(MEMBER_KEY, JSON.stringify({ ...JSON.parse(stored), whatsappSubscribed: true }));
+          } catch {}
+          return;
+        }
+        setVisible(true);
+      } catch {
+        if (!member.whatsappSubscribed) setVisible(true);
+      }
+    };
+
+    const t = setTimeout(check, 2200);
     return () => clearTimeout(t);
-  }, [ready, cleared, member]);
+  }, [ready, cleared, member?._id]);
 
   // Stop polling when unmounted
   useEffect(() => {
