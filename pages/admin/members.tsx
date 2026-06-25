@@ -46,6 +46,7 @@ export default function AdminMembers() {
   const [notifyTarget, setNotifyTarget] = useState<any>(null);
   const [notifySubject, setNotifySubject] = useState('');
   const [notifyMessage, setNotifyMessage] = useState('');
+  const [notifyChannels, setNotifyChannels] = useState<string[]>(['email', 'whatsapp']);
   const [notifySending, setNotifySending] = useState(false);
   const [notifyDone, setNotifyDone] = useState<{ sent: boolean; channels?: string[]; errors?: string[] } | null>(null);
   const [search, setSearch] = useState('');
@@ -81,8 +82,12 @@ export default function AdminMembers() {
     setNotifyTarget(m);
     setNotifySubject('');
     setNotifyMessage('');
+    setNotifyChannels(['email', 'whatsapp']);
     setNotifyDone(null);
   };
+
+  const toggleChannel = (ch: string) =>
+    setNotifyChannels(prev => prev.includes(ch) ? prev.filter(c => c !== ch) : [...prev, ch]);
 
   const applyTemplate = (tpl: typeof NOTIFY_TEMPLATES[0]) => {
     setNotifySubject(tpl.subject);
@@ -93,11 +98,15 @@ export default function AdminMembers() {
     if (!notifySubject.trim() || !notifyMessage.trim()) {
       toast('Subject and message are required.', 'error'); return;
     }
+    if (notifyChannels.length === 0) {
+      toast('Select at least one channel.', 'error'); return;
+    }
     setNotifySending(true);
     try {
       const res = await api.post(`/members/${notifyTarget._id}/notify`, {
         subject: notifySubject,
         message: notifyMessage,
+        channels: notifyChannels,
       });
       setNotifyDone({ sent: res.data.sent, channels: res.data.channels, errors: res.data.errors });
     } catch (err: any) {
@@ -602,8 +611,49 @@ export default function AdminMembers() {
                     ))}
                   </div>
                 </div>
+                {/* Channel picker */}
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginBottom: 7, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Send via</div>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    {/* Email toggle */}
+                    <button
+                      type="button"
+                      onClick={() => toggleChannel('email')}
+                      style={{
+                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                        padding: '9px 12px', borderRadius: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
+                        border: notifyChannels.includes('email') ? '2px solid #3b82f6' : '2px solid rgba(255,255,255,0.1)',
+                        background: notifyChannels.includes('email') ? 'rgba(59,130,246,0.12)' : 'transparent',
+                        color: notifyChannels.includes('email') ? '#93c5fd' : 'var(--text-3)',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      Email
+                      {!notifyTarget.email && <span style={{ fontSize: '0.65rem', color: '#f87171' }}>(no email)</span>}
+                    </button>
+                    {/* WhatsApp toggle */}
+                    <button
+                      type="button"
+                      onClick={() => toggleChannel('whatsapp')}
+                      style={{
+                        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                        padding: '9px 12px', borderRadius: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
+                        border: notifyChannels.includes('whatsapp') ? '2px solid #22c55e' : '2px solid rgba(255,255,255,0.1)',
+                        background: notifyChannels.includes('whatsapp') ? 'rgba(34,197,94,0.1)' : 'transparent',
+                        color: notifyChannels.includes('whatsapp') ? '#4ade80' : 'var(--text-3)',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      WhatsApp
+                      {!notifyTarget.phone && !notifyTarget.whatsapp && <span style={{ fontSize: '0.65rem', color: '#f87171' }}>(no phone)</span>}
+                    </button>
+                  </div>
+                </div>
+
                 <div className="form-group">
-                  <label className="form-label">Subject</label>
+                  <label className="form-label">Subject <span style={{ color: 'var(--text-3)', fontWeight: 400 }}>(email only)</span></label>
                   <input className="form-input" value={notifySubject} onChange={(e) => setNotifySubject(e.target.value)} placeholder="Email subject line" />
                 </div>
                 <div className="form-group">
@@ -612,13 +662,10 @@ export default function AdminMembers() {
                 </div>
                 <div className="modal-actions">
                   <button className="btn btn-ghost" onClick={() => setNotifyTarget(null)}>Cancel</button>
-                  <button className="btn btn-primary" onClick={sendNotify} disabled={notifySending || !notifyTarget.email}>
+                  <button className="btn btn-primary" onClick={sendNotify} disabled={notifySending || notifyChannels.length === 0}>
                     {notifySending
                       ? <><div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
-                      : <>
-                          <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                          Send Email
-                        </>}
+                      : `Send via ${notifyChannels.join(' & ') || '—'}`}
                   </button>
                 </div>
               </>
