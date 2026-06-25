@@ -410,8 +410,7 @@ export default function HomePage() {
                 const w = ws.wallet;
                 const color = w?.color || '#22c55e';
                 return (
-                  <div key={w?._id} onClick={() => setActiveWallet(ws)} style={{
-                    padding: 24, borderRadius: 'var(--radius)',
+                  <div key={w?._id} onClick={() => setActiveWallet(ws)} className="wallet-card-wrap" style={{
                     background: 'var(--bg-card)',
                     border: `1px solid ${color}33`,
                     position: 'relative', overflow: 'hidden',

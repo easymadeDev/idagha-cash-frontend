@@ -176,7 +176,7 @@ export default function ContributionsPage() {
               {/* LEFT: Steps + Bank accounts */}
               <div className="contribute-left">
                 {/* How it works */}
-                <div className="card" style={{ marginBottom: 24, padding: '24px 22px' }}>
+                <div className="card contrib-how-card" style={{ marginBottom: 24 }}>
                   <div className="section-title" style={{ marginBottom: 18 }}>How It Works</div>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                     {STEPS.map((s, i) => (
@@ -205,7 +205,7 @@ export default function ContributionsPage() {
                     </div>
                   ) : (
                     bankAccounts.map((acc: any, i: number) => (
-                      <div key={i} className="card" style={{ padding: '20px 22px', border: `1px solid ${acc.border}`, background: acc.color }}>
+                      <div key={i} className="card bank-card" style={{ border: `1px solid ${acc.border}`, background: acc.color }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
                           <span style={{ fontSize: '1.4rem' }}>{acc.icon}</span>
                           <div style={{ fontWeight: 800, fontSize: '0.95rem' }}>{acc.bank}</div>
@@ -214,7 +214,7 @@ export default function ContributionsPage() {
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
                             <div>
                               <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>Account Number</div>
-                              <div style={{ fontFamily: 'var(--font-d)', fontSize: '1.35rem', fontWeight: 800, letterSpacing: '0.06em', color: 'var(--text-1)' }}>
+                              <div className="bank-account-number">
                                 {acc.accountNumber}
                               </div>
                             </div>
@@ -240,7 +240,7 @@ export default function ContributionsPage() {
 
               {/* RIGHT: Submission form */}
               <div className="contribute-right">
-                <div className="card" style={{ padding: '28px 24px', position: 'sticky', top: 130 }}>
+                <div className="card contrib-form-card" style={{ position: 'sticky', top: 90 }}>
                   <div className="section-title" style={{ marginBottom: 6 }}>Notify the Secretary</div>
                   <p style={{ fontSize: '0.82rem', color: 'var(--text-3)', marginBottom: 22, lineHeight: 1.6 }}>
                     After transferring, fill this form so your payment can be confirmed and recorded publicly.

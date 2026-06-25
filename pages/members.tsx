@@ -134,24 +134,21 @@ export default function MembersPage() {
                   onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
                 >
                   {/* Card top */}
-                  <div style={{ padding: '20px 20px 16px', display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                    <div style={{
-                      width: 56, height: 56, borderRadius: 14, flexShrink: 0,
+                  <div className="member-card-top">
+                    <div className="member-card-avatar" style={{
                       background: bg, color: fg,
-                      display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: '1.05rem', fontWeight: 800, letterSpacing: '-0.02em',
-                      overflow: 'hidden', border: m.photo ? '2px solid rgba(34,197,94,0.3)' : 'none',
+                      border: m.photo ? '2px solid rgba(34,197,94,0.3)' : 'none',
                     }}>
                       {m.photo ? (
                         <img src={m.photo} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : getInitials(m.name)}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: '0.97rem', marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      <div className="member-card-name">
                         {m.name}
                       </div>
                       {m.nickname && (
-                        <div style={{ fontSize: '0.78rem', color: fg, fontWeight: 600, marginBottom: 5 }}>
+                        <div style={{ fontSize: '0.78rem', color: fg, fontWeight: 600, marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                           "{m.nickname}"
                         </div>
                       )}
@@ -168,7 +165,7 @@ export default function MembersPage() {
                   </div>
 
                   {/* Details */}
-                  <div style={{ padding: '0 20px 16px', display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div className="member-card-details">
                     {m.location && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'var(--text-3)' }}>
                         <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeLinecap="round"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round"/></svg>
@@ -190,10 +187,10 @@ export default function MembersPage() {
                   </div>
 
                   {/* Contribution footer */}
-                  <div style={{ borderTop: '1px solid var(--border)', padding: '14px 20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(6,13,8,0.5)' }}>
+                  <div className="member-card-footer">
                     <div>
                       <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>Total Contributed</div>
-                      <div style={{ fontFamily: 'var(--font-d)', fontSize: '1.1rem', fontWeight: 800, color: contrib.total > 0 ? 'var(--green-400)' : 'var(--text-3)', letterSpacing: '-0.02em' }}>
+                      <div className="member-card-contrib-value" style={{ color: contrib.total > 0 ? 'var(--green-400)' : 'var(--text-3)' }}>
                         {contrib.total > 0 ? formatNaira(contrib.total) : '—'}
                       </div>
                     </div>
@@ -216,21 +213,71 @@ export default function MembersPage() {
       </div>
       <style>{`
         .members-cta-bar {
-          margin-bottom: 36px; padding: 20px 22px;
+          margin-bottom: 28px; padding: 18px 20px;
           background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.03));
           border: 1px solid rgba(34,197,94,0.22); border-radius: var(--radius);
           display: flex; align-items: center; justify-content: space-between;
-          flex-wrap: wrap; gap: 16px;
+          flex-wrap: wrap; gap: 14px;
           animation: fadeUp 0.6s var(--ease) 0.3s both;
         }
         .members-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
-          gap: 14px;
+          grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+          gap: 12px;
+          margin-bottom: 28px;
+        }
+        .member-card-top {
+          padding: 14px 14px 10px;
+          display: flex; gap: 11px; align-items: flex-start;
+        }
+        .member-card-avatar {
+          width: 44px; height: 44px; border-radius: 11px; flex-shrink: 0;
+          display: flex; align-items: center; justify-content: center;
+          font-size: 0.88rem; font-weight: 800; letter-spacing: -0.02em;
+          overflow: hidden;
+        }
+        .member-card-name {
+          font-weight: 800; font-size: 0.88rem; margin-bottom: 2px;
+          overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .member-card-details {
+          padding: 0 14px 10px;
+          display: flex; flex-direction: column; gap: 4px;
+          font-size: 0.78rem;
+        }
+        .member-card-footer {
+          border-top: 1px solid var(--border);
+          padding: 10px 14px;
+          display: flex; justify-content: space-between; align-items: center;
+          background: rgba(6,13,8,0.5);
+        }
+        .member-card-contrib-value {
+          font-family: var(--font-d); font-size: clamp(0.85rem, 3vw, 1rem);
+          font-weight: 800; letter-spacing: -0.02em;
+        }
+        @media (max-width: 900px) {
+          .members-grid { grid-template-columns: repeat(2,1fr); gap: 10px; }
         }
         @media (max-width: 600px) {
-          .members-cta-bar { padding: 16px 14px; }
-          .members-grid { grid-template-columns: 1fr; }
+          .members-cta-bar { padding: 12px 13px; gap: 10px; }
+          .members-grid { grid-template-columns: repeat(2,1fr); gap: 8px; }
+          .member-card-top { padding: 11px 11px 8px; gap: 9px; }
+          .member-card-avatar { width: 36px; height: 36px; border-radius: 9px; font-size: 0.75rem; }
+          .member-card-name { font-size: 0.78rem; white-space: normal; overflow: visible; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+          .member-card-details { padding: 0 11px 8px; font-size: 0.68rem; gap: 3px; }
+          .member-card-footer { padding: 8px 11px; }
+          .member-card-contrib-value { font-size: 0.76rem; }
+          /* hide long email addresses on 2-col mobile */
+          .member-card-details .member-detail-email { display: none; }
+        }
+        @media (max-width: 400px) {
+          .members-grid { gap: 6px; }
+          .member-card-top { padding: 9px 9px 7px; gap: 8px; }
+          .member-card-avatar { width: 32px; height: 32px; border-radius: 8px; font-size: 0.68rem; }
+          .member-card-name { font-size: 0.74rem; }
+          .member-card-details { padding: 0 9px 7px; font-size: 0.65rem; }
+          .member-card-footer { padding: 7px 9px; }
+          .member-card-contrib-value { font-size: 0.72rem; }
         }
       `}</style>
     </Layout>
