@@ -4,7 +4,7 @@ import { useGate } from '../lib/gate';
 import { useRouter } from 'next/router';
 import { useToast } from '../components/Toast';
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
+const API = '/api';
 
 const EMPTY = { nickname: '', phone: '', whatsapp: '', email: '', location: '', occupation: '', birthday: '' };
 
@@ -27,14 +27,14 @@ export default function ProfilePage() {
     if (!cleared || !member) { router.replace('/home'); return; }
     const tok = sessionStorage.getItem('idagha_member_token') || '';
     // Public member list also has profile data — use as fallback
-    fetch(`${BACKEND}/members/${member._id}/profile`, { headers: { 'x-member-token': tok } })
+    fetch(`${API}/members/${member._id}/profile`, { headers: { 'x-member-token': tok } })
       .then(async r => {
         if (!r.ok) throw new Error(`${r.status}`);
         return r.json();
       })
       .catch(() =>
         // Token may be expired/missing — fall back to public member endpoint
-        fetch(`${BACKEND}/members`).then(r => r.json()).then((list: any[]) =>
+        fetch(`${API}/members`).then(r => r.json()).then((list: any[]) =>
           list.find((m: any) => m._id === member._id || m._id?.toString() === member._id)
         )
       )
@@ -81,7 +81,7 @@ export default function ProfilePage() {
     setSaving(true);
     const tok = sessionStorage.getItem('idagha_member_token') || '';
     try {
-      const res = await fetch(`${BACKEND}/members/${member._id}/self-update`, {
+      const res = await fetch(`${API}/members/${member._id}/self-update`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', 'x-member-token': tok },
         body: JSON.stringify(form),
@@ -91,7 +91,7 @@ export default function ProfilePage() {
       if (photo) {
         const fd = new FormData();
         fd.append('photo', photo);
-        const pr = await fetch(`${BACKEND}/members/${member._id}/photo`, {
+        const pr = await fetch(`${API}/members/${member._id}/photo`, {
           method: 'POST',
           headers: { 'x-member-token': tok },
           body: fd,
