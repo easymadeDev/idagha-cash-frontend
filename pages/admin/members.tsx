@@ -233,10 +233,10 @@ export default function AdminMembers() {
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {pending.map((m: any) => (
                 <div key={m._id} style={{
-                  display: 'flex', alignItems: 'center', gap: 12,
+                  display: 'flex', alignItems: 'center', gap: 10,
                   padding: '12px 14px', background: 'var(--bg-card)',
                   border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
-                  flexWrap: 'wrap', gap: 10,
+                  flexWrap: 'wrap',
                 }}>
                   <div style={{
                     width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
