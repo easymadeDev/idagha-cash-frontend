@@ -116,6 +116,7 @@ export default function AdminSettings() {
 
   const [waStatus, setWaStatus] = useState<{ ready: boolean; hasQr: boolean } | null>(null);
   const [waQr, setWaQr] = useState<string | null>(null);
+  const [waResetting, setWaResetting] = useState(false);
 
   useEffect(() => {
     const check = () => {
@@ -376,7 +377,7 @@ export default function AdminSettings() {
                 ) : waStatus.hasQr ? (
                   <span style={badgeStyle('#fb923c', 'rgba(251,146,60,0.12)')}>SCAN QR</span>
                 ) : (
-                  <span style={badgeStyle('var(--text-3)', 'rgba(155,155,155,0.12)')}>DISABLED</span>
+                  <span style={badgeStyle('var(--text-3)', 'rgba(155,155,155,0.12)')}>CONNECTING...</span>
                 )}
               </div>
               <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 1 }}>
@@ -384,9 +385,30 @@ export default function AdminSettings() {
                   ? 'Linked and ready to send messages.'
                   : waStatus?.hasQr
                   ? 'Scan the QR code below to connect.'
-                  : 'WhatsApp messaging is currently disabled on the server. Email reminders are active.'}
+                  : 'Establishing connection — QR will appear here shortly.'}
               </p>
             </div>
+            {waStatus && (
+              <button
+                className="btn btn-ghost btn-sm"
+                style={{ fontSize: '0.72rem', padding: '4px 10px', flexShrink: 0, color: 'var(--red)', opacity: waResetting ? 0.6 : 1 }}
+                disabled={waResetting}
+                onClick={async () => {
+                  if (!confirm('Clear the WhatsApp session and get a fresh QR code?')) return;
+                  setWaResetting(true);
+                  try {
+                    await api.delete('/whatsapp/logout');
+                    toast('Session cleared — a new QR will appear shortly.', 'success');
+                  } catch {
+                    toast('Failed to reset session.', 'error');
+                  } finally {
+                    setWaResetting(false);
+                  }
+                }}
+              >
+                {waResetting ? 'Resetting...' : 'Reset Session'}
+              </button>
+            )}
           </div>
 
           {waStatus?.hasQr && waQr && (
