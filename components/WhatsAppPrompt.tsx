@@ -19,11 +19,12 @@ export default function WhatsAppPrompt() {
 
     const check = async () => {
       try {
-        const token = sessionStorage.getItem('idagha_member_token') || localStorage.getItem('idagha_token') || '';
-        const res = await fetch(`/api/members/${member._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        if (!res.ok) return;
+        const res = await fetch(`/api/members/${member._id}/profile`);
+        if (!res.ok) {
+          // Can't verify — show popup only if session says not subscribed
+          if (!member.whatsappSubscribed) setVisible(true);
+          return;
+        }
         const data = await res.json();
         if (data?.whatsappSubscribed) {
           // Already subscribed — update session silently, never show popup
@@ -72,10 +73,7 @@ export default function WhatsAppPrompt() {
     if (!member) return;
     pollRef.current = setInterval(async () => {
       try {
-        const token = sessionStorage.getItem('idagha_member_token') || localStorage.getItem('idagha_token') || '';
-        const res = await fetch(`/api/members/${member._id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await fetch(`/api/members/${member._id}/profile`);
         if (!res.ok) return;
         const data = await res.json();
         if (data?.whatsappSubscribed) {
