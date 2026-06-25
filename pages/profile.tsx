@@ -26,9 +26,20 @@ export default function ProfilePage() {
     if (!ready) return;
     if (!cleared || !member) { router.replace('/home'); return; }
     const tok = sessionStorage.getItem('idagha_member_token') || '';
+    // Public member list also has profile data — use as fallback
     fetch(`${BACKEND}/members/${member._id}/profile`, { headers: { 'x-member-token': tok } })
-      .then(r => r.json())
-      .then(data => {
+      .then(async r => {
+        if (!r.ok) throw new Error(`${r.status}`);
+        return r.json();
+      })
+      .catch(() =>
+        // Token may be expired/missing — fall back to public member endpoint
+        fetch(`${BACKEND}/members`).then(r => r.json()).then((list: any[]) =>
+          list.find((m: any) => m._id === member._id || m._id?.toString() === member._id)
+        )
+      )
+      .then((data: any) => {
+        if (!data) { setLoaded(true); return; }
         const filled = {
           nickname:   data.nickname   || '',
           phone:      data.phone      || '',
