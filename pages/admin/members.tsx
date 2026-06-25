@@ -16,6 +16,19 @@ const EMPTY = {
 
 const POSITIONS = ['Member', 'Secretary', 'President', 'Vice President', 'Treasurer', 'PRO', 'Welfare Officer', 'Financial Secretary'];
 
+const AVATAR_COLORS = [
+  ['rgba(34,197,94,0.15)', 'var(--green-400)'],
+  ['rgba(96,165,250,0.15)', 'var(--blue)'],
+  ['rgba(251,191,36,0.15)', 'var(--yellow)'],
+  ['rgba(248,113,113,0.15)', 'var(--red)'],
+  ['rgba(167,139,250,0.15)', '#c4b5fd'],
+  ['rgba(251,146,60,0.15)', '#fb923c'],
+];
+
+function getInitials(name: string) {
+  return name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase();
+}
+
 export default function AdminMembers() {
   const { toast } = useToast();
   const { data: members, isLoading } = useSWR('/api/members/admin/all', fetcher);
@@ -35,6 +48,8 @@ export default function AdminMembers() {
   const [notifyMessage, setNotifyMessage] = useState('');
   const [notifySending, setNotifySending] = useState(false);
   const [notifyDone, setNotifyDone] = useState<{ sent: boolean; error?: string } | null>(null);
+  const [search, setSearch] = useState('');
+  const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
   const PROFILE_URL = 'https://idagha2018alumni-beta.vercel.app/profile';
@@ -94,9 +109,18 @@ export default function AdminMembers() {
 
   const allList = Array.isArray(members) ? members : [];
   const pending = allList.filter((m: any) => m.status === 'pending');
-  const list = allList.filter((m: any) => m.status !== 'pending');
+  const approved = allList.filter((m: any) => m.status !== 'pending');
 
-  const f = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
+  const filtered = search.trim()
+    ? approved.filter((m: any) =>
+        m.name.toLowerCase().includes(search.toLowerCase()) ||
+        (m.nickname || '').toLowerCase().includes(search.toLowerCase()) ||
+        (m.location || '').toLowerCase().includes(search.toLowerCase()) ||
+        (m.phone || '').includes(search)
+      )
+    : approved;
+
+  const f = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) =>
     setForm({ ...form, [field]: e.target.value });
 
   const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -132,7 +156,6 @@ export default function AdminMembers() {
       } else {
         saved = (await api.post('/members', form)).data;
       }
-      // Upload photo if a new one was selected
       if (photo && saved?._id) {
         const fd = new FormData();
         fd.append('photo', photo);
@@ -143,45 +166,30 @@ export default function AdminMembers() {
       mutate('/api/members/admin/all');
       mutate('/api/members');
       setModal(false);
+      toast(editing ? 'Member updated.' : 'Member added.', 'success');
     } catch (err: any) {
       toast(err.response?.data?.message || 'Failed to save. Check your connection and try again.', 'error');
     } finally { setSaving(false); }
   };
 
   const remove = async (id: string) => {
-    try { await api.delete(`/members/${id}`); mutate('/api/members/admin/all'); mutate('/api/members'); }
-    catch { /* handled */ }
+    try { await api.delete(`/members/${id}`); mutate('/api/members/admin/all'); mutate('/api/members'); toast('Member deleted.', 'success'); }
+    catch { toast('Failed to delete.', 'error'); }
     setDeleteId(null);
   };
 
   const toggleActive = async (m: any) => {
     try { await api.put(`/members/${m._id}`, { isActive: !m.isActive }); mutate('/api/members/admin/all'); }
-    catch { /* handled */ }
+    catch { toast('Failed to update status.', 'error'); }
   };
 
   const approve = async (m: any) => {
-    try { await api.put(`/members/${m._id}/approve`); mutate('/api/members/admin/all'); mutate('/api/members'); }
-    catch { /* handled */ }
-  };
-
-  const sendWelcomeAll = async () => {
-    setWelcomeSending(true);
-    try {
-      const res = await api.post('/members/welcome/all');
-      setWelcomeResult(res.data);
-    } catch (err: any) {
-      toast(err.response?.data?.message || 'Failed to send welcome messages.', 'error');
-      setWelcomeModal(false);
-    } finally {
-      setWelcomeSending(false);
-    }
+    try { await api.put(`/members/${m._id}/approve`); mutate('/api/members/admin/all'); mutate('/api/members'); toast('Member approved.', 'success'); }
+    catch { toast('Failed to approve.', 'error'); }
   };
 
   const sendWelcomeSelected = async () => {
-    if (selectedMembers.length === 0) {
-      toast('Please select at least one member.', 'error');
-      return;
-    }
+    if (selectedMembers.length === 0) { toast('Please select at least one member.', 'error'); return; }
     setWelcomeSending(true);
     try {
       const res = await api.post('/members/welcome/selected', { memberIds: selectedMembers });
@@ -189,64 +197,67 @@ export default function AdminMembers() {
     } catch (err: any) {
       toast(err.response?.data?.message || 'Failed to send welcome messages.', 'error');
       setWelcomeModal(false);
-    } finally {
-      setWelcomeSending(false);
-    }
+    } finally { setWelcomeSending(false); }
   };
 
   return (
     <AdminLayout>
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 28, gap: 16, flexWrap: 'wrap' }}>
+        {/* Header */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, gap: 14, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-d)', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Members</h1>
-            <p style={{ color: 'var(--text-3)', fontSize: '0.875rem', marginTop: 4 }}>Manage registered group members visible on the public directory.</p>
+            <h1 style={{ fontFamily: 'var(--font-d)', fontSize: 'clamp(1.3rem,4vw,1.6rem)', fontWeight: 800, letterSpacing: '-0.03em', margin: 0 }}>Members</h1>
+            <p style={{ color: 'var(--text-3)', fontSize: '0.82rem', marginTop: 4 }}>
+              {approved.length} registered · {pending.length > 0 ? `${pending.length} pending approval` : 'all approved'}
+            </p>
           </div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            <button className="btn btn-ghost" onClick={() => { setWelcomeResult(null); setWelcomeModal(true); }}>
-              <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-              Send Welcome
+            <button className="btn btn-ghost btn-sm" onClick={() => { setWelcomeResult(null); setWelcomeModal(true); }}>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Welcome
             </button>
-            <button className="btn btn-primary" onClick={openAdd}>+ Add Member</button>
+            <button className="btn btn-primary btn-sm" onClick={openAdd}>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
+              Add Member
+            </button>
           </div>
         </div>
 
         {/* Pending registrations */}
         {pending.length > 0 && (
-          <div style={{ marginBottom: 28, padding: '20px 24px', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.25)', borderRadius: 'var(--radius)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16 }}>
-              <span className="badge badge-yellow"><span className="badge-dot" />{pending.length} Pending Approval</span>
-              <span style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>Self-registered — review and approve or delete</span>
+          <div style={{ marginBottom: 24, padding: '16px 18px', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.25)', borderRadius: 'var(--radius)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+              <span className="badge badge-yellow"><span className="badge-dot" />{pending.length} Pending</span>
+              <span style={{ fontSize: '0.78rem', color: 'var(--text-3)' }}>Self-registered — review &amp; approve</span>
             </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {pending.map((m: any) => (
-                <div key={m._id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', background: 'var(--grad-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', flexWrap: 'wrap' }}>
-                  {/* Photo or initials */}
+                <div key={m._id} style={{
+                  display: 'flex', alignItems: 'center', gap: 12,
+                  padding: '12px 14px', background: 'var(--bg-card)',
+                  border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)',
+                  flexWrap: 'wrap', gap: 10,
+                }}>
                   <div style={{
-                    width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
+                    width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
                     overflow: 'hidden', background: 'rgba(34,197,94,0.1)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     border: '1px solid var(--border-mid)',
                   }}>
-                    {m.photo ? (
-                      <img src={m.photo} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <span style={{ fontSize: '0.85rem', fontWeight: 800, color: 'var(--green-400)' }}>
-                        {m.name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()}
-                      </span>
-                    )}
+                    {m.photo
+                      ? <img src={m.photo} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--green-400)' }}>{getInitials(m.name)}</span>}
                   </div>
-                  <div style={{ flex: 1, minWidth: 200 }}>
-                    <div style={{ fontWeight: 700 }}>{m.name}</div>
-                    <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginTop: 3 }}>
+                  <div style={{ flex: 1, minWidth: 140 }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{m.name}</div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--text-3)', marginTop: 2 }}>
                       {[m.gender, m.location, m.phone].filter(Boolean).join(' · ')}
                     </div>
-                    {m.occupation && <div style={{ fontSize: '0.78rem', color: 'var(--text-3)' }}>{m.occupation}</div>}
-                    {m.email && <div style={{ fontSize: '0.78rem', color: 'var(--blue)' }}>{m.email}</div>}
+                    {m.email && <div style={{ fontSize: '0.72rem', color: 'var(--blue)', marginTop: 1 }}>{m.email}</div>}
                   </div>
-                  <div style={{ display: 'flex', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
                     <button className="btn btn-primary btn-sm" onClick={() => approve(m)}>
-                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       Approve
                     </button>
                     <button className="btn btn-ghost btn-sm" onClick={() => openEdit(m)}>Edit</button>
@@ -258,113 +269,157 @@ export default function AdminMembers() {
           </div>
         )}
 
-        <div className="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th style={{ width: 32 }}>#</th>
-                <th style={{ width: 48 }}></th>
-                <th>Member</th>
-                <th>Phone</th>
-                <th>Location</th>
-                <th>Position</th>
-                <th>Status</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {isLoading ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>Loading…</td></tr>
-              ) : list.length === 0 ? (
-                <tr><td colSpan={8} style={{ textAlign: 'center', padding: 40, color: 'var(--text-3)' }}>No members yet. Add one above.</td></tr>
-              ) : list.map((m: any, i: number) => (
-                <tr key={m._id} style={{ opacity: m.isActive ? 1 : 0.5 }}>
-                  <td className="hide-mobile" style={{ color: 'var(--text-3)', fontSize: '0.8rem' }}>{i + 1}</td>
-                  <td className="hide-mobile" style={{ paddingRight: 0 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: '50%', overflow: 'hidden', background: 'rgba(34,197,94,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid var(--border)', flexShrink: 0 }}>
+        {/* Search */}
+        <div style={{ marginBottom: 16 }}>
+          <div className="search-box">
+            <svg className="search-box-icon" width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" strokeLinecap="round"/>
+            </svg>
+            <input
+              placeholder="Search by name, nickname, location, phone…"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+        </div>
+
+        {/* Member Cards Grid */}
+        {isLoading ? (
+          <div className="admin-members-grid">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="skeleton" style={{ height: 160, borderRadius: 'var(--radius)' }} />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="card" style={{ textAlign: 'center', padding: '48px 24px', color: 'var(--text-3)' }}>
+            {approved.length === 0 ? 'No members yet. Add one above.' : 'No members match your search.'}
+          </div>
+        ) : (
+          <div className="admin-members-grid">
+            {filtered.map((m: any, i: number) => {
+              const [avatarBg, avatarFg] = AVATAR_COLORS[i % AVATAR_COLORS.length];
+              const isExpanded = expandedCard === m._id;
+              return (
+                <div key={m._id} className="admin-member-card" style={{ opacity: m.isActive ? 1 : 0.6 }}>
+                  {/* Top: avatar + name + status */}
+                  <div className="admin-member-card-top">
+                    <div style={{
+                      width: 44, height: 44, borderRadius: 11, flexShrink: 0,
+                      background: m.photo ? 'transparent' : avatarBg,
+                      color: avatarFg, overflow: 'hidden',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: '0.85rem', fontWeight: 800,
+                      border: m.photo ? '2px solid var(--border-mid)' : 'none',
+                    }}>
                       {m.photo
                         ? <img src={m.photo} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        : <span style={{ fontSize: '0.7rem', fontWeight: 800, color: 'var(--green-400)' }}>{m.name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()}</span>}
+                        : getInitials(m.name)}
                     </div>
-                  </td>
-                  <td data-label="Member">
-                    <div style={{ fontWeight: 700 }}>{m.name}</div>
-                    <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 2 }}>
-                      {[m.nickname && `"${m.nickname}"`, m.gender].filter(Boolean).join(' · ')}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.88rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {m.name}
+                      </div>
+                      {m.nickname && (
+                        <div style={{ fontSize: '0.72rem', color: avatarFg, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          "{m.nickname}"
+                        </div>
+                      )}
+                      <div style={{ display: 'flex', gap: 4, flexWrap: 'wrap', marginTop: 3 }}>
+                        {m.position
+                          ? <span className="badge badge-green" style={{ fontSize: '0.6rem', padding: '1px 6px' }}>{m.position}</span>
+                          : <span className="badge" style={{ fontSize: '0.6rem', padding: '1px 6px', background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)' }}>Member</span>}
+                        <span className={`badge ${m.isActive ? 'badge-green' : ''}`} style={!m.isActive ? { fontSize: '0.6rem', padding: '1px 6px', background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)' } : { fontSize: '0.6rem', padding: '1px 6px' }}>
+                          {m.isActive ? 'Active' : 'Inactive'}
+                        </span>
+                      </div>
                     </div>
-                  </td>
-                  <td data-label="Phone" style={{ color: 'var(--text-3)', fontSize: '0.85rem' }}>{m.phone || '—'}</td>
-                  <td data-label="Location">
-                    <div style={{ fontSize: '0.85rem' }}>{m.location || '—'}</div>
-                    {m.occupation && <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 1 }}>{m.occupation}</div>}
-                  </td>
-                  <td data-label="Position">
-                    {m.position
-                      ? <span className="badge badge-green">{m.position}</span>
-                      : <span className="badge" style={{ background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)' }}>Member</span>}
-                  </td>
-                  <td data-label="Status">
-                    <span className={`badge ${m.isActive ? 'badge-green' : ''}`} style={!m.isActive ? { background: 'rgba(107,114,128,0.1)', color: 'var(--text-3)', borderColor: 'var(--border)' } : {}}>
-                      {m.isActive ? 'Active' : 'Inactive'}
-                    </span>
-                  </td>
-                  <td className="actions-cell">
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap' }}>
-                      <button className="btn btn-ghost btn-sm" onClick={() => openEdit(m)}>Edit</button>
-                      <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(m)}>{m.isActive ? 'Deactivate' : 'Activate'}</button>
-                      <button
-                        className="btn btn-sm"
-                        style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' }}
-                        onClick={() => openNotify(m)}
-                        title="Send notification email"
-                      >
-                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        Notify
-                      </button>
-                      <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(m._id)}>Delete</button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+                  </div>
+
+                  {/* Details */}
+                  <div className="admin-member-card-details">
+                    {m.phone && (
+                      <div className="admin-member-detail-row">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}><path d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" strokeLinecap="round"/></svg>
+                        <span>{m.phone}</span>
+                      </div>
+                    )}
+                    {m.location && (
+                      <div className="admin-member-detail-row">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeLinecap="round"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round"/></svg>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.location}</span>
+                      </div>
+                    )}
+                    {m.occupation && (
+                      <div className="admin-member-detail-row">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}><path d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round"/></svg>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{m.occupation}</span>
+                      </div>
+                    )}
+                    {isExpanded && m.email && (
+                      <div className="admin-member-detail-row">
+                        <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round"/></svg>
+                        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', color: 'var(--blue)' }}>{m.email}</span>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  <div className="admin-member-card-actions">
+                    <button className="btn btn-ghost btn-sm" style={{ flex: 1 }} onClick={() => openEdit(m)}>Edit</button>
+                    <button
+                      className="btn btn-sm"
+                      style={{ flex: 1, background: 'rgba(59,130,246,0.1)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.2)' }}
+                      onClick={() => openNotify(m)}
+                    >
+                      Notify
+                    </button>
+                    <button
+                      className="btn btn-sm"
+                      style={{ flex: 1, background: m.isActive ? 'rgba(107,114,128,0.1)' : 'rgba(34,197,94,0.1)', color: m.isActive ? 'var(--text-3)' : 'var(--green-400)', border: '1px solid var(--border)' }}
+                      onClick={() => toggleActive(m)}
+                    >
+                      {m.isActive ? 'Deactivate' : 'Activate'}
+                    </button>
+                    <button className="btn btn-danger btn-sm" style={{ flexShrink: 0 }} onClick={() => setDeleteId(m._id)}>
+                      <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <div style={{ marginTop: 12, fontSize: '0.78rem', color: 'var(--text-3)', textAlign: 'right' }}>
+          {filtered.length} of {approved.length} members
         </div>
       </div>
 
       {/* Add/Edit Modal */}
       {modal && (
         <div className="modal-overlay" onClick={() => setModal(false)}>
-          <div className="modal" style={{ maxWidth: 580 }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal" style={{ maxWidth: 560 }} onClick={(e) => e.stopPropagation()}>
             <p className="modal-title">{editing ? 'Edit Member' : 'Add New Member'}</p>
             <form onSubmit={save}>
-              {/* Photo upload */}
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 24 }}>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 20 }}>
                 <div style={{ textAlign: 'center' }}>
                   <button
-                    type="button"
-                    onClick={() => fileRef.current?.click()}
+                    type="button" onClick={() => fileRef.current?.click()}
                     style={{
-                      width: 90, height: 90, borderRadius: '50%',
+                      width: 80, height: 80, borderRadius: '50%',
                       background: photoPreview ? 'transparent' : 'rgba(34,197,94,0.06)',
                       border: `2px dashed ${photoPreview ? 'rgba(34,197,94,0.5)' : 'rgba(34,197,94,0.3)'}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      cursor: 'pointer', overflow: 'hidden', padding: 0,
-                      transition: 'all 0.2s var(--ease)',
+                      cursor: 'pointer', overflow: 'hidden', padding: 0, transition: 'all 0.2s',
                     }}
                   >
-                    {photoPreview ? (
-                      <img src={photoPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                    ) : (
-                      <svg width="26" height="26" fill="none" stroke="var(--green-400)" strokeWidth="1.5" viewBox="0 0 24 24">
-                        <path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round"/>
-                      </svg>
-                    )}
+                    {photoPreview
+                      ? <img src={photoPreview} alt="preview" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      : <svg width="24" height="24" fill="none" stroke="var(--green-400)" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" strokeLinecap="round"/></svg>}
                   </button>
                   <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handlePhoto} />
-                  <div style={{ marginTop: 6, fontSize: '0.72rem', color: 'var(--text-3)' }}>
-                    {photoPreview ? (
-                      <span style={{ color: 'var(--green-400)', cursor: 'pointer' }} onClick={() => fileRef.current?.click()}>Change photo</span>
-                    ) : 'Click to upload photo'}
+                  <div style={{ marginTop: 5, fontSize: '0.7rem', color: 'var(--text-3)' }}>
+                    {photoPreview ? <span style={{ color: 'var(--green-400)', cursor: 'pointer' }} onClick={() => fileRef.current?.click()}>Change photo</span> : 'Click to upload'}
                   </div>
                 </div>
               </div>
@@ -374,12 +429,10 @@ export default function AdminMembers() {
                   <label className="form-label">Full Name *</label>
                   <input className="form-input" value={form.name} onChange={f('name')} required placeholder="e.g. Chukwuemeka Obi" />
                 </div>
-
                 <div className="form-group">
-                  <label className="form-label">Nickname in School</label>
+                  <label className="form-label">Nickname</label>
                   <input className="form-input" value={form.nickname} onChange={f('nickname')} placeholder="e.g. Ice" />
                 </div>
-
                 <div className="form-group">
                   <label className="form-label">Gender</label>
                   <select className="form-select" value={form.gender} onChange={f('gender')}>
@@ -388,40 +441,33 @@ export default function AdminMembers() {
                     <option value="Female">Female</option>
                   </select>
                 </div>
-
                 <div className="form-group">
                   <label className="form-label">Phone Number</label>
                   <input className="form-input" value={form.phone} onChange={f('phone')} placeholder="e.g. 08012345678" />
                 </div>
-
                 <div className="form-group">
-                  <label className="form-label">WhatsApp Number</label>
+                  <label className="form-label">WhatsApp</label>
                   <input className="form-input" value={form.whatsapp} onChange={f('whatsapp')} placeholder="e.g. 08012345678" />
                 </div>
-
                 <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                   <label className="form-label">Email Address</label>
                   <input className="form-input" type="email" value={form.email} onChange={f('email')} placeholder="e.g. emeka@email.com" />
                 </div>
-
                 <div className="form-group">
-                  <label className="form-label">Current State / City</label>
+                  <label className="form-label">State / City</label>
                   <input className="form-input" value={form.location} onChange={f('location')} placeholder="e.g. Lagos" />
                 </div>
-
                 <div className="form-group">
-                  <label className="form-label">Occupation / Business</label>
-                  <input className="form-input" value={form.occupation} onChange={f('occupation')} placeholder="e.g. Software Engineer" />
+                  <label className="form-label">Occupation</label>
+                  <input className="form-input" value={form.occupation} onChange={f('occupation')} placeholder="e.g. Engineer" />
                 </div>
-
                 <div className="form-group">
-                  <label className="form-label">Member Position</label>
+                  <label className="form-label">Position</label>
                   <select className="form-select" value={form.position} onChange={f('position')}>
                     <option value="">Select position</option>
                     {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
-
                 <div className="form-group">
                   <label className="form-label">Birthday</label>
                   <input className="form-input" type="date" value={form.birthday} onChange={f('birthday')} />
@@ -442,7 +488,9 @@ export default function AdminMembers() {
         <div className="modal-overlay" onClick={() => setDeleteId(null)}>
           <div className="modal" style={{ maxWidth: 360 }} onClick={(e) => e.stopPropagation()}>
             <p className="modal-title">Delete Member?</p>
-            <p style={{ color: 'var(--text-3)', marginBottom: 20, fontSize: '0.9rem' }}>This will permanently remove the member from the public directory. This action cannot be undone.</p>
+            <p style={{ color: 'var(--text-3)', marginBottom: 20, fontSize: '0.9rem' }}>
+              This will permanently remove the member. This cannot be undone.
+            </p>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={() => setDeleteId(null)}>Cancel</button>
               <button className="btn btn-danger" onClick={() => remove(deleteId)}>Delete</button>
@@ -454,95 +502,59 @@ export default function AdminMembers() {
       {/* Send Welcome Modal */}
       {welcomeModal && (
         <div className="modal-overlay" onClick={() => { if (!welcomeSending) { setWelcomeModal(false); setWelcomeResult(null); setSelectedMembers([]); } }}>
-          <div className="modal" style={{ maxWidth: 520, maxHeight: '80vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+          <div className="modal" style={{ maxWidth: 480 }} onClick={(e) => e.stopPropagation()}>
             <p className="modal-title">Send Welcome Messages</p>
-
             {!welcomeResult ? (
               <>
-                <p style={{ color: 'var(--text-3)', marginBottom: 16, fontSize: '0.9rem' }}>
+                <p style={{ color: 'var(--text-3)', marginBottom: 14, fontSize: '0.875rem' }}>
                   Select members to send <strong>welcome email + WhatsApp</strong> to:
                 </p>
-
-                <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => setSelectedMembers(list.map((m: any) => m._id))}
-                  >
-                    Select All
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm"
-                    onClick={() => setSelectedMembers([])}
-                  >
-                    Clear
-                  </button>
-                  <span style={{ fontSize: '0.85rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }}>
-                    {selectedMembers.length}/{list.length} selected
+                <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+                  <button className="btn btn-ghost btn-sm" onClick={() => setSelectedMembers(approved.map((m: any) => m._id))}>Select All</button>
+                  <button className="btn btn-ghost btn-sm" onClick={() => setSelectedMembers([])}>Clear</button>
+                  <span style={{ fontSize: '0.82rem', color: 'var(--text-3)', display: 'flex', alignItems: 'center' }}>
+                    {selectedMembers.length}/{approved.length} selected
                   </span>
                 </div>
-
-                <div style={{ maxHeight: 300, overflow: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: 16, background: 'var(--bg-base)' }}>
-                  {list.map((m: any) => (
-                    <div key={m._id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
+                <div style={{ maxHeight: 260, overflowY: 'auto', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', marginBottom: 14, background: 'var(--bg-base)' }}>
+                  {approved.map((m: any) => (
+                    <div key={m._id}
+                      style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', borderBottom: '1px solid var(--border)', cursor: 'pointer' }}
                       onClick={() => setSelectedMembers(selectedMembers.includes(m._id) ? selectedMembers.filter(id => id !== m._id) : [...selectedMembers, m._id])}
                     >
-                      <input
-                        type="checkbox"
-                        checked={selectedMembers.includes(m._id)}
-                        onChange={() => {}}
-                        style={{ cursor: 'pointer' }}
-                      />
+                      <input type="checkbox" checked={selectedMembers.includes(m._id)} onChange={() => {}} style={{ cursor: 'pointer' }} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: 600, fontSize: '0.9rem' }}>{m.name}</div>
-                        <div style={{ fontSize: '0.75rem', color: 'var(--text-3)' }}>
-                          {[m.email && '✉️ Email', m.phone && '📱 Phone'].filter(Boolean).join(' · ')}
+                        <div style={{ fontWeight: 600, fontSize: '0.875rem' }}>{m.name}</div>
+                        <div style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>
+                          {[m.email && '✉️', m.phone && '📱'].filter(Boolean).join(' ')}
+                          {!m.email && !m.phone && 'No contact info'}
                         </div>
                       </div>
                     </div>
                   ))}
                 </div>
-
-                <div style={{ padding: '12px 14px', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.25)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--yellow)', marginBottom: 16 }}>
-                  WhatsApp messages will only send if WhatsApp is connected.
+                <div style={{ padding: '10px 14px', background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.25)', borderRadius: 'var(--radius-sm)', fontSize: '0.79rem', color: 'var(--yellow)', marginBottom: 14 }}>
+                  WhatsApp messages only send if WhatsApp is connected.
                 </div>
-
                 <div className="modal-actions">
                   <button className="btn btn-ghost" onClick={() => { setWelcomeModal(false); setSelectedMembers([]); }} disabled={welcomeSending}>Cancel</button>
                   <button className="btn btn-primary" onClick={sendWelcomeSelected} disabled={welcomeSending || selectedMembers.length === 0}>
-                    {welcomeSending ? (
-                      <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
-                    ) : `Send to ${selectedMembers.length}`}
+                    {welcomeSending
+                      ? <><div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
+                      : `Send to ${selectedMembers.length}`}
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <div className="alert alert-success" style={{ marginBottom: 16 }}>Welcome messages sent successfully!</div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                    <span style={{ color: 'var(--text-3)' }}>Total members</span>
-                    <strong>{welcomeResult.total}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                    <span style={{ color: 'var(--text-3)' }}>Emails sent</span>
-                    <strong style={{ color: 'var(--green-400)' }}>{welcomeResult.emailSent}</strong>
-                  </div>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
-                    <span style={{ color: 'var(--text-3)' }}>WhatsApp sent</span>
-                    <strong style={{ color: 'var(--green-400)' }}>{welcomeResult.whatsappSent}</strong>
-                  </div>
-                  {welcomeResult.noEmail?.length > 0 && (
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: 4 }}>
-                      No email: {welcomeResult.noEmail.join(', ')}
+                <div className="alert alert-success" style={{ marginBottom: 14 }}>Welcome messages sent!</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+                  {[['Total', welcomeResult.total, ''], ['Emails sent', welcomeResult.emailSent, 'var(--green-400)'], ['WhatsApp sent', welcomeResult.whatsappSent, 'var(--green-400)']].map(([label, val, color]) => (
+                    <div key={label as string} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                      <span style={{ color: 'var(--text-3)' }}>{label}</span>
+                      <strong style={{ color: (color as string) || 'var(--text-1)' }}>{val}</strong>
                     </div>
-                  )}
-                  {welcomeResult.noPhone?.length > 0 && (
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-3)' }}>
-                      No phone: {welcomeResult.noPhone.join(', ')}
-                    </div>
-                  )}
+                  ))}
                 </div>
                 <div className="modal-actions">
                   <button className="btn btn-primary" onClick={() => { setWelcomeModal(false); setWelcomeResult(null); setSelectedMembers([]); }}>Done</button>
@@ -556,155 +568,136 @@ export default function AdminMembers() {
       {/* Notify Member Modal */}
       {notifyTarget && (
         <div className="modal-overlay" onClick={() => { if (!notifySending) { setNotifyTarget(null); setNotifyDone(null); } }}>
-          <div
-            style={{
-              background: '#111827', border: '1px solid rgba(168,85,247,0.2)',
-              boxShadow: '0 24px 60px rgba(0,0,0,0.6)', borderRadius: 'var(--radius)',
-              padding: '28px 32px', width: '100%', maxWidth: 560,
-              margin: '24px auto', maxHeight: '90vh', overflow: 'auto',
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <div className="modal" style={{ maxWidth: 520 }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 18 }}>
               <div style={{
-                width: 44, height: 44, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
+                width: 40, height: 40, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
                 background: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center',
                 justifyContent: 'center', border: '1px solid rgba(59,130,246,0.3)',
               }}>
                 {notifyTarget.photo
                   ? <img src={notifyTarget.photo} alt={notifyTarget.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#93c5fd' }}>
-                    {notifyTarget.name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()}
-                  </span>}
+                  : <span style={{ fontSize: '0.78rem', fontWeight: 800, color: '#93c5fd' }}>{getInitials(notifyTarget.name)}</span>}
               </div>
               <div>
-                <p style={{ fontWeight: 700, fontSize: '1.05rem', color: '#f9fafb', margin: 0 }}>Notify {notifyTarget.name}</p>
-                <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: 0, marginTop: 2 }}>
-                  {notifyTarget.email ? `Will send to ${notifyTarget.email}` : 'No email address on record — cannot send'}
+                <p style={{ fontWeight: 700, fontSize: '1rem', margin: 0 }}>Notify {notifyTarget.name}</p>
+                <p style={{ fontSize: '0.76rem', color: 'var(--text-3)', margin: 0, marginTop: 2 }}>
+                  {notifyTarget.email ? `→ ${notifyTarget.email}` : '⚠️ No email address on record'}
                 </p>
               </div>
             </div>
 
             {!notifyDone ? (
               <>
-                {/* Quick templates */}
-                <div style={{ marginBottom: 18 }}>
-                  <p style={{ fontSize: '0.78rem', color: '#9ca3af', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Quick Templates</p>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+                <div style={{ marginBottom: 14 }}>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginBottom: 7, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Quick Templates</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
                     {NOTIFY_TEMPLATES.map((tpl) => (
-                      <button
-                        key={tpl.label}
-                        type="button"
-                        onClick={() => applyTemplate(tpl)}
-                        style={{
-                          padding: '5px 12px', borderRadius: 6, fontSize: '0.78rem',
-                          background: 'rgba(59,130,246,0.1)', color: '#93c5fd',
-                          border: '1px solid rgba(59,130,246,0.25)', cursor: 'pointer',
-                          transition: 'all 0.15s',
-                        }}
-                      >
+                      <button key={tpl.label} type="button" onClick={() => applyTemplate(tpl)}
+                        style={{ padding: '4px 10px', borderRadius: 6, fontSize: '0.74rem', background: 'rgba(59,130,246,0.1)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.22)', cursor: 'pointer' }}>
                         {tpl.label}
                       </button>
                     ))}
                   </div>
                 </div>
-
-                <div style={{ marginBottom: 14 }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#d1d5db', marginBottom: 6, fontWeight: 600 }}>Subject</label>
-                  <input
-                    value={notifySubject}
-                    onChange={(e) => setNotifySubject(e.target.value)}
-                    placeholder="Email subject line"
-                    style={{
-                      width: '100%', padding: '10px 14px', borderRadius: 8,
-                      background: '#1f2937', color: '#f9fafb',
-                      border: '1px solid rgba(255,255,255,0.12)', outline: 'none',
-                      fontSize: '0.9rem', boxSizing: 'border-box',
-                    }}
-                  />
+                <div className="form-group">
+                  <label className="form-label">Subject</label>
+                  <input className="form-input" value={notifySubject} onChange={(e) => setNotifySubject(e.target.value)} placeholder="Email subject line" />
                 </div>
-
-                <div style={{ marginBottom: 20 }}>
-                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#d1d5db', marginBottom: 6, fontWeight: 600 }}>Message</label>
-                  <textarea
-                    value={notifyMessage}
-                    onChange={(e) => setNotifyMessage(e.target.value)}
-                    placeholder="Write your message here…"
-                    rows={7}
-                    style={{
-                      width: '100%', padding: '10px 14px', borderRadius: 8,
-                      background: '#1f2937', color: '#f9fafb',
-                      border: '1px solid rgba(255,255,255,0.12)', outline: 'none',
-                      fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box',
-                      lineHeight: 1.6,
-                    }}
-                  />
+                <div className="form-group">
+                  <label className="form-label">Message</label>
+                  <textarea className="form-textarea" value={notifyMessage} onChange={(e) => setNotifyMessage(e.target.value)} placeholder="Write your message here…" rows={6} />
                 </div>
-
-                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-                  <button
-                    type="button"
-                    onClick={() => setNotifyTarget(null)}
-                    style={{ padding: '9px 18px', borderRadius: 8, background: 'transparent', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: '0.9rem' }}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={sendNotify}
-                    disabled={notifySending || !notifyTarget.email}
-                    style={{
-                      padding: '9px 22px', borderRadius: 8, fontSize: '0.9rem', fontWeight: 600,
-                      background: notifyTarget.email ? '#3b82f6' : '#374151',
-                      color: notifyTarget.email ? 'white' : '#6b7280',
-                      border: 'none', cursor: notifyTarget.email ? 'pointer' : 'not-allowed',
-                      display: 'flex', alignItems: 'center', gap: 8,
-                    }}
-                  >
-                    {notifySending ? (
-                      <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
-                    ) : (
-                      <>
-                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                        Send Email
-                      </>
-                    )}
+                <div className="modal-actions">
+                  <button className="btn btn-ghost" onClick={() => setNotifyTarget(null)}>Cancel</button>
+                  <button className="btn btn-primary" onClick={sendNotify} disabled={notifySending || !notifyTarget.email}>
+                    {notifySending
+                      ? <><div style={{ width: 13, height: 13, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
+                      : <>
+                          <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          Send Email
+                        </>}
                   </button>
                 </div>
               </>
             ) : (
-              <div style={{ textAlign: 'center', padding: '24px 0' }}>
+              <div style={{ textAlign: 'center', padding: '20px 0' }}>
                 {notifyDone.sent ? (
                   <>
-                    <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(34,197,94,0.1)', border: '2px solid rgba(34,197,94,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                      <svg width="26" height="26" fill="none" stroke="#4ade80" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(34,197,94,0.1)', border: '2px solid rgba(34,197,94,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                      <svg width="24" height="24" fill="none" stroke="var(--green-400)" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
-                    <p style={{ color: '#4ade80', fontWeight: 700, fontSize: '1.05rem', margin: '0 0 6px' }}>Email sent!</p>
-                    <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Notification delivered to {notifyTarget.email}</p>
+                    <p style={{ color: 'var(--green-400)', fontWeight: 700, margin: '0 0 5px' }}>Email sent!</p>
+                    <p style={{ color: 'var(--text-3)', fontSize: '0.82rem', margin: 0 }}>Delivered to {notifyTarget.email}</p>
                   </>
                 ) : (
                   <>
-                    <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '2px solid rgba(239,68,68,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-                      <svg width="26" height="26" fill="none" stroke="#f87171" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(248,113,113,0.1)', border: '2px solid rgba(248,113,113,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                      <svg width="24" height="24" fill="none" stroke="var(--red)" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
-                    <p style={{ color: '#f87171', fontWeight: 700, fontSize: '1.05rem', margin: '0 0 6px' }}>Failed to send</p>
-                    <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>{notifyDone.error || 'Unknown error'}</p>
+                    <p style={{ color: 'var(--red)', fontWeight: 700, margin: '0 0 5px' }}>Failed to send</p>
+                    <p style={{ color: 'var(--text-3)', fontSize: '0.82rem', margin: 0 }}>{notifyDone.error || 'Unknown error'}</p>
                   </>
                 )}
-                <button
-                  type="button"
-                  onClick={() => { setNotifyTarget(null); setNotifyDone(null); }}
-                  style={{ marginTop: 20, padding: '9px 24px', borderRadius: 8, background: '#374151', color: '#f9fafb', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
-                >
-                  Close
-                </button>
+                <button className="btn btn-ghost" style={{ marginTop: 18 }} onClick={() => { setNotifyTarget(null); setNotifyDone(null); }}>Close</button>
               </div>
             )}
           </div>
         </div>
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .admin-members-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+          gap: 12px;
+        }
+        .admin-member-card {
+          background: var(--grad-card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          overflow: hidden;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .admin-member-card:hover {
+          border-color: var(--border-mid);
+          box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+        .admin-member-card-top {
+          display: flex; gap: 11px; align-items: flex-start;
+          padding: 14px 14px 10px;
+        }
+        .admin-member-card-details {
+          padding: 0 14px 10px;
+          display: flex; flex-direction: column; gap: 4px;
+        }
+        .admin-member-detail-row {
+          display: flex; align-items: center; gap: 6px;
+          font-size: 0.76rem; color: var(--text-3);
+        }
+        .admin-member-card-actions {
+          display: flex; gap: 6px; align-items: center;
+          padding: 10px 12px;
+          border-top: 1px solid var(--border);
+          background: rgba(6,13,8,0.4);
+        }
+
+        @media (max-width: 768px) {
+          .admin-members-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+        }
+        @media (max-width: 480px) {
+          .admin-members-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+          .admin-member-card-top { padding: 11px 11px 8px; gap: 9px; }
+          .admin-member-card-details { padding: 0 11px 8px; }
+          .admin-member-card-actions { padding: 8px 10px; gap: 5px; }
+          .admin-member-card-actions .btn { font-size: 0.7rem; padding: 5px 8px; }
+        }
+        @media (max-width: 380px) {
+          .admin-members-grid { grid-template-columns: 1fr; }
+        }
+      `}</style>
     </AdminLayout>
   );
 }
