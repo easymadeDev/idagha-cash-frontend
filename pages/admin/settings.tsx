@@ -1,19 +1,58 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api from '../../lib/api';
 import { useToast } from '../../components/Toast';
 
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 const authFetcher = (url: string) =>
   fetch(url, { headers: { Authorization: `Bearer ${typeof window !== 'undefined' ? localStorage.getItem('idagha_token') || '' : ''}` } }).then((r) => r.json());
 
+function parseBirthdayMonthDay(birthday: string): { month: number; day: number } | null {
+  if (!birthday) return null;
+  const b = birthday.trim();
+  // YYYY-MM-DD or MM-DD
+  let m = b.match(/(?:\d{4}-)?(\d{1,2})-(\d{1,2})/);
+  if (m) return { month: parseInt(m[1]) - 1, day: parseInt(m[2]) };
+  // DD/MM or MM/DD — assume DD/MM (Nigerian convention)
+  m = b.match(/(\d{1,2})\/(\d{1,2})/);
+  if (m) return { month: parseInt(m[2]) - 1, day: parseInt(m[1]) };
+  return null;
+}
+
+function getUpcomingBirthdays(members: any[], windowDays = 30) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const results: { name: string; photo: string; daysUntil: number; month: number; day: number }[] = [];
+
+  for (const m of members) {
+    if (!m.birthday) continue;
+    const parsed = parseBirthdayMonthDay(m.birthday);
+    if (!parsed) continue;
+
+    const thisYear = new Date(today.getFullYear(), parsed.month, parsed.day);
+    thisYear.setHours(0, 0, 0, 0);
+    let diff = Math.round((thisYear.getTime() - today.getTime()) / 86400000);
+    if (diff < 0) {
+      const nextYear = new Date(today.getFullYear() + 1, parsed.month, parsed.day);
+      diff = Math.round((nextYear.getTime() - today.getTime()) / 86400000);
+    }
+    if (diff <= windowDays) {
+      results.push({ name: m.name, photo: m.photo, daysUntil: diff, month: parsed.month, day: parsed.day });
+    }
+  }
+
+  return results.sort((a, b) => a.daysUntil - b.daysUntil);
+}
+
 export default function AdminSettings() {
   const { toast } = useToast();
   const { data: bankAccounts, isLoading } = useSWR('/api/settings/bank-accounts', fetcher);
   const { data: cronSchedule } = useSWR('/api/settings/cron-schedule', authFetcher);
+  const { data: members } = useSWR('/api/members', fetcher);
 
   const [saving, setSaving] = useState(false);
   const [savingCron, setSavingCron] = useState(false);
@@ -69,6 +108,11 @@ export default function AdminSettings() {
   };
 
   const handleCronChange = (field: string, value: any) => setCronForm({ ...cronForm, [field]: value });
+
+  const upcomingBirthdays = useMemo(() => {
+    if (!Array.isArray(members)) return [];
+    return getUpcomingBirthdays(members);
+  }, [members]);
 
   return (
     <AdminLayout>
@@ -163,30 +207,68 @@ export default function AdminSettings() {
                 </div>
 
                 {cronForm.birthdayEnabled && (
-                  <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end' }}>
-                    <div style={{ flex: 1 }}>
-                      <label style={labelStyle}>Hour</label>
-                      <select className="form-input" style={inputStyle}
-                        value={parseCronTime(cronForm.birthdayTime).hour}
-                        onChange={(e) => handleCronChange('birthdayTime', buildCron(e.target.value, parseCronTime(cronForm.birthdayTime).minute))}>
-                        {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>)}
-                      </select>
+                  <>
+                    <div style={{ display: 'flex', gap: 10, alignItems: 'flex-end', marginBottom: 12 }}>
+                      <div style={{ flex: 1 }}>
+                        <label style={labelStyle}>Hour</label>
+                        <select className="form-input" style={inputStyle}
+                          value={parseCronTime(cronForm.birthdayTime).hour}
+                          onChange={(e) => handleCronChange('birthdayTime', buildCron(e.target.value, parseCronTime(cronForm.birthdayTime).minute))}>
+                          {Array.from({ length: 24 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, '0')}:00</option>)}
+                        </select>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <label style={labelStyle}>Minute</label>
+                        <select className="form-input" style={inputStyle}
+                          value={parseCronTime(cronForm.birthdayTime).minute}
+                          onChange={(e) => handleCronChange('birthdayTime', buildCron(parseCronTime(cronForm.birthdayTime).hour, e.target.value))}>
+                          {Array.from({ length: 60 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, '0')}</option>)}
+                        </select>
+                      </div>
+                      <div style={{ flex: 2, padding: '7px 10px', background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.18)', borderRadius: 7, fontSize: '0.75rem' }}>
+                        <span style={{ color: 'var(--text-3)' }}>Sends daily at </span>
+                        <span style={{ fontWeight: 700, color: 'var(--green-400)' }}>
+                          {String(parseCronTime(cronForm.birthdayTime).hour).padStart(2, '0')}:{String(parseCronTime(cronForm.birthdayTime).minute).padStart(2, '0')}
+                        </span>
+                      </div>
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <label style={labelStyle}>Minute</label>
-                      <select className="form-input" style={inputStyle}
-                        value={parseCronTime(cronForm.birthdayTime).minute}
-                        onChange={(e) => handleCronChange('birthdayTime', buildCron(parseCronTime(cronForm.birthdayTime).hour, e.target.value))}>
-                        {Array.from({ length: 60 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, '0')}</option>)}
-                      </select>
+
+                    {/* Upcoming Birthdays */}
+                    <div style={{ background: 'var(--bg-base)', border: '1px solid var(--border)', borderRadius: 8, overflow: 'hidden' }}>
+                      <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '0.72rem', fontWeight: 700, color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Upcoming Birthdays (30 days)</span>
+                        <span style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>{upcomingBirthdays.length} member{upcomingBirthdays.length !== 1 ? 's' : ''}</span>
+                      </div>
+                      {upcomingBirthdays.length === 0 ? (
+                        <div style={{ padding: '12px', fontSize: '0.75rem', color: 'var(--text-3)', textAlign: 'center' }}>No birthdays in the next 30 days</div>
+                      ) : (
+                        <div style={{ maxHeight: 180, overflowY: 'auto' }}>
+                          {upcomingBirthdays.map((b, i) => (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '7px 12px', borderBottom: i < upcomingBirthdays.length - 1 ? '1px solid var(--border)' : 'none' }}>
+                              <div style={{ width: 28, height: 28, borderRadius: '50%', overflow: 'hidden', flexShrink: 0, background: 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                {b.photo ? (
+                                  <img src={b.photo} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                                ) : (
+                                  <span style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>{b.name[0]}</span>
+                                )}
+                              </div>
+                              <div style={{ flex: 1, minWidth: 0 }}>
+                                <div style={{ fontSize: '0.775rem', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{b.name}</div>
+                                <div style={{ fontSize: '0.68rem', color: 'var(--text-3)' }}>{MONTHS[b.month]} {b.day}</div>
+                              </div>
+                              <span style={{
+                                fontSize: '0.65rem', fontWeight: 700, padding: '2px 7px', borderRadius: 99, flexShrink: 0,
+                                background: b.daysUntil === 0 ? 'rgba(34,197,94,0.15)' : b.daysUntil <= 3 ? 'rgba(251,146,60,0.15)' : 'rgba(155,155,155,0.1)',
+                                color: b.daysUntil === 0 ? 'var(--green-400)' : b.daysUntil <= 3 ? '#fb923c' : 'var(--text-3)',
+                              }}>
+                                {b.daysUntil === 0 ? 'Today!' : b.daysUntil === 1 ? 'Tomorrow' : `${b.daysUntil}d`}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </div>
-                    <div style={{ flex: 2, padding: '7px 10px', background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.18)', borderRadius: 7, fontSize: '0.75rem' }}>
-                      <span style={{ color: 'var(--text-3)' }}>Sends daily at </span>
-                      <span style={{ fontWeight: 700, color: 'var(--green-400)' }}>
-                        {String(parseCronTime(cronForm.birthdayTime).hour).padStart(2, '0')}:{String(parseCronTime(cronForm.birthdayTime).minute).padStart(2, '0')}
-                      </span>
-                    </div>
-                  </div>
+                  </>
                 )}
               </div>
 
