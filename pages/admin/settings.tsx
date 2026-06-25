@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api from '../../lib/api';
@@ -113,6 +113,25 @@ export default function AdminSettings() {
     if (!Array.isArray(members)) return [];
     return getUpcomingBirthdays(members);
   }, [members]);
+
+  const [waStatus, setWaStatus] = useState<{ ready: boolean; hasQr: boolean } | null>(null);
+  const [waQr, setWaQr] = useState<string | null>(null);
+
+  useEffect(() => {
+    const check = () => {
+      fetch('/api/whatsapp/status').then(r => r.json()).then((s) => {
+        setWaStatus(s);
+        if (s.hasQr && !s.ready) {
+          fetch('/api/whatsapp/qr').then(r => r.json()).then(d => setWaQr(d.qr || null)).catch(() => {});
+        } else {
+          setWaQr(null);
+        }
+      }).catch(() => setWaStatus(null));
+    };
+    check();
+    const t = setInterval(check, 5000);
+    return () => clearInterval(t);
+  }, []);
 
   return (
     <AdminLayout>
@@ -338,6 +357,45 @@ export default function AdminSettings() {
               {savingCron ? 'Saving...' : 'Save Scheduler'}
             </button>
           </div>
+        </section>
+
+        {/* WhatsApp Connection */}
+        <section className="card" style={{ padding: '16px 18px', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: waQr ? 14 : 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <span style={{ fontSize: '1rem' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="#25d366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.127.558 4.122 1.532 5.852L0 24l6.336-1.503A11.94 11.94 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.8 9.8 0 01-5.003-1.368l-.36-.214-3.73.885.916-3.613-.235-.373A9.79 9.79 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+              </span>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <span style={{ fontSize: '0.875rem', fontWeight: 700 }}>WhatsApp Connection</span>
+                  {waStatus === null ? (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: 99, background: 'rgba(155,155,155,0.12)', color: 'var(--text-3)' }}>CHECKING</span>
+                  ) : waStatus.ready ? (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: 99, background: 'rgba(34,197,94,0.12)', color: 'var(--green-400)' }}>CONNECTED</span>
+                  ) : (
+                    <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: 99, background: 'rgba(248,113,113,0.12)', color: 'var(--red)' }}>NOT CONNECTED</span>
+                  )}
+                </div>
+                <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 1 }}>
+                  {waStatus?.ready ? 'WhatsApp is linked and ready to send messages.' : waQr ? 'Scan the QR code below to connect.' : 'Used for sending WhatsApp reminders to members.'}
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {waStatus && !waStatus.ready && waQr && (
+            <div style={{ textAlign: 'center', padding: '16px 0 4px' }}>
+              <img src={waQr} alt="WhatsApp QR Code" style={{ width: 200, height: 200, borderRadius: 8, display: 'block', margin: '0 auto', background: '#fff' }} />
+              <p style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 10 }}>Open WhatsApp → Linked Devices → Link a Device</p>
+            </div>
+          )}
+
+          {waStatus && !waStatus.ready && !waQr && (
+            <div style={{ marginTop: 10, padding: '8px 12px', background: 'rgba(251,146,60,0.07)', border: '1px solid rgba(251,146,60,0.18)', borderRadius: 7, fontSize: '0.75rem', color: '#fb923c' }}>
+              WhatsApp QR not available yet — the backend may still be starting up. This page polls every 5 seconds.
+            </div>
+          )}
         </section>
       </div>
     </AdminLayout>

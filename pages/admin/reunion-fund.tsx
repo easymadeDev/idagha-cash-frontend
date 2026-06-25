@@ -20,18 +20,10 @@ export default function AdminReunionFund() {
   const [waNotifying, setWaNotifying] = useState<string | null>(null);
   const [waResult, setWaResult] = useState<any>(null);
   const [waStatus, setWaStatus] = useState<{ ready: boolean; hasQr: boolean } | null>(null);
-  const [waQr, setWaQr] = useState<string | null>(null);
 
   useEffect(() => {
     const check = () => {
-      fetch('/api/whatsapp/status').then(r => r.json()).then((s) => {
-        setWaStatus(s);
-        if (s.hasQr && !s.ready) {
-          fetch('/api/whatsapp/qr').then(r => r.json()).then(d => setWaQr(d.qr || null)).catch(() => {});
-        } else {
-          setWaQr(null);
-        }
-      }).catch(() => {});
+      fetch('/api/whatsapp/status').then(r => r.json()).then(setWaStatus).catch(() => {});
     };
     check();
     const t = setInterval(check, 5000);
@@ -213,15 +205,6 @@ export default function AdminReunionFund() {
                     )}
                   </button>
                 </div>
-              </div>
-            )}
-
-            {/* WhatsApp QR code */}
-            {waStatus && !waStatus.ready && waQr && (
-              <div style={{ marginBottom: 16, padding: '20px', background: 'rgba(37,211,102,0.06)', border: '1px solid rgba(37,211,102,0.2)', borderRadius: 'var(--radius)', textAlign: 'center' }}>
-                <div style={{ fontWeight: 700, marginBottom: 8, color: '#25d366' }}>Scan to connect WhatsApp</div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', marginBottom: 16 }}>Open WhatsApp → Linked Devices → Link a Device</div>
-                <QrCanvas value={waQr} />
               </div>
             )}
 
@@ -453,7 +436,3 @@ function MemberRow({ m, memberTarget, onNotify, notifying, onNotifyWa, waNotifyi
   );
 }
 
-function QrCanvas({ value }: { value: string }) {
-  // value is now a base64 data URL from the backend
-  return <img src={value} alt="WhatsApp QR Code" style={{ width: 220, height: 220, borderRadius: 8, display: 'block', margin: '0 auto', background: '#fff' }} />;
-}
