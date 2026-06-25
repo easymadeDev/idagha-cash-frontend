@@ -30,7 +30,65 @@ export default function AdminMembers() {
   const [welcomeSending, setWelcomeSending] = useState(false);
   const [welcomeResult, setWelcomeResult] = useState<any>(null);
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [notifyTarget, setNotifyTarget] = useState<any>(null);
+  const [notifySubject, setNotifySubject] = useState('');
+  const [notifyMessage, setNotifyMessage] = useState('');
+  const [notifySending, setNotifySending] = useState(false);
+  const [notifyDone, setNotifyDone] = useState<{ sent: boolean; error?: string } | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  const NOTIFY_TEMPLATES = [
+    {
+      label: 'Update Profile Photo',
+      subject: 'Action Required: Please Update Your Profile Photo',
+      message: `We noticed your profile on the IDAGHA Alumni portal does not have a profile photo yet.\n\nKindly log in and upload a recent photo so your fellow alumni can recognise you on the Members directory.\n\nThank you for keeping your profile complete.`,
+    },
+    {
+      label: 'Update Contact Details',
+      subject: 'Action Required: Please Update Your Contact Information',
+      message: `Your contact information on the IDAGHA Alumni portal appears to be incomplete or out of date.\n\nKindly log in and update your phone number, WhatsApp, email address, and location so we can reach you and keep our records accurate.\n\nThank you!`,
+    },
+    {
+      label: 'Complete Your Profile',
+      subject: 'Action Required: Complete Your IDAGHA Alumni Profile',
+      message: `Your IDAGHA Alumni profile is missing some important details.\n\nPlease log in and fill in your nickname, occupation, location, and any other information you haven't provided yet. A complete profile helps your classmates find and reconnect with you.\n\nThank you for your cooperation.`,
+    },
+    {
+      label: 'Pay Outstanding Contribution',
+      subject: 'Reminder: Outstanding Contribution on Your Account',
+      message: `This is a friendly reminder that you have an outstanding contribution on your IDAGHA Alumni account.\n\nKindly log in to the portal and make your payment at your earliest convenience to keep your account in good standing.\n\nThank you!`,
+    },
+  ];
+
+  const openNotify = (m: any) => {
+    setNotifyTarget(m);
+    setNotifySubject('');
+    setNotifyMessage('');
+    setNotifyDone(null);
+  };
+
+  const applyTemplate = (tpl: typeof NOTIFY_TEMPLATES[0]) => {
+    setNotifySubject(tpl.subject);
+    setNotifyMessage(tpl.message);
+  };
+
+  const sendNotify = async () => {
+    if (!notifySubject.trim() || !notifyMessage.trim()) {
+      toast('Subject and message are required.', 'error'); return;
+    }
+    setNotifySending(true);
+    try {
+      const res = await api.post(`/members/${notifyTarget._id}/notify`, {
+        subject: notifySubject,
+        message: notifyMessage,
+      });
+      setNotifyDone({ sent: res.data.sent, error: res.data.error });
+    } catch (err: any) {
+      setNotifyDone({ sent: false, error: err.response?.data?.message || 'Failed to send' });
+    } finally {
+      setNotifySending(false);
+    }
+  };
 
   const allList = Array.isArray(members) ? members : [];
   const pending = allList.filter((m: any) => m.status === 'pending');
@@ -252,6 +310,15 @@ export default function AdminMembers() {
                     <div style={{ display: 'flex', gap: 6, flexWrap: 'nowrap' }}>
                       <button className="btn btn-ghost btn-sm" onClick={() => openEdit(m)}>Edit</button>
                       <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(m)}>{m.isActive ? 'Deactivate' : 'Activate'}</button>
+                      <button
+                        className="btn btn-sm"
+                        style={{ background: 'rgba(59,130,246,0.12)', color: '#93c5fd', border: '1px solid rgba(59,130,246,0.25)' }}
+                        onClick={() => openNotify(m)}
+                        title="Send notification email"
+                      >
+                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        Notify
+                      </button>
                       <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(m._id)}>Delete</button>
                     </div>
                   </td>
@@ -479,6 +546,157 @@ export default function AdminMembers() {
                   <button className="btn btn-primary" onClick={() => { setWelcomeModal(false); setWelcomeResult(null); setSelectedMembers([]); }}>Done</button>
                 </div>
               </>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Notify Member Modal */}
+      {notifyTarget && (
+        <div className="modal-overlay" onClick={() => { if (!notifySending) { setNotifyTarget(null); setNotifyDone(null); } }}>
+          <div
+            style={{
+              background: '#111827', border: '1px solid rgba(168,85,247,0.2)',
+              boxShadow: '0 24px 60px rgba(0,0,0,0.6)', borderRadius: 'var(--radius)',
+              padding: '28px 32px', width: '100%', maxWidth: 560,
+              margin: '24px auto', maxHeight: '90vh', overflow: 'auto',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: '50%', flexShrink: 0, overflow: 'hidden',
+                background: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center',
+                justifyContent: 'center', border: '1px solid rgba(59,130,246,0.3)',
+              }}>
+                {notifyTarget.photo
+                  ? <img src={notifyTarget.photo} alt={notifyTarget.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : <span style={{ fontSize: '0.85rem', fontWeight: 800, color: '#93c5fd' }}>
+                    {notifyTarget.name.split(' ').slice(0, 2).map((n: string) => n[0]).join('').toUpperCase()}
+                  </span>}
+              </div>
+              <div>
+                <p style={{ fontWeight: 700, fontSize: '1.05rem', color: '#f9fafb', margin: 0 }}>Notify {notifyTarget.name}</p>
+                <p style={{ fontSize: '0.8rem', color: '#6b7280', margin: 0, marginTop: 2 }}>
+                  {notifyTarget.email ? `Will send to ${notifyTarget.email}` : 'No email address on record — cannot send'}
+                </p>
+              </div>
+            </div>
+
+            {!notifyDone ? (
+              <>
+                {/* Quick templates */}
+                <div style={{ marginBottom: 18 }}>
+                  <p style={{ fontSize: '0.78rem', color: '#9ca3af', marginBottom: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Quick Templates</p>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 7 }}>
+                    {NOTIFY_TEMPLATES.map((tpl) => (
+                      <button
+                        key={tpl.label}
+                        type="button"
+                        onClick={() => applyTemplate(tpl)}
+                        style={{
+                          padding: '5px 12px', borderRadius: 6, fontSize: '0.78rem',
+                          background: 'rgba(59,130,246,0.1)', color: '#93c5fd',
+                          border: '1px solid rgba(59,130,246,0.25)', cursor: 'pointer',
+                          transition: 'all 0.15s',
+                        }}
+                      >
+                        {tpl.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div style={{ marginBottom: 14 }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#d1d5db', marginBottom: 6, fontWeight: 600 }}>Subject</label>
+                  <input
+                    value={notifySubject}
+                    onChange={(e) => setNotifySubject(e.target.value)}
+                    placeholder="Email subject line"
+                    style={{
+                      width: '100%', padding: '10px 14px', borderRadius: 8,
+                      background: '#1f2937', color: '#f9fafb',
+                      border: '1px solid rgba(255,255,255,0.12)', outline: 'none',
+                      fontSize: '0.9rem', boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+
+                <div style={{ marginBottom: 20 }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: '#d1d5db', marginBottom: 6, fontWeight: 600 }}>Message</label>
+                  <textarea
+                    value={notifyMessage}
+                    onChange={(e) => setNotifyMessage(e.target.value)}
+                    placeholder="Write your message here…"
+                    rows={7}
+                    style={{
+                      width: '100%', padding: '10px 14px', borderRadius: 8,
+                      background: '#1f2937', color: '#f9fafb',
+                      border: '1px solid rgba(255,255,255,0.12)', outline: 'none',
+                      fontSize: '0.9rem', resize: 'vertical', boxSizing: 'border-box',
+                      lineHeight: 1.6,
+                    }}
+                  />
+                </div>
+
+                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
+                  <button
+                    type="button"
+                    onClick={() => setNotifyTarget(null)}
+                    style={{ padding: '9px 18px', borderRadius: 8, background: 'transparent', color: '#9ca3af', border: '1px solid rgba(255,255,255,0.1)', cursor: 'pointer', fontSize: '0.9rem' }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={sendNotify}
+                    disabled={notifySending || !notifyTarget.email}
+                    style={{
+                      padding: '9px 22px', borderRadius: 8, fontSize: '0.9rem', fontWeight: 600,
+                      background: notifyTarget.email ? '#3b82f6' : '#374151',
+                      color: notifyTarget.email ? 'white' : '#6b7280',
+                      border: 'none', cursor: notifyTarget.email ? 'pointer' : 'not-allowed',
+                      display: 'flex', alignItems: 'center', gap: 8,
+                    }}
+                  >
+                    {notifySending ? (
+                      <><div style={{ width: 14, height: 14, border: '2px solid rgba(255,255,255,0.3)', borderTopColor: 'white', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} /> Sending…</>
+                    ) : (
+                      <>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        Send Email
+                      </>
+                    )}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '24px 0' }}>
+                {notifyDone.sent ? (
+                  <>
+                    <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(34,197,94,0.1)', border: '2px solid rgba(34,197,94,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                      <svg width="26" height="26" fill="none" stroke="#4ade80" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <p style={{ color: '#4ade80', fontWeight: 700, fontSize: '1.05rem', margin: '0 0 6px' }}>Email sent!</p>
+                    <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>Notification delivered to {notifyTarget.email}</p>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ width: 56, height: 56, borderRadius: '50%', background: 'rgba(239,68,68,0.1)', border: '2px solid rgba(239,68,68,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+                      <svg width="26" height="26" fill="none" stroke="#f87171" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </div>
+                    <p style={{ color: '#f87171', fontWeight: 700, fontSize: '1.05rem', margin: '0 0 6px' }}>Failed to send</p>
+                    <p style={{ color: '#9ca3af', fontSize: '0.85rem', margin: 0 }}>{notifyDone.error || 'Unknown error'}</p>
+                  </>
+                )}
+                <button
+                  type="button"
+                  onClick={() => { setNotifyTarget(null); setNotifyDone(null); }}
+                  style={{ marginTop: 20, padding: '9px 24px', borderRadius: 8, background: '#374151', color: '#f9fafb', border: 'none', cursor: 'pointer', fontSize: '0.9rem' }}
+                >
+                  Close
+                </button>
+              </div>
             )}
           </div>
         </div>
