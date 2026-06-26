@@ -83,6 +83,7 @@ export default function RegisterPage() {
         // Store the member_token so they can update their profile immediately without re-login
         if (member.member_token) {
           sessionStorage.setItem('idagha_member_token', member.member_token);
+          localStorage.setItem('idagha_member_token', member.member_token);
         }
       }
       setCleared(true);

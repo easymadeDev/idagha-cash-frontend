@@ -105,7 +105,10 @@ export default function WelcomePopup() {
       });
       const data = await res.json();
       if (data.found) {
-        if (typeof window !== 'undefined') sessionStorage.setItem('idagha_member_token', data.member_token);
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('idagha_member_token', data.member_token);
+          localStorage.setItem('idagha_member_token', data.member_token);
+        }
         setFoundMember(data.member);
         setMember({
           _id: data.member._id,

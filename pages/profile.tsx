@@ -25,7 +25,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!ready) return;
     if (!cleared || !member) { router.replace('/home'); return; }
-    const tok = sessionStorage.getItem('idagha_member_token') || '';
+    const tok = sessionStorage.getItem('idagha_member_token') || localStorage.getItem('idagha_member_token') || '';
     fetch(`${API}/members/${member._id}/profile`, { headers: { 'x-member-token': tok } })
       .then(async r => {
         if (!r.ok) throw new Error(`${r.status}`);
@@ -77,7 +77,7 @@ export default function ProfilePage() {
     e.preventDefault();
     if (!member) return;
     setSaving(true);
-    const tok = sessionStorage.getItem('idagha_member_token') || '';
+    const tok = sessionStorage.getItem('idagha_member_token') || localStorage.getItem('idagha_member_token') || '';
     try {
       const res = await fetch(`${API}/members/${member._id}/self-update`, {
         method: 'PUT',

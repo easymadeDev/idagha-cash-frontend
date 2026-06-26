@@ -12,6 +12,20 @@ const MEMBER_TOKEN_KEY = 'idagha_member_token';
 const MEMBER_KEY       = 'idagha_member';
 const REGISTERED_KEY   = 'idagha_registered'; // set after self-registration (pending approval)
 
+// Member token is stored in both sessionStorage (fast) and localStorage (survives tab close)
+function getMemberToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return sessionStorage.getItem(MEMBER_TOKEN_KEY) || localStorage.getItem(MEMBER_TOKEN_KEY);
+}
+function saveMemberToken(token: string) {
+  sessionStorage.setItem(MEMBER_TOKEN_KEY, token);
+  localStorage.setItem(MEMBER_TOKEN_KEY, token);
+}
+function clearMemberToken() {
+  sessionStorage.removeItem(MEMBER_TOKEN_KEY);
+  localStorage.removeItem(MEMBER_TOKEN_KEY);
+}
+
 // Fully open — no token needed
 const FULLY_EXEMPT = (pathname: string) =>
   pathname === '/' ||
@@ -41,12 +55,18 @@ export default function App({ Component, pageProps }: AppProps) {
   const [ready, setReady] = useState(false); // true after sessionStorage is read
 
   useEffect(() => {
-    const memberToken  = sessionStorage.getItem(MEMBER_TOKEN_KEY);
+    const memberToken  = getMemberToken();
     const registered   = sessionStorage.getItem(REGISTERED_KEY);
+    // Sync localStorage token into sessionStorage so reads are consistent
+    if (memberToken) sessionStorage.setItem(MEMBER_TOKEN_KEY, memberToken);
     if (isTokenValid(memberToken) || registered === '1') setClearedState(true);
     try {
-      const raw = sessionStorage.getItem(MEMBER_KEY);
-      if (raw) setMemberState(JSON.parse(raw));
+      const raw = sessionStorage.getItem(MEMBER_KEY) || localStorage.getItem(MEMBER_KEY);
+      if (raw) {
+        setMemberState(JSON.parse(raw));
+        // Keep both storages in sync
+        sessionStorage.setItem(MEMBER_KEY, raw);
+      }
     } catch {}
     setReady(true); // gate checks can now run safely
   }, []);
@@ -55,8 +75,9 @@ export default function App({ Component, pageProps }: AppProps) {
     if (typeof window !== 'undefined') {
       if (!v) {
         sessionStorage.removeItem(GATE_TOKEN_KEY);
-        sessionStorage.removeItem(MEMBER_TOKEN_KEY);
+        clearMemberToken();
         sessionStorage.removeItem(MEMBER_KEY);
+        localStorage.removeItem(MEMBER_KEY);
         sessionStorage.removeItem(REGISTERED_KEY);
       }
     }
@@ -65,8 +86,14 @@ export default function App({ Component, pageProps }: AppProps) {
 
   const setMember = (m: SessionMember | null) => {
     if (typeof window !== 'undefined') {
-      if (m) sessionStorage.setItem(MEMBER_KEY, JSON.stringify(m));
-      else sessionStorage.removeItem(MEMBER_KEY);
+      if (m) {
+        const serialized = JSON.stringify(m);
+        sessionStorage.setItem(MEMBER_KEY, serialized);
+        localStorage.setItem(MEMBER_KEY, serialized);
+      } else {
+        sessionStorage.removeItem(MEMBER_KEY);
+        localStorage.removeItem(MEMBER_KEY);
+      }
     }
     setMemberState(m);
   };
@@ -76,7 +103,7 @@ export default function App({ Component, pageProps }: AppProps) {
     if (FULLY_EXEMPT(router.pathname)) return;
     if (cleared) return; // already verified — no redirect needed
 
-    const memberToken = sessionStorage.getItem(MEMBER_TOKEN_KEY);
+    const memberToken = getMemberToken();
     const registered  = sessionStorage.getItem(REGISTERED_KEY);
     const gateToken   = sessionStorage.getItem(GATE_TOKEN_KEY);
 
