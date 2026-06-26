@@ -84,7 +84,11 @@ export default function ProfilePage() {
         headers: { 'Content-Type': 'application/json', 'x-member-token': tok },
         body: JSON.stringify(form),
       });
-      if (!res.ok) throw new Error('Failed to update profile.');
+      if (!res.ok) {
+        let msg = 'Failed to update profile.';
+        try { const d = await res.json(); msg = d?.message || msg; } catch {}
+        throw new Error(msg);
+      }
 
       if (photo) {
         const fd = new FormData();

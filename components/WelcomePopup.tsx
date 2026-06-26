@@ -119,13 +119,11 @@ export default function WelcomePopup() {
         setStep('found');
         const intended = sessionStorage.getItem('idagha_redirect_after_login');
         sessionStorage.removeItem('idagha_redirect_after_login');
-        setTimeout(() => dismiss(intended && intended !== '/' ? intended : '/home'), 1800);
+        // Pending members go to /profile so they can complete their details
+        const dest = data.pending ? '/profile' : (intended && intended !== '/' ? intended : '/home');
+        setTimeout(() => dismiss(dest), 1800);
       } else if (data.deactivated) {
         setIsDeactivated(true);
-        setVerifyError(data.message);
-        setStep('notfound');
-      } else if (data.pending) {
-        setIsPending(true);
         setVerifyError(data.message);
         setStep('notfound');
       } else {
