@@ -249,34 +249,46 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
   );
 }
 
+function getGreeting(): { title: string; content: string; icon: string } {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12)  return { icon: '🌅', title: 'Good Morning!', content: 'Welcome back to the IDAGHA Class of 2018 Alumni Portal. Have a wonderful and productive morning!' };
+  if (h >= 12 && h < 17) return { icon: '☀️', title: 'Good Afternoon!', content: 'Hope your day is going great. Stay connected with your fellow alumni right here.' };
+  if (h >= 17 && h < 21) return { icon: '🌇', title: 'Good Evening!', content: 'Welcome back! Unwind and catch up on the latest from your alumni family.' };
+  return { icon: '🌙', title: 'Good Night!', content: 'Still up? The IDAGHA Alumni Portal is always here for you. Rest well tonight.' };
+}
+
 function AnnouncementSlider({ announcements }: { announcements: any[] }) {
+  const greeting = getGreeting();
+  const greetingSlide = { _id: '__greeting__', title: greeting.title, content: greeting.content, _icon: greeting.icon };
+  const slides = [greetingSlide, ...announcements];
+
   const [idx, setIdx] = useState(0);
   const timerRef = useRef<any>(null);
 
   const restart = (next: number) => {
     clearInterval(timerRef.current);
     setIdx(next);
-    if (announcements.length > 1) {
-      timerRef.current = setInterval(() => setIdx(i => (i + 1) % announcements.length), 4500);
-    }
+    timerRef.current = setInterval(() => setIdx(i => (i + 1) % slides.length), 4500);
   };
 
   useEffect(() => {
-    if (announcements.length <= 1) return;
-    timerRef.current = setInterval(() => setIdx(i => (i + 1) % announcements.length), 4500);
+    timerRef.current = setInterval(() => setIdx(i => (i + 1) % slides.length), 4500);
     return () => clearInterval(timerRef.current);
-  }, [announcements.length]);
+  }, [slides.length]);
 
-  const a = announcements[idx];
+  const a = slides[idx];
+  const isGreeting = a._id === '__greeting__';
 
   return (
     <div style={{ paddingTop: 24 }}>
       <div className="announce-bar" style={{ alignItems: 'center' }}>
         {/* Icon */}
-        <div className="announce-icon" style={{ flexShrink: 0 }}>
-          <svg width="16" height="16" fill="none" stroke="var(--green-400)" strokeWidth="2" viewBox="0 0 24 24">
-            <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+        <div className="announce-icon" style={{ flexShrink: 0, fontSize: isGreeting ? '1rem' : undefined }}>
+          {isGreeting ? (a as any)._icon : (
+            <svg width="16" height="16" fill="none" stroke="var(--green-400)" strokeWidth="2" viewBox="0 0 24 24">
+              <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+          )}
         </div>
 
         {/* Sliding content */}
@@ -288,14 +300,14 @@ function AnnouncementSlider({ announcements }: { announcements: any[] }) {
         </div>
 
         {/* Prev / counter / next */}
-        {announcements.length > 1 && (
+        {slides.length > 1 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, marginLeft: 10 }}>
-            <button onClick={() => restart((idx - 1 + announcements.length) % announcements.length)}
+            <button onClick={() => restart((idx - 1 + slides.length) % slides.length)}
               style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 4, lineHeight: 1 }}>
               <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
-            <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontWeight: 700, minWidth: 26, textAlign: 'center' }}>{idx + 1}/{announcements.length}</span>
-            <button onClick={() => restart((idx + 1) % announcements.length)}
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontWeight: 700, minWidth: 26, textAlign: 'center' }}>{idx + 1}/{slides.length}</span>
+            <button onClick={() => restart((idx + 1) % slides.length)}
               style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 4, lineHeight: 1 }}>
               <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
             </button>
@@ -304,9 +316,9 @@ function AnnouncementSlider({ announcements }: { announcements: any[] }) {
       </div>
 
       {/* Dot indicators */}
-      {announcements.length > 1 && (
+      {slides.length > 1 && (
         <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 8 }}>
-          {announcements.map((_, i) => (
+          {slides.map((_, i) => (
             <button key={i} onClick={() => restart(i)} style={{
               width: i === idx ? 20 : 6, height: 6, borderRadius: 99,
               border: 'none', cursor: 'pointer', padding: 0,
@@ -414,9 +426,7 @@ export default function HomePage() {
       <div className="container">
 
         {/* ── Announcements slider ── */}
-        {Array.isArray(announcements) && announcements.length > 0 && (
-          <AnnouncementSlider announcements={announcements} />
-        )}
+        <AnnouncementSlider announcements={Array.isArray(announcements) ? announcements : []} />
 
         {/* ── Hero ── */}
         <div className="hero">
