@@ -263,16 +263,18 @@ function AnnouncementSlider({ announcements }: { announcements: any[] }) {
   const slides = [greetingSlide, ...announcements];
 
   const [idx, setIdx] = useState(0);
+  const [expanded, setExpanded] = useState(false);
   const timerRef = useRef<any>(null);
 
   const restart = (next: number) => {
     clearInterval(timerRef.current);
     setIdx(next);
-    timerRef.current = setInterval(() => setIdx(i => (i + 1) % slides.length), 4500);
+    setExpanded(false);
+    timerRef.current = setInterval(() => { setIdx(i => (i + 1) % slides.length); setExpanded(false); }, 4500);
   };
 
   useEffect(() => {
-    timerRef.current = setInterval(() => setIdx(i => (i + 1) % slides.length), 4500);
+    timerRef.current = setInterval(() => { setIdx(i => (i + 1) % slides.length); setExpanded(false); }, 4500);
     return () => clearInterval(timerRef.current);
   }, [slides.length]);
 
@@ -298,10 +300,13 @@ function AnnouncementSlider({ announcements }: { announcements: any[] }) {
             )}
           </div>
 
-          <div className="announce-content-wrap">
+          <div className="announce-content-wrap"
+            style={{ cursor: 'pointer', ...(expanded ? { height: 'auto' } : {}) }}
+            onClick={() => setExpanded(e => !e)}>
             <div key={a._id} style={{ animation: 'announceSlide 0.35s cubic-bezier(0.4,0,0.2,1) both' }}>
               <div className="announce-title">{a.title}</div>
-              <div className="announce-body">{a.content}</div>
+              <div className="announce-body" style={expanded ? { WebkitLineClamp: 'unset', display: 'block' } : undefined}>{a.content}</div>
+              {!expanded && <span style={{ fontSize: '0.68rem', color: 'var(--green-400)', opacity: 0.7 }}>tap to read more</span>}
             </div>
           </div>
 
