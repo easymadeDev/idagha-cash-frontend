@@ -183,7 +183,7 @@ export default function PledgesPage() {
               {form.memberPhone && <div style={{ fontSize: '.8rem', color: '#9ca3af' }}>{form.memberPhone}</div>}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 14 }}>
               <div style={fw}>
                 <label style={lbl}>Support Amount (₦) *</label>
                 <input style={inp} type="number" min={1} value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} placeholder="e.g. 10000" />
@@ -198,12 +198,39 @@ export default function PledgesPage() {
               <textarea style={{ ...inp, resize: 'vertical', minHeight: 64 }} value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} placeholder="Any message for the committee..." />
             </div>
 
-            <label style={{ display: 'flex', alignItems: 'flex-start', gap: 10, cursor: 'pointer', margin: '4px 0 20px' }}>
-              <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} style={{ marginTop: 3, accentColor: '#7c3aed' }} />
-              <span style={{ fontSize: '.85rem', color: '#d1d5db', lineHeight: 1.5 }}>
-                I commit to fulfil this support for the 2026 IDAGHA Reunion Fund and understand the admin will follow up for payment.
-              </span>
-            </label>
+            <button
+              type="button"
+              onClick={() => setAgreed(!agreed)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 14, width: '100%',
+                background: agreed ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.04)',
+                border: `2px solid ${agreed ? '#7c3aed' : 'rgba(255,255,255,0.1)'}`,
+                borderRadius: 10, padding: '12px 14px', cursor: 'pointer',
+                textAlign: 'left', margin: '4px 0 20px', transition: 'all 0.15s',
+              }}
+            >
+              <div style={{
+                width: 22, height: 22, borderRadius: 6, flexShrink: 0,
+                border: `2px solid ${agreed ? '#7c3aed' : 'rgba(255,255,255,0.2)'}`,
+                background: agreed ? '#7c3aed' : 'transparent',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.15s',
+              }}>
+                {agreed && (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="20 6 9 17 4 12" />
+                  </svg>
+                )}
+              </div>
+              <div>
+                <div style={{ fontSize: '.82rem', fontWeight: 700, color: agreed ? '#c4b5fd' : '#d1d5db', marginBottom: 2 }}>
+                  I commit to this support
+                </div>
+                <div style={{ fontSize: '.76rem', color: '#6b7280', lineHeight: 1.45 }}>
+                  I understand this is a promise to pay, and the admin will follow up with me to confirm payment.
+                </div>
+              </div>
+            </button>
 
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
               <button onClick={() => setModal(false)} style={btnOutline}>Cancel</button>
