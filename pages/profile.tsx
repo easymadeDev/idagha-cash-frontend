@@ -90,6 +90,7 @@ export default function ProfilePage() {
         throw new Error(msg);
       }
 
+      let newPhoto: string | undefined;
       if (photo) {
         const fd = new FormData();
         fd.append('photo', photo);
@@ -100,14 +101,13 @@ export default function ProfilePage() {
         });
         if (pr.ok) {
           const updated = await pr.json();
-          const newPhoto = updated.photo || photoPreview;
-          setPhotoPreview(newPhoto);
-          setMember({ ...member, photo: newPhoto });
+          newPhoto = updated.photo || photoPreview;
+          setPhotoPreview(newPhoto as string);
         }
       }
 
       setOriginal(form);
-      setMember({ ...member, nickname: form.nickname });
+      setMember({ ...member, nickname: form.nickname, ...(newPhoto ? { photo: newPhoto } : {}) });
       toast('Profile updated!', 'success');
       setEditing(false);
       setPhoto(null);
