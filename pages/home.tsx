@@ -1,7 +1,7 @@
 import Layout from '../components/Layout';
 import useSWR from 'swr';
 import { useRouter } from 'next/router';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import Image from 'next/image';
 import { formatNaira, formatDate } from '../lib/api';
 
@@ -249,6 +249,84 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
   );
 }
 
+function AnnouncementSlider({ announcements }: { announcements: any[] }) {
+  const [idx, setIdx] = useState(0);
+  const timerRef = useRef<any>(null);
+
+  const restart = (next: number) => {
+    clearInterval(timerRef.current);
+    setIdx(next);
+    if (announcements.length > 1) {
+      timerRef.current = setInterval(() => setIdx(i => (i + 1) % announcements.length), 4500);
+    }
+  };
+
+  useEffect(() => {
+    if (announcements.length <= 1) return;
+    timerRef.current = setInterval(() => setIdx(i => (i + 1) % announcements.length), 4500);
+    return () => clearInterval(timerRef.current);
+  }, [announcements.length]);
+
+  const a = announcements[idx];
+
+  return (
+    <div style={{ paddingTop: 24 }}>
+      <div className="announce-bar" style={{ alignItems: 'center' }}>
+        {/* Icon */}
+        <div className="announce-icon" style={{ flexShrink: 0 }}>
+          <svg width="16" height="16" fill="none" stroke="var(--green-400)" strokeWidth="2" viewBox="0 0 24 24">
+            <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </div>
+
+        {/* Sliding content */}
+        <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+          <div key={a._id} style={{ animation: 'announceSlide 0.35s cubic-bezier(0.4,0,0.2,1) both' }}>
+            <div className="announce-title">{a.title}</div>
+            <div className="announce-body">{a.content}</div>
+          </div>
+        </div>
+
+        {/* Prev / counter / next */}
+        {announcements.length > 1 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0, marginLeft: 10 }}>
+            <button onClick={() => restart((idx - 1 + announcements.length) % announcements.length)}
+              style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 4, lineHeight: 1 }}>
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+            <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontWeight: 700, minWidth: 26, textAlign: 'center' }}>{idx + 1}/{announcements.length}</span>
+            <button onClick={() => restart((idx + 1) % announcements.length)}
+              style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 4, lineHeight: 1 }}>
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Dot indicators */}
+      {announcements.length > 1 && (
+        <div style={{ display: 'flex', justifyContent: 'center', gap: 5, marginTop: 8 }}>
+          {announcements.map((_, i) => (
+            <button key={i} onClick={() => restart(i)} style={{
+              width: i === idx ? 20 : 6, height: 6, borderRadius: 99,
+              border: 'none', cursor: 'pointer', padding: 0,
+              background: i === idx ? 'var(--green-400)' : 'rgba(34,197,94,0.2)',
+              transition: 'all 0.3s ease',
+            }} />
+          ))}
+        </div>
+      )}
+
+      <style>{`
+        @keyframes announceSlide {
+          from { opacity: 0; transform: translateX(20px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 function useCountUp(target: number, duration = 1400) {
@@ -335,23 +413,9 @@ export default function HomePage() {
       {activeWallet && <WalletModal ws={activeWallet} onClose={() => setActiveWallet(null)} />}
       <div className="container">
 
-        {/* ── Announcements ── */}
+        {/* ── Announcements slider ── */}
         {Array.isArray(announcements) && announcements.length > 0 && (
-          <div style={{ paddingTop: 24 }}>
-            {announcements.map((a: any) => (
-              <div key={a._id} className="announce-bar">
-                <div className="announce-icon">
-                  <svg width="16" height="16" fill="none" stroke="var(--green-400)" strokeWidth="2" viewBox="0 0 24 24">
-                    <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </div>
-                <div>
-                  <div className="announce-title">{a.title}</div>
-                  <div className="announce-body">{a.content}</div>
-                </div>
-              </div>
-            ))}
-          </div>
+          <AnnouncementSlider announcements={announcements} />
         )}
 
         {/* ── Hero ── */}
