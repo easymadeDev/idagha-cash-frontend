@@ -298,7 +298,7 @@ function AnnouncementSlider({ announcements }: { announcements: any[] }) {
             )}
           </div>
 
-          <div style={{ flex: 1, minWidth: 0, overflow: 'hidden' }}>
+          <div className="announce-content-wrap">
             <div key={a._id} style={{ animation: 'announceSlide 0.35s cubic-bezier(0.4,0,0.2,1) both' }}>
               <div className="announce-title">{a.title}</div>
               <div className="announce-body">{a.content}</div>
