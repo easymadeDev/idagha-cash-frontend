@@ -56,12 +56,12 @@ export default function AdminAnnouncements() {
   return (
     <AdminLayout>
       <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}>
           <div>
-            <h1 style={{ fontFamily: 'var(--font-d)', fontSize: '1.6rem', fontWeight: 800, letterSpacing: '-0.03em' }}>Announcements</h1>
-            <p style={{ color: 'var(--text-3)', fontSize: '0.875rem', marginTop: 4 }}>Post and manage public announcements.</p>
+            <h1 style={{ fontFamily: 'var(--font-d)', fontSize: '1.25rem', fontWeight: 800, letterSpacing: '-0.02em' }}>Announcements</h1>
+            <p style={{ color: 'var(--text-3)', fontSize: '0.8rem', marginTop: 2 }}>Post and manage public announcements.</p>
           </div>
-          <button className="btn btn-primary" onClick={openAdd}>+ New Announcement</button>
+          <button className="btn btn-primary btn-sm" onClick={openAdd}>+ New</button>
         </div>
 
         {isLoading ? (
@@ -71,21 +71,21 @@ export default function AdminAnnouncements() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {list.map((a: any) => (
-              <div key={a._id} className="card" style={{ opacity: a.isActive ? 1 : 0.6 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', marginBottom: 8 }}>
+              <div key={a._id} className="card" style={{ padding: '14px 16px', opacity: a.isActive ? 1 : 0.55 }}>
+                <div className="admin-announce-card" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', gap: 7, alignItems: 'center', marginBottom: 7, flexWrap: 'wrap' }}>
                       <span className={`badge ${a.type === 'success' ? 'badge-green' : a.type === 'warning' ? 'badge-yellow' : 'badge-blue'}`}>{a.type}</span>
                       {!a.isActive && <span className="badge" style={{ background: 'rgba(107,114,128,0.12)', color: 'var(--text-3)', borderColor: 'var(--border)' }}>Hidden</span>}
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-3)', marginLeft: 'auto' }}>{formatDate(a.createdAt)}</span>
                     </div>
-                    <h3 style={{ fontWeight: 700, marginBottom: 6 }}>{a.title}</h3>
-                    <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', lineHeight: 1.6 }}>{a.content}</p>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 8 }}>{formatDate(a.createdAt)}</p>
+                    <h3 style={{ fontWeight: 700, fontSize: '0.9rem', marginBottom: 5 }}>{a.title}</h3>
+                    <p style={{ color: 'var(--text-3)', fontSize: '0.82rem', lineHeight: 1.55, wordBreak: 'break-word' }}>{a.content}</p>
                   </div>
                   <div className="announce-actions">
                     <button className="btn btn-ghost btn-sm" onClick={() => openEdit(a)}>Edit</button>
                     <button className="btn btn-ghost btn-sm" onClick={() => toggleActive(a)}>{a.isActive ? 'Hide' : 'Show'}</button>
-                    <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(a._id)}>Delete</button>
+                    <button className="btn btn-danger btn-sm" onClick={() => setDeleteId(a._id)}>Del</button>
                   </div>
                 </div>
               </div>
