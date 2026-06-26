@@ -392,35 +392,40 @@ export default function AdminMembers() {
 
                   {/* Actions */}
                   <div className="admin-member-card-actions">
-                    <button className="amca-btn amca-edit" onClick={() => openEdit(m)} title="Edit">
-                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      Edit
-                    </button>
-                    <button className="amca-btn amca-notify" onClick={() => openNotify(m)} title="Notify by email/WhatsApp">
-                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                      Notify
-                    </button>
-                    <button
-                      className="amca-btn"
-                      style={m.whatsappSubscribed ? { background: 'rgba(37,211,102,0.12)', color: '#25d366', border: '1px solid rgba(37,211,102,0.3)' } : { background: 'rgba(107,114,128,0.08)', color: 'var(--text-3)', border: '1px solid var(--border)' }}
-                      onClick={() => toggleWaSubscribed(m)}
-                      title={m.whatsappSubscribed ? 'Mark as not subscribed' : 'Mark as WhatsApp subscribed'}
-                    >
-                      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
-                      {m.whatsappSubscribed ? 'WA ✓' : 'WA ✗'}
-                    </button>
-                    <button
-                      className={`amca-btn ${m.isActive ? 'amca-deactivate' : 'amca-activate'}`}
-                      onClick={() => toggleActive(m)}
-                      title={m.isActive ? 'Deactivate' : 'Activate'}
-                    >
-                      {m.isActive
-                        ? <><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/></svg> Off</>
-                        : <><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" strokeLinecap="round"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round"/></svg> On</>}
-                    </button>
-                    <button className="amca-btn amca-delete" onClick={() => setDeleteId(m._id)} title="Delete member">
-                      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                    </button>
+                    <div className="amca-row">
+                      <button className="amca-btn amca-edit" onClick={() => openEdit(m)} title="Edit">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        Edit
+                      </button>
+                      <button className="amca-btn amca-notify" onClick={() => openNotify(m)} title="Notify by email/WhatsApp">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        Notify
+                      </button>
+                      <button
+                        className="amca-btn amca-wa"
+                        style={m.whatsappSubscribed ? { background: 'rgba(37,211,102,0.12)', color: '#25d366', border: '1px solid rgba(37,211,102,0.3)' } : { background: 'rgba(107,114,128,0.08)', color: 'var(--text-3)', border: '1px solid var(--border)' }}
+                        onClick={() => toggleWaSubscribed(m)}
+                        title={m.whatsappSubscribed ? 'Mark as not subscribed' : 'Mark as WhatsApp subscribed'}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                        {m.whatsappSubscribed ? 'WA ✓' : 'WA ✗'}
+                      </button>
+                    </div>
+                    <div className="amca-row">
+                      <button
+                        className={`amca-btn amca-toggle ${m.isActive ? 'amca-deactivate' : 'amca-activate'}`}
+                        onClick={() => toggleActive(m)}
+                        title={m.isActive ? 'Deactivate' : 'Activate'}
+                      >
+                        {m.isActive
+                          ? <><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round" strokeLinejoin="round"/></svg> Off</>
+                          : <><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" strokeLinecap="round"/><path d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" strokeLinecap="round"/></svg> On</>}
+                      </button>
+                      <button className="amca-btn amca-delete" onClick={() => setDeleteId(m._id)} title="Delete member">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        Delete
+                      </button>
+                    </div>
                   </div>
                 </div>
               );
@@ -462,7 +467,7 @@ export default function AdminMembers() {
                 </div>
               </div>
 
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 16px' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: '0 16px' }}>
                 <div className="form-group" style={{ gridColumn: '1 / -1' }}>
                   <label className="form-label">Full Name *</label>
                   <input className="form-input" value={form.name} onChange={f('name')} required placeholder="e.g. Chukwuemeka Obi" />
@@ -780,10 +785,13 @@ export default function AdminMembers() {
           overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .admin-member-card-actions {
-          display: flex; gap: 5px; align-items: center;
+          display: flex; flex-direction: column; gap: 5px;
           padding: 9px 11px;
           border-top: 1px solid var(--border);
           background: rgba(6,13,8,0.4);
+        }
+        .amca-row {
+          display: flex; gap: 5px; align-items: center;
         }
 
         /* Action buttons */
@@ -797,35 +805,25 @@ export default function AdminMembers() {
         .amca-edit:hover { background: rgba(255,255,255,0.08); color: var(--text-1); }
         .amca-notify  { flex: 1; background: rgba(59,130,246,0.1); color: #93c5fd; border-color: rgba(59,130,246,0.25); }
         .amca-notify:hover { background: rgba(59,130,246,0.18); }
-        .amca-deactivate { flex: 1; background: rgba(107,114,128,0.1); color: var(--text-3); border-color: var(--border); }
+        .amca-wa      { flex: 1; }
+        .amca-toggle  { flex: 1; }
+        .amca-deactivate { background: rgba(107,114,128,0.1); color: var(--text-3); border-color: var(--border); }
         .amca-deactivate:hover { background: rgba(248,113,113,0.1); color: var(--red); border-color: rgba(248,113,113,0.3); }
-        .amca-activate   { flex: 1; background: rgba(34,197,94,0.1); color: var(--green-400); border-color: rgba(34,197,94,0.25); }
+        .amca-activate   { background: rgba(34,197,94,0.1); color: var(--green-400); border-color: rgba(34,197,94,0.25); }
         .amca-activate:hover { background: rgba(34,197,94,0.18); }
-        .amca-delete  { flex-shrink: 0; width: 30px; padding: 5px; background: rgba(248,113,113,0.08); color: var(--red); border-color: rgba(248,113,113,0.2); border-radius: 6px; }
+        .amca-delete  { flex: 1; background: rgba(248,113,113,0.08); color: var(--red); border-color: rgba(248,113,113,0.2); }
         .amca-delete:hover { background: rgba(248,113,113,0.18); }
 
         /* Responsive breakpoints */
         @media (max-width: 1100px) {
           .admin-members-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
         }
-        @media (max-width: 768px) {
-          .admin-members-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-          .admin-member-card-top { padding: 11px 11px 8px; gap: 9px; }
-          .admin-member-card-details { padding: 0 11px 8px; }
-          .admin-member-card-actions { padding: 8px 9px; gap: 4px; }
-          .amca-btn { font-size: 0.69rem; padding: 5px 7px; gap: 4px; }
-          .amca-delete { width: 27px; padding: 5px 4px; }
-        }
-        @media (max-width: 480px) {
-          .admin-members-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-          .admin-member-card-top { padding: 10px 10px 7px; gap: 8px; }
-          .admin-member-card-details { padding: 0 10px 7px; }
-          .admin-member-card-actions { padding: 7px 8px; gap: 4px; }
-          .amca-btn { font-size: 0.65rem; padding: 4px 6px; }
-          .amca-delete { width: 26px; padding: 4px; }
-        }
-        @media (max-width: 360px) {
-          .admin-members-grid { grid-template-columns: 1fr; }
+        @media (max-width: 640px) {
+          .admin-members-grid { grid-template-columns: 1fr; gap: 8px; }
+          .admin-member-card-top { padding: 12px 12px 8px; gap: 10px; }
+          .admin-member-card-details { padding: 0 12px 10px; }
+          .admin-member-card-actions { padding: 9px 10px; gap: 6px; }
+          .amca-btn { font-size: 0.73rem; padding: 6px 10px; }
         }
       `}</style>
     </AdminLayout>

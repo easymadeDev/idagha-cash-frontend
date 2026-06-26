@@ -4,8 +4,6 @@ import useSWR from 'swr';
 import api, { pledgeApi, formatNaira, formatDate } from '../../lib/api';
 import { useToast } from '../../components/Toast';
 
-const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
-
 const authFetcher = (url: string) =>
   fetch(url, {
     headers: {
@@ -31,9 +29,9 @@ const STATUS_META: Record<string, { label: string; color: string; bg: string; bo
 
 export default function AdminPledges() {
   const { toast } = useToast();
-  const { data: pledges, isLoading, mutate } = useSWR(`${BACKEND}/pledges`, authFetcher);
-  const { data: stats, mutate: mutateStats } = useSWR(`${BACKEND}/pledges/stats`, authFetcher);
-  const { data: members } = useSWR(`${BACKEND}/members/admin/all`, authFetcher);
+  const { data: pledges, isLoading, mutate } = useSWR('/api/pledges', authFetcher);
+  const { data: stats, mutate: mutateStats } = useSWR('/api/pledges/stats', authFetcher);
+  const { data: members } = useSWR('/api/members/admin/all', authFetcher);
 
   const [activeTab, setActiveTab] = useState<'pending' | 'fulfilled' | 'all'>('pending');
   const [modal, setModal] = useState(false);
@@ -298,7 +296,7 @@ export default function AdminPledges() {
               <label className="form-label">WhatsApp / Phone</label>
               <input className="form-input" value={form.memberPhone} onChange={(e) => setForm((f) => ({ ...f, memberPhone: e.target.value }))} placeholder="+234..." />
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 14 }}>
               <div className="form-group">
                 <label className="form-label">Amount (₦) *</label>
                 <input className="form-input" type="number" min={1} value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} placeholder="e.g. 10000" />
@@ -405,6 +403,7 @@ export default function AdminPledges() {
           padding: 9px 12px;
           border-top: 1px solid var(--border);
           background: rgba(6,13,8,0.4);
+          flex-wrap: wrap;
         }
         .pa-btn {
           display: flex; align-items: center; gap: 4px;
@@ -417,18 +416,21 @@ export default function AdminPledges() {
         .pa-green:hover { background: rgba(34,197,94,0.18); }
         .pa-ghost  { background: rgba(255,255,255,0.04); color: var(--text-2); border-color: var(--border); }
         .pa-ghost:hover { background: rgba(255,255,255,0.08); color: var(--text-1); }
-        .pa-red    { width: 28px; padding: 5px; background: rgba(248,113,113,0.08); color: var(--red); border-color: rgba(248,113,113,0.2); border-radius: 6px; justify-content: center; }
+        .pa-red    { width: 28px; padding: 5px; background: rgba(248,113,113,0.08); color: var(--red); border-color: rgba(248,113,113,0.2); border-radius: 6px; justify-content: center; flex-shrink: 0; }
         .pa-red:hover { background: rgba(248,113,113,0.18); }
 
         @media (max-width: 640px) {
           .pledges-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
           .pledge-tab { padding: 7px 12px; font-size: 0.82rem; }
+          /* On mobile make the amount/status column sit below name on very narrow */
+          .pledge-card-top { flex-wrap: wrap; }
+          .pledge-card-top > div:last-child { flex-direction: row; align-items: center; gap: 8px; width: 100%; justify-content: flex-end; }
         }
-        @media (max-width: 380px) {
+        @media (max-width: 400px) {
           .pledges-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
-          .pledge-card-top { padding: 11px 11px 8px; gap: 9px; }
-          .pledge-card-actions { padding: 7px 9px; gap: 4px; }
-          .pa-btn { font-size: 0.68rem; padding: 4px 8px; }
+          .pledge-card-top { padding: 11px 11px 8px; gap: 8px; }
+          .pledge-card-actions { padding: 8px 10px; gap: 5px; }
+          .pa-btn { font-size: 0.7rem; padding: 5px 9px; }
         }
       `}</style>
     </AdminLayout>
