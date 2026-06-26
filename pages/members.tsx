@@ -140,7 +140,7 @@ export default function MembersPage() {
                       border: m.photo ? '2px solid rgba(34,197,94,0.3)' : 'none',
                     }}>
                       {m.photo ? (
-                        <img src={m.photo} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <img src={m.photo} alt={m.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       ) : getInitials(m.name)}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>

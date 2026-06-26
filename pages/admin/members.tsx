@@ -264,7 +264,7 @@ export default function AdminMembers() {
                     border: '1px solid var(--border-mid)',
                   }}>
                     {m.photo
-                      ? <img src={m.photo} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ? <img src={m.photo} alt={m.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                       : <span style={{ fontSize: '0.78rem', fontWeight: 800, color: 'var(--green-400)' }}>{getInitials(m.name)}</span>}
                   </div>
                   <div style={{ flex: 1, minWidth: 140 }}>
@@ -331,7 +331,7 @@ export default function AdminMembers() {
                       border: m.photo ? '2px solid var(--border-mid)' : 'none',
                     }}>
                       {m.photo
-                        ? <img src={m.photo} alt={m.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ? <img src={m.photo} alt={m.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         : getInitials(m.name)}
                     </div>
                     <div style={{ flex: 1, minWidth: 0 }}>
