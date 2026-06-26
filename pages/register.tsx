@@ -78,7 +78,13 @@ export default function RegisterPage() {
       let member: any = {};
       try { member = await res.json(); } catch {}
 
-      if (typeof window !== 'undefined') sessionStorage.setItem('idagha_registered', '1');
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('idagha_registered', '1');
+        // Store the member_token so they can update their profile immediately without re-login
+        if (member.member_token) {
+          sessionStorage.setItem('idagha_member_token', member.member_token);
+        }
+      }
       setCleared(true);
       if (member._id) {
         setMember({ _id: member._id, name: member.name, nickname: member.nickname || '', photo: member.photo || '', position: member.position || '' });
