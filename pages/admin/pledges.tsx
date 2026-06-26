@@ -23,10 +23,10 @@ const EMPTY_FORM = {
   dueDate: '',
 };
 
-const STATUS_META: Record<string, { label: string; color: string; bg: string }> = {
-  pending:   { label: 'Pending',   color: '#92400e', bg: 'rgba(251,191,36,0.15)' },
-  fulfilled: { label: 'Fulfilled', color: '#15803d', bg: 'rgba(34,197,94,0.15)' },
-  cancelled: { label: 'Cancelled', color: '#dc2626', bg: 'rgba(220,38,38,0.1)' },
+const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string }> = {
+  pending:   { label: 'Pending',   color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',  border: 'rgba(251,191,36,0.3)' },
+  fulfilled: { label: 'Fulfilled', color: 'var(--green-400)', bg: 'rgba(34,197,94,0.1)',  border: 'rgba(34,197,94,0.3)' },
+  cancelled: { label: 'Cancelled', color: 'var(--red)',  bg: 'rgba(248,113,113,0.1)', border: 'rgba(248,113,113,0.3)' },
 };
 
 export default function AdminPledges() {
@@ -53,14 +53,9 @@ export default function AdminPledges() {
     : [];
 
   const filtered = activeTab === 'all' ? list : list.filter((p) => p.status === activeTab);
-
   const pendingList = list.filter((p) => p.status === 'pending');
 
-  const openAdd = () => {
-    setEditing(null);
-    setForm(EMPTY_FORM);
-    setModal(true);
-  };
+  const openAdd = () => { setEditing(null); setForm(EMPTY_FORM); setModal(true); };
 
   const openEdit = (pledge: any) => {
     setEditing(pledge);
@@ -78,15 +73,7 @@ export default function AdminPledges() {
 
   const handleMemberSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const m = memberList.find((m: any) => m._id === e.target.value);
-    if (m) {
-      setForm((f) => ({
-        ...f,
-        memberId: m._id,
-        memberName: m.name,
-        memberEmail: m.email || '',
-        memberPhone: m.whatsapp || m.phone || '',
-      }));
-    }
+    if (m) setForm((f) => ({ ...f, memberId: m._id, memberName: m.name, memberEmail: m.email || '', memberPhone: m.whatsapp || m.phone || '' }));
   };
 
   const handleSave = async () => {
@@ -110,14 +97,9 @@ export default function AdminPledges() {
         await pledgeApi.adminCreate(payload);
         toast('Reunion support added — member notified', 'success');
       }
-      setModal(false);
-      mutate();
-      mutateStats();
-    } catch {
-      toast('Failed to save reunion support', 'error');
-    } finally {
-      setSaving(false);
-    }
+      setModal(false); mutate(); mutateStats();
+    } catch { toast('Failed to save reunion support', 'error'); }
+    finally { setSaving(false); }
   };
 
   const handleFulfill = async () => {
@@ -125,15 +107,10 @@ export default function AdminPledges() {
     setFulfilling(true);
     try {
       await pledgeApi.fulfill(fulfillId);
-      toast('Reunion support fulfilled — automatically added to Reunion Fund Wallet', 'success');
-      setFulfillId(null);
-      mutate();
-      mutateStats();
-    } catch {
-      toast('Failed to fulfill reunion support', 'error');
-    } finally {
-      setFulfilling(false);
-    }
+      toast('Marked fulfilled — added to Reunion Fund Wallet', 'success');
+      setFulfillId(null); mutate(); mutateStats();
+    } catch { toast('Failed to fulfill reunion support', 'error'); }
+    finally { setFulfilling(false); }
   };
 
   const handleDelete = async () => {
@@ -141,12 +118,8 @@ export default function AdminPledges() {
     try {
       await pledgeApi.remove(deleteId);
       toast('Reunion support deleted', 'success');
-      setDeleteId(null);
-      mutate();
-      mutateStats();
-    } catch {
-      toast('Failed to delete reunion support', 'error');
-    }
+      setDeleteId(null); mutate(); mutateStats();
+    } catch { toast('Failed to delete reunion support', 'error'); }
   };
 
   const openReminderModal = (pledgeId?: string) => {
@@ -161,61 +134,55 @@ export default function AdminPledges() {
       const { sent, failed, noContact } = res.data;
       toast(`Reminders sent: ${sent}${failed.length ? `, failed: ${failed.length}` : ''}${noContact.length ? `, no contact: ${noContact.length}` : ''}`, 'success');
       setReminderModal(false);
-    } catch {
-      toast('Failed to send reminders', 'error');
-    } finally {
-      setSendingReminder(false);
-    }
+    } catch { toast('Failed to send reminders', 'error'); }
+    finally { setSendingReminder(false); }
   };
 
   return (
     <AdminLayout>
-      <div style={{ padding: '24px 0' }}>
+      <div>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 24, flexWrap: 'wrap', gap: 12 }}>
           <div>
-            <h1 style={{ fontSize: '1.5rem', fontWeight: 700, margin: 0, color: 'var(--text-1)' }}>Reunion Support</h1>
-            <p style={{ color: 'var(--text-3)', margin: '4px 0 0', fontSize: '.9rem' }}>Track and manage member support for the 2026 Reunion Fund</p>
+            <h1 style={{ fontFamily: 'var(--font-d)', fontSize: 'clamp(1.3rem,4vw,1.6rem)', fontWeight: 800, letterSpacing: '-0.03em', margin: 0 }}>Reunion Support</h1>
+            <p style={{ color: 'var(--text-3)', margin: '4px 0 0', fontSize: '0.82rem' }}>Track member support for the 2026 Reunion Fund</p>
           </div>
-          <div style={{ display: 'flex', gap: 10 }}>
-            <button onClick={() => openReminderModal()} style={btnOutline}>Send Reminders</button>
-            <button onClick={openAdd} style={btnPrimary}>+ Add Support</button>
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <button className="btn btn-ghost btn-sm" onClick={() => openReminderModal()}>
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round"/></svg>
+              Reminders
+            </button>
+            <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', border: 'none' }} onClick={openAdd}>
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
+              Add Support
+            </button>
           </div>
         </div>
 
-        {/* Stats */}
+        {/* Stats grid */}
         {stats && (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(160px,1fr))', gap: 14, marginBottom: 28 }}>
+          <div className="pledges-stats-grid">
             <StatCard label="Total Support" value={formatNaira(stats.totalPledged)} color="#a855f7" />
-            <StatCard label="Fulfilled" value={formatNaira(stats.totalFulfilled)} color="#22c55e" />
+            <StatCard label="Fulfilled" value={formatNaira(stats.totalFulfilled)} color="var(--green-400)" />
             <StatCard label="Pending" value={formatNaira(stats.totalPending)} color="#fbbf24" />
-            <StatCard label="Total Count" value={String(stats.count)} color="#60a5fa" />
-            <StatCard label="Fulfilled Count" value={String(stats.fulfilledCount)} color="#22c55e" />
-            <StatCard label="Pending Count" value={String(stats.pendingCount)} color="#fbbf24" />
+            <StatCard label="Count" value={String(stats.count)} color="var(--blue)" />
+            <StatCard label="Fulfilled" value={String(stats.fulfilledCount)} color="var(--green-400)" sub="records" />
+            <StatCard label="Pending" value={String(stats.pendingCount)} color="#fbbf24" sub="records" />
           </div>
         )}
 
         {/* Tabs */}
-        <div style={{ display: 'flex', gap: 4, marginBottom: 20, borderBottom: '1px solid var(--border)', paddingBottom: 0 }}>
+        <div style={{ display: 'flex', gap: 2, marginBottom: 18, borderBottom: '1px solid var(--border)' }}>
           {(['pending', 'fulfilled', 'all'] as const).map((t) => (
             <button
               key={t}
               onClick={() => setActiveTab(t)}
-              style={{
-                padding: '8px 20px',
-                border: 'none',
-                background: 'none',
-                cursor: 'pointer',
-                fontWeight: activeTab === t ? 700 : 400,
-                color: activeTab === t ? '#a855f7' : 'var(--text-3)',
-                borderBottom: activeTab === t ? '2px solid #a855f7' : '2px solid transparent',
-                fontSize: '.92rem',
-                textTransform: 'capitalize',
-              }}
+              className="pledge-tab"
+              style={{ color: activeTab === t ? '#a855f7' : 'var(--text-3)', borderBottom: activeTab === t ? '2px solid #a855f7' : '2px solid transparent', fontWeight: activeTab === t ? 700 : 400 }}
             >
               {t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1)}
               {t !== 'all' && (
-                <span style={{ marginLeft: 6, background: t === 'pending' ? 'rgba(251,191,36,0.2)' : 'rgba(34,197,94,0.2)', color: t === 'pending' ? '#92400e' : '#15803d', borderRadius: 99, padding: '1px 8px', fontSize: '.78rem', fontWeight: 700 }}>
+                <span style={{ marginLeft: 5, background: t === 'pending' ? 'rgba(251,191,36,0.15)' : 'rgba(34,197,94,0.15)', color: t === 'pending' ? '#fbbf24' : 'var(--green-400)', borderRadius: 99, padding: '1px 7px', fontSize: '0.72rem', fontWeight: 700 }}>
                   {list.filter((p) => p.status === t).length}
                 </span>
               )}
@@ -223,79 +190,94 @@ export default function AdminPledges() {
           ))}
         </div>
 
-        {/* Table */}
+        {/* Cards list */}
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-3)' }}>Loading…</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {[...Array(4)].map((_, i) => <div key={i} className="skeleton" style={{ height: 90, borderRadius: 'var(--radius)' }} />)}
+          </div>
         ) : filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: 48, color: 'var(--text-3)' }}>No reunion support records found</div>
+          <div className="card" style={{ textAlign: 'center', padding: '40px 24px', color: 'var(--text-3)' }}>
+            No reunion support records found
+          </div>
         ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '.9rem' }}>
-              <thead>
-                <tr style={{ background: 'var(--surface-2)', borderBottom: '1px solid var(--border)' }}>
-                  {['Member', 'Amount', 'Status', 'Due Date', 'Added By', 'Note', 'Actions'].map((h) => (
-                    <th key={h} style={{ padding: '10px 14px', textAlign: 'left', color: 'var(--text-3)', fontWeight: 600, fontSize: '.82rem', whiteSpace: 'nowrap' }}>{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {filtered.map((pledge: any) => {
-                  const sm = STATUS_META[pledge.status] || STATUS_META.pending;
-                  return (
-                    <tr key={pledge._id} style={{ borderBottom: '1px solid var(--border)' }}>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--text-1)' }}>{pledge.memberName}</div>
-                        {pledge.memberEmail && <div style={{ fontSize: '.78rem', color: 'var(--text-3)' }}>{pledge.memberEmail}</div>}
-                        {pledge.memberPhone && <div style={{ fontSize: '.78rem', color: 'var(--text-3)' }}>{pledge.memberPhone}</div>}
-                      </td>
-                      <td style={{ padding: '12px 14px', fontWeight: 700, color: '#a855f7' }}>{formatNaira(pledge.amount)}</td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <span style={{ background: sm.bg, color: sm.color, borderRadius: 99, padding: '4px 12px', fontSize: '.8rem', fontWeight: 700 }}>{sm.label}</span>
-                      </td>
-                      <td style={{ padding: '12px 14px', color: 'var(--text-2)', fontSize: '.87rem' }}>
-                        {pledge.dueDate ? formatDate(pledge.dueDate) : '—'}
-                      </td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <span style={{ background: pledge.addedBy === 'admin' ? 'rgba(96,165,250,0.12)' : 'rgba(168,85,247,0.12)', color: pledge.addedBy === 'admin' ? '#2563eb' : '#7c3aed', borderRadius: 99, padding: '3px 10px', fontSize: '.78rem', fontWeight: 600 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {filtered.map((pledge: any) => {
+              const sm = STATUS_META[pledge.status] || STATUS_META.pending;
+              return (
+                <div key={pledge._id} className="pledge-card">
+                  {/* Top row: name + amount + status */}
+                  <div className="pledge-card-top">
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontWeight: 700, fontSize: '0.92rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {pledge.memberName}
+                      </div>
+                      <div style={{ fontSize: '0.74rem', color: 'var(--text-3)', marginTop: 2, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        {pledge.memberPhone && <span>{pledge.memberPhone}</span>}
+                        {pledge.memberEmail && <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 160 }}>{pledge.memberEmail}</span>}
+                        {pledge.dueDate && <span>Due: {formatDate(pledge.dueDate)}</span>}
+                      </div>
+                      {pledge.note && (
+                        <div style={{ fontSize: '0.73rem', color: 'var(--text-3)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          Note: {pledge.note}
+                        </div>
+                      )}
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5, flexShrink: 0 }}>
+                      <div style={{ fontWeight: 800, fontSize: '1rem', color: '#a855f7' }}>{formatNaira(pledge.amount)}</div>
+                      <div style={{ display: 'flex', gap: 5 }}>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: sm.bg, color: sm.color, border: `1px solid ${sm.border}` }}>
+                          {sm.label}
+                        </span>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: pledge.addedBy === 'admin' ? 'rgba(96,165,250,0.1)' : 'rgba(168,85,247,0.1)', color: pledge.addedBy === 'admin' ? 'var(--blue)' : '#c084fc', border: '1px solid var(--border)' }}>
                           {pledge.addedBy === 'admin' ? 'Admin' : 'Self'}
                         </span>
-                      </td>
-                      <td style={{ padding: '12px 14px', color: 'var(--text-3)', fontSize: '.85rem', maxWidth: 160 }}>{pledge.note || '—'}</td>
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                          {pledge.status === 'pending' && (
-                            <>
-                              <button onClick={() => setFulfillId(pledge._id)} style={btnSmGreen}>Fulfill</button>
-                              <button onClick={() => openReminderModal(pledge._id)} style={btnSmOutline}>Remind</button>
-                            </>
-                          )}
-                          <button onClick={() => openEdit(pledge)} style={btnSmOutline}>Edit</button>
-                          <button onClick={() => setDeleteId(pledge._id)} style={btnSmRed}>Delete</button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Actions */}
+                  <div className="pledge-card-actions">
+                    {pledge.status === 'pending' && (
+                      <>
+                        <button className="pa-btn pa-green" onClick={() => setFulfillId(pledge._id)}>
+                          <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          Fulfill
+                        </button>
+                        <button className="pa-btn pa-ghost" onClick={() => openReminderModal(pledge._id)}>
+                          <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                          Remind
+                        </button>
+                      </>
+                    )}
+                    <button className="pa-btn pa-ghost" onClick={() => openEdit(pledge)}>
+                      <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      Edit
+                    </button>
+                    <button className="pa-btn pa-red" onClick={() => setDeleteId(pledge._id)}>
+                      <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         )}
+
+        <div style={{ marginTop: 10, fontSize: '0.78rem', color: 'var(--text-3)', textAlign: 'right' }}>
+          {filtered.length} record{filtered.length !== 1 ? 's' : ''}
+        </div>
       </div>
 
       {/* Add/Edit Modal */}
       {modal && (
-        <div style={overlay} onClick={() => setModal(false)}>
-          <div style={modalBox} onClick={(e) => e.stopPropagation()}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-              <h2 style={{ margin: 0, fontSize: '1.15rem', fontWeight: 700 }}>{editing ? 'Edit Reunion Support' : 'Add Reunion Support for Member'}</h2>
-              <button onClick={() => setModal(false)} style={closeBtn}>✕</button>
-            </div>
+        <div className="modal-overlay" onClick={() => setModal(false)}>
+          <div className="modal" style={{ maxWidth: 540 }} onClick={(e) => e.stopPropagation()}>
+            <p className="modal-title">{editing ? 'Edit Reunion Support' : 'Add Reunion Support'}</p>
 
-            {/* Member selector */}
             {!editing && (
-              <div style={fieldWrap}>
-                <label style={labelStyle}>Select Member (optional)</label>
-                <select style={inputStyle} onChange={handleMemberSelect} defaultValue="">
+              <div className="form-group">
+                <label className="form-label">Select Member (optional)</label>
+                <select className="form-select" onChange={handleMemberSelect} defaultValue="">
                   <option value="">— type manually or select —</option>
                   {memberList.map((m: any) => (
                     <option key={m._id} value={m._id}>{m.name}</option>
@@ -304,36 +286,38 @@ export default function AdminPledges() {
               </div>
             )}
 
-            <div style={fieldWrap}>
-              <label style={labelStyle}>Member Name *</label>
-              <input style={inputStyle} value={form.memberName} onChange={(e) => setForm((f) => ({ ...f, memberName: e.target.value }))} placeholder="Full name" />
+            <div className="form-group">
+              <label className="form-label">Member Name *</label>
+              <input className="form-input" value={form.memberName} onChange={(e) => setForm((f) => ({ ...f, memberName: e.target.value }))} placeholder="Full name" />
             </div>
-            <div style={fieldWrap}>
-              <label style={labelStyle}>Email</label>
-              <input style={inputStyle} type="email" value={form.memberEmail} onChange={(e) => setForm((f) => ({ ...f, memberEmail: e.target.value }))} placeholder="Email address" />
+            <div className="form-group">
+              <label className="form-label">Email</label>
+              <input className="form-input" type="email" value={form.memberEmail} onChange={(e) => setForm((f) => ({ ...f, memberEmail: e.target.value }))} placeholder="Email address" />
             </div>
-            <div style={fieldWrap}>
-              <label style={labelStyle}>WhatsApp / Phone</label>
-              <input style={inputStyle} value={form.memberPhone} onChange={(e) => setForm((f) => ({ ...f, memberPhone: e.target.value }))} placeholder="+234..." />
+            <div className="form-group">
+              <label className="form-label">WhatsApp / Phone</label>
+              <input className="form-input" value={form.memberPhone} onChange={(e) => setForm((f) => ({ ...f, memberPhone: e.target.value }))} placeholder="+234..." />
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
-              <div style={fieldWrap}>
-                <label style={labelStyle}>Support Amount (₦) *</label>
-                <input style={inputStyle} type="number" min={1} value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} placeholder="e.g. 10000" />
+              <div className="form-group">
+                <label className="form-label">Amount (₦) *</label>
+                <input className="form-input" type="number" min={1} value={form.amount} onChange={(e) => setForm((f) => ({ ...f, amount: e.target.value }))} placeholder="e.g. 10000" />
               </div>
-              <div style={fieldWrap}>
-                <label style={labelStyle}>Due Date</label>
-                <input style={inputStyle} type="date" value={form.dueDate} onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))} />
+              <div className="form-group">
+                <label className="form-label">Due Date</label>
+                <input className="form-input" type="date" value={form.dueDate} onChange={(e) => setForm((f) => ({ ...f, dueDate: e.target.value }))} />
               </div>
             </div>
-            <div style={fieldWrap}>
-              <label style={labelStyle}>Note</label>
-              <textarea style={{ ...inputStyle, resize: 'vertical', minHeight: 72 }} value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} placeholder="Optional note..." />
+            <div className="form-group">
+              <label className="form-label">Note</label>
+              <textarea className="form-textarea" value={form.note} onChange={(e) => setForm((f) => ({ ...f, note: e.target.value }))} placeholder="Optional note…" rows={3} />
             </div>
 
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
-              <button onClick={() => setModal(false)} style={btnOutline}>Cancel</button>
-              <button onClick={handleSave} disabled={saving} style={btnPrimary}>{saving ? 'Saving…' : editing ? 'Save Changes' : 'Add Support'}</button>
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={() => setModal(false)}>Cancel</button>
+              <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', border: 'none' }} onClick={handleSave} disabled={saving}>
+                {saving ? 'Saving…' : editing ? 'Save Changes' : 'Add Support'}
+              </button>
             </div>
           </div>
         </div>
@@ -341,15 +325,17 @@ export default function AdminPledges() {
 
       {/* Fulfill Confirm */}
       {fulfillId && (
-        <div style={overlay} onClick={() => setFulfillId(null)}>
-          <div style={{ ...modalBox, maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Mark as Fulfilled?</h2>
-            <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>
-              This will mark the reunion support as fulfilled and <strong>automatically add the amount as a contribution to the Reunion Fund Wallet</strong>. This action cannot be undone.
+        <div className="modal-overlay" onClick={() => setFulfillId(null)}>
+          <div className="modal" style={{ maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
+            <p className="modal-title">Mark as Fulfilled?</p>
+            <p style={{ color: 'var(--text-3)', marginBottom: 20, fontSize: '0.9rem' }}>
+              This will mark the support as fulfilled and <strong style={{ color: 'var(--text-1)' }}>automatically add the amount to the Reunion Fund Wallet</strong>. Cannot be undone.
             </p>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button onClick={() => setFulfillId(null)} style={btnOutline}>Cancel</button>
-              <button onClick={handleFulfill} disabled={fulfilling} style={btnPrimary}>{fulfilling ? 'Marking…' : 'Confirm Fulfill'}</button>
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={() => setFulfillId(null)}>Cancel</button>
+              <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', border: 'none' }} onClick={handleFulfill} disabled={fulfilling}>
+                {fulfilling ? 'Marking…' : 'Confirm Fulfill'}
+              </button>
             </div>
           </div>
         </div>
@@ -357,13 +343,13 @@ export default function AdminPledges() {
 
       {/* Delete Confirm */}
       {deleteId && (
-        <div style={overlay} onClick={() => setDeleteId(null)}>
-          <div style={{ ...modalBox, maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Delete Reunion Support?</h2>
-            <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>This reunion support record will be permanently removed.</p>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button onClick={() => setDeleteId(null)} style={btnOutline}>Cancel</button>
-              <button onClick={handleDelete} style={{ ...btnPrimary, background: '#dc2626' }}>Delete</button>
+        <div className="modal-overlay" onClick={() => setDeleteId(null)}>
+          <div className="modal" style={{ maxWidth: 380 }} onClick={(e) => e.stopPropagation()}>
+            <p className="modal-title">Delete Support Record?</p>
+            <p style={{ color: 'var(--text-3)', marginBottom: 20, fontSize: '0.9rem' }}>This reunion support record will be permanently removed.</p>
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={() => setDeleteId(null)}>Cancel</button>
+              <button className="btn btn-danger" onClick={handleDelete}>Delete</button>
             </div>
           </div>
         </div>
@@ -371,143 +357,91 @@ export default function AdminPledges() {
 
       {/* Reminder Modal */}
       {reminderModal && (
-        <div style={overlay} onClick={() => setReminderModal(false)}>
-          <div style={{ ...modalBox, maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
-            <h2 style={{ margin: '0 0 12px', fontSize: '1.1rem' }}>Send Reunion Support Reminders</h2>
-            <p style={{ color: 'var(--text-2)', margin: '0 0 20px' }}>
+        <div className="modal-overlay" onClick={() => setReminderModal(false)}>
+          <div className="modal" style={{ maxWidth: 400 }} onClick={(e) => e.stopPropagation()}>
+            <p className="modal-title">Send Reminders</p>
+            <p style={{ color: 'var(--text-3)', marginBottom: 20, fontSize: '0.9rem' }}>
               {reminderTargets.length > 0
                 ? 'Send a reminder to this member about their pending reunion support via email and WhatsApp.'
                 : `Send reminders to all ${pendingList.length} members with pending reunion support via email and WhatsApp.`}
             </p>
-            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button onClick={() => setReminderModal(false)} style={btnOutline}>Cancel</button>
-              <button onClick={handleSendReminder} disabled={sendingReminder} style={btnPrimary}>
+            <div className="modal-actions">
+              <button className="btn btn-ghost" onClick={() => setReminderModal(false)}>Cancel</button>
+              <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', border: 'none' }} onClick={handleSendReminder} disabled={sendingReminder}>
                 {sendingReminder ? 'Sending…' : 'Send Now'}
               </button>
             </div>
           </div>
         </div>
       )}
+
+      <style>{`
+        .pledges-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 10px;
+          margin-bottom: 24px;
+        }
+        .pledge-tab {
+          padding: 8px 16px; border: none; background: none;
+          cursor: pointer; font-size: 0.88rem;
+          font-family: var(--font); transition: color 0.15s;
+          white-space: nowrap;
+        }
+        .pledge-card {
+          background: var(--grad-card);
+          border: 1px solid var(--border);
+          border-radius: var(--radius);
+          overflow: hidden;
+          transition: border-color 0.2s;
+        }
+        .pledge-card:hover { border-color: var(--border-mid); }
+        .pledge-card-top {
+          display: flex; gap: 12px; align-items: flex-start;
+          padding: 14px 14px 10px;
+        }
+        .pledge-card-actions {
+          display: flex; gap: 5px; align-items: center;
+          padding: 9px 12px;
+          border-top: 1px solid var(--border);
+          background: rgba(6,13,8,0.4);
+        }
+        .pa-btn {
+          display: flex; align-items: center; gap: 4px;
+          padding: 5px 10px; border-radius: 6px; font-size: 0.73rem; font-weight: 600;
+          cursor: pointer; border: 1px solid transparent; transition: all 0.15s;
+          font-family: var(--font); white-space: nowrap;
+        }
+        .pa-btn:last-child { margin-left: auto; }
+        .pa-green  { background: rgba(34,197,94,0.1); color: var(--green-400); border-color: rgba(34,197,94,0.25); }
+        .pa-green:hover { background: rgba(34,197,94,0.18); }
+        .pa-ghost  { background: rgba(255,255,255,0.04); color: var(--text-2); border-color: var(--border); }
+        .pa-ghost:hover { background: rgba(255,255,255,0.08); color: var(--text-1); }
+        .pa-red    { width: 28px; padding: 5px; background: rgba(248,113,113,0.08); color: var(--red); border-color: rgba(248,113,113,0.2); border-radius: 6px; justify-content: center; }
+        .pa-red:hover { background: rgba(248,113,113,0.18); }
+
+        @media (max-width: 640px) {
+          .pledges-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+          .pledge-tab { padding: 7px 12px; font-size: 0.82rem; }
+        }
+        @media (max-width: 380px) {
+          .pledges-stats-grid { grid-template-columns: repeat(2, 1fr); gap: 6px; }
+          .pledge-card-top { padding: 11px 11px 8px; gap: 9px; }
+          .pledge-card-actions { padding: 7px 9px; gap: 4px; }
+          .pa-btn { font-size: 0.68rem; padding: 4px 8px; }
+        }
+      `}</style>
     </AdminLayout>
   );
 }
 
-function StatCard({ label, value, color }: { label: string; value: string; color: string }) {
+function StatCard({ label, value, color, sub }: { label: string; value: string; color: string; sub?: string }) {
   return (
-    <div style={{ background: 'var(--surface-1)', border: '1px solid var(--border)', borderRadius: 12, padding: '16px 20px' }}>
-      <div style={{ fontSize: '.8rem', color: 'var(--text-3)', marginBottom: 4 }}>{label}</div>
-      <div style={{ fontSize: '1.25rem', fontWeight: 700, color }}>{value}</div>
+    <div style={{ background: 'var(--grad-card)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', padding: '12px 14px' }}>
+      <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginBottom: 3, display: 'flex', gap: 4, alignItems: 'baseline' }}>
+        {label} {sub && <span style={{ fontSize: '0.65rem' }}>{sub}</span>}
+      </div>
+      <div style={{ fontSize: '1.1rem', fontWeight: 800, color, fontFamily: 'var(--font-d)', letterSpacing: '-0.02em' }}>{value}</div>
     </div>
   );
 }
-
-// ── shared styles ─────────────────────────────────────────────────────────────
-
-const btnPrimary: React.CSSProperties = {
-  background: 'linear-gradient(135deg,#7c3aed,#a855f7)',
-  color: '#fff',
-  border: 'none',
-  borderRadius: 8,
-  padding: '9px 20px',
-  cursor: 'pointer',
-  fontWeight: 600,
-  fontSize: '.9rem',
-};
-
-const btnOutline: React.CSSProperties = {
-  background: 'transparent',
-  color: 'var(--text-2)',
-  border: '1px solid var(--border)',
-  borderRadius: 8,
-  padding: '9px 20px',
-  cursor: 'pointer',
-  fontWeight: 600,
-  fontSize: '.9rem',
-};
-
-const btnSmGreen: React.CSSProperties = {
-  background: 'rgba(34,197,94,0.12)',
-  color: '#15803d',
-  border: 'none',
-  borderRadius: 6,
-  padding: '5px 12px',
-  cursor: 'pointer',
-  fontSize: '.8rem',
-  fontWeight: 600,
-};
-
-const btnSmOutline: React.CSSProperties = {
-  background: 'transparent',
-  color: 'var(--text-2)',
-  border: '1px solid var(--border)',
-  borderRadius: 6,
-  padding: '5px 12px',
-  cursor: 'pointer',
-  fontSize: '.8rem',
-  fontWeight: 600,
-};
-
-const btnSmRed: React.CSSProperties = {
-  background: 'rgba(220,38,38,0.1)',
-  color: '#dc2626',
-  border: 'none',
-  borderRadius: 6,
-  padding: '5px 12px',
-  cursor: 'pointer',
-  fontSize: '.8rem',
-  fontWeight: 600,
-};
-
-const overlay: React.CSSProperties = {
-  position: 'fixed',
-  inset: 0,
-  background: 'rgba(0,0,0,0.75)',
-  backdropFilter: 'blur(4px)',
-  display: 'flex',
-  alignItems: 'center',
-  justifyContent: 'center',
-  zIndex: 1000,
-  padding: 16,
-};
-
-const modalBox: React.CSSProperties = {
-  background: '#111827',
-  border: '1px solid rgba(168,85,247,0.2)',
-  borderRadius: 14,
-  padding: 28,
-  width: '100%',
-  maxWidth: 560,
-  maxHeight: '90vh',
-  overflowY: 'auto',
-  boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
-};
-
-const closeBtn: React.CSSProperties = {
-  background: 'none',
-  border: 'none',
-  fontSize: '1.1rem',
-  cursor: 'pointer',
-  color: 'var(--text-3)',
-  padding: 4,
-};
-
-const fieldWrap: React.CSSProperties = { marginBottom: 14 };
-
-const labelStyle: React.CSSProperties = {
-  display: 'block',
-  fontSize: '.82rem',
-  fontWeight: 600,
-  color: '#d1d5db',
-  marginBottom: 5,
-};
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '9px 12px',
-  border: '1px solid rgba(255,255,255,0.12)',
-  borderRadius: 8,
-  background: '#1f2937',
-  color: '#f9fafb',
-  fontSize: '.9rem',
-  boxSizing: 'border-box',
-};
