@@ -1,5 +1,4 @@
 import Navbar from './Navbar';
-import ActivityTicker from './ActivityTicker';
 import { useRouter } from 'next/router';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -7,7 +6,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <>
       <Navbar />
-      <ActivityTicker />
       <div className="page-wrap">{children}</div>
       <footer className="footer">
         <div className="footer-inner">
