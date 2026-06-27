@@ -445,6 +445,31 @@ export default function HomePage() {
   return (
     <Layout>
       {activeWallet && <WalletModal ws={activeWallet} onClose={() => setActiveWallet(null)} />}
+
+      {/* ── Live banner strip ── */}
+      <div style={{
+        width: '100%',
+        background: 'linear-gradient(90deg, rgba(6,78,59,0.9) 0%, rgba(4,47,46,0.95) 50%, rgba(6,78,59,0.9) 100%)',
+        borderBottom: '1px solid rgba(34,197,94,0.2)',
+        padding: '8px 20px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+        backdropFilter: 'blur(8px)',
+      }}>
+        <span style={{
+          width: 8, height: 8, borderRadius: '50%',
+          background: 'var(--green-400)',
+          boxShadow: '0 0 8px var(--green-400)',
+          display: 'inline-block', flexShrink: 0,
+          animation: 'livePing 1.5s ease-in-out infinite',
+        }} />
+        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--green-400)', letterSpacing: '0.04em' }}>
+          Live Public Financial Dashboard
+        </span>
+        <span style={{ fontSize: '0.72rem', color: 'rgba(134,239,172,0.6)', letterSpacing: '0.03em' }}>
+          · Every transaction recorded in real time
+        </span>
+      </div>
+
       <div className="container">
 
         {/* ── Announcements slider ── */}
