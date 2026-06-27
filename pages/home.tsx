@@ -480,10 +480,6 @@ export default function HomePage() {
           <div className="hero-bg-glow" />
           <div className="hero-row">
             <div className="hero-text">
-              <div className="hero-eyebrow">
-                <span className="live-dot" />
-                Live Public Financial Dashboard
-              </div>
               <h1 className="hero-title">
                 IDAGHA Class of 2018<br />
                 <span className="grad-text">Alumni Portal</span>
