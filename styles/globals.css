@@ -149,7 +149,7 @@ button { font-family: var(--font); }
 .nav-mobile-btn { display: none; background: none; border: none; color: var(--text-1); cursor: pointer; padding: 8px; flex-shrink: 0; }
 
 /* ─── HERO ───────────────────────────────────── */
-.hero { padding: 80px 0 60px; position: relative; }
+.hero { padding: 36px 0 32px; position: relative; }
 .hero-row {
   display: flex; align-items: flex-start; gap: 40px;
 }

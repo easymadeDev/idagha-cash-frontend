@@ -288,7 +288,7 @@ function AnnouncementSlider({ announcements }: { announcements: any[] }) {
   );
 
   return (
-    <div style={{ paddingTop: 24 }}>
+    <div style={{ paddingTop: 12 }}>
       <div className="announce-bar">
         {/* Top row: icon + text + (desktop-only) nav */}
         <div className="announce-top-row">
