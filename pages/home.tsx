@@ -449,24 +449,20 @@ export default function HomePage() {
       {/* ── Live banner strip ── */}
       <div style={{
         width: '100%',
-        background: 'linear-gradient(90deg, rgba(6,78,59,0.9) 0%, rgba(4,47,46,0.95) 50%, rgba(6,78,59,0.9) 100%)',
-        borderBottom: '1px solid rgba(34,197,94,0.2)',
-        padding: '8px 20px',
-        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-        backdropFilter: 'blur(8px)',
+        background: 'rgba(34,197,94,0.07)',
+        borderBottom: '1px solid rgba(34,197,94,0.15)',
+        padding: '7px 16px',
+        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
       }}>
         <span style={{
-          width: 8, height: 8, borderRadius: '50%',
+          width: 7, height: 7, borderRadius: '50%',
           background: 'var(--green-400)',
-          boxShadow: '0 0 8px var(--green-400)',
+          boxShadow: '0 0 6px var(--green-400)',
           display: 'inline-block', flexShrink: 0,
           animation: 'livePing 1.5s ease-in-out infinite',
         }} />
-        <span style={{ fontSize: '0.78rem', fontWeight: 700, color: 'var(--green-400)', letterSpacing: '0.04em' }}>
+        <span style={{ fontSize: '0.75rem', fontWeight: 600, color: 'var(--green-400)' }}>
           Live Public Financial Dashboard
-        </span>
-        <span style={{ fontSize: '0.72rem', color: 'rgba(134,239,172,0.6)', letterSpacing: '0.03em' }}>
-          · Every transaction recorded in real time
         </span>
       </div>
 
