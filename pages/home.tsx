@@ -273,6 +273,8 @@ function AnnouncementSlider({ announcements }: { announcements: any[] }) {
     timerRef.current = setInterval(() => { setIdx(i => (i + 1) % slides.length); setExpanded(false); }, 4500);
   };
 
+  const pause = () => clearInterval(timerRef.current);
+
   useEffect(() => {
     timerRef.current = setInterval(() => { setIdx(i => (i + 1) % slides.length); setExpanded(false); }, 4500);
     return () => clearInterval(timerRef.current);
@@ -302,7 +304,7 @@ function AnnouncementSlider({ announcements }: { announcements: any[] }) {
 
           <div className="announce-content-wrap"
             style={{ cursor: 'pointer', ...(expanded ? { height: 'auto' } : {}) }}
-            onClick={() => setExpanded(e => !e)}>
+            onClick={() => { pause(); setExpanded(e => !e); }}>
             <div key={a._id} style={{ animation: 'announceSlide 0.35s cubic-bezier(0.4,0,0.2,1) both' }}>
               <div className="announce-title">{a.title}</div>
               <div className="announce-body" style={expanded ? { WebkitLineClamp: 'unset', display: 'block' } : undefined}>{a.content}</div>
