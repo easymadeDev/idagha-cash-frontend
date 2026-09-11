@@ -54,6 +54,9 @@ export default function AdminContributions() {
   const [approving, setApproving] = useState(false);
   const [approveError, setApproveError] = useState('');
 
+  const NOT_A_MEMBER = '__not_a_member__';
+  const [contributorMode, setContributorMode] = useState<'member' | 'other'>('member');
+
   const list = Array.isArray(contributions) ? contributions : [];
   const memberList = Array.isArray(members)
     ? members.filter((m: any) => m.status === 'active').sort((a: any, b: any) => a.name.localeCompare(b.name))
@@ -108,12 +111,15 @@ export default function AdminContributions() {
   const openAdd = () => {
     const groupWallet = walletList.find((w: any) => w.type === 'general');
     setEditing(null);
+    setContributorMode('member');
     setForm({ ...EMPTY, walletId: groupWallet?._id || '', category: 'monthly-dues' });
     setModal(true);
   };
 
   const openEdit = (c: any) => {
     setEditing(c);
+    const isKnownMember = memberList.some((m: any) => m.name === c.contributorName);
+    setContributorMode(isKnownMember ? 'member' : 'other');
     setForm({
       contributorName: c.contributorName,
       amount: String(c.amount),
@@ -530,11 +536,18 @@ export default function AdminContributions() {
                 <label className="form-label">
                   {isReunion ? 'Member (Reunion Fund) *' : 'Member / Contributor *'}
                 </label>
-                {memberList.length > 0 ? (
+                {memberList.length > 0 && contributorMode === 'member' ? (
                   <select
                     className="form-select"
                     value={form.contributorName}
-                    onChange={(e) => setForm({ ...form, contributorName: e.target.value })}
+                    onChange={(e) => {
+                      if (e.target.value === NOT_A_MEMBER) {
+                        setContributorMode('other');
+                        setForm({ ...form, contributorName: '' });
+                      } else {
+                        setForm({ ...form, contributorName: e.target.value });
+                      }
+                    }}
                     required
                   >
                     <option value="">— Select member —</option>
@@ -548,15 +561,31 @@ export default function AdminContributions() {
                         </option>
                       );
                     })}
+                    <option value={NOT_A_MEMBER}>+ Someone else (not a member yet)</option>
                   </select>
                 ) : (
-                  <input
-                    className="form-input"
-                    value={form.contributorName}
-                    onChange={(e) => setForm({ ...form, contributorName: e.target.value })}
-                    required
-                    placeholder="Type contributor name"
-                  />
+                  <div>
+                    <input
+                      className="form-input"
+                      value={form.contributorName}
+                      onChange={(e) => setForm({ ...form, contributorName: e.target.value })}
+                      required
+                      autoFocus={memberList.length > 0}
+                      placeholder="Type the person's full name"
+                    />
+                    {memberList.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => { setContributorMode('member'); setForm({ ...form, contributorName: '' }); }}
+                        style={{ marginTop: 6, background: 'none', border: 'none', padding: 0, color: 'var(--blue)', fontSize: '0.78rem', cursor: 'pointer', textDecoration: 'underline' }}
+                      >
+                        ← Pick from existing members instead
+                      </button>
+                    )}
+                    <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 5 }}>
+                      Not a member yet — once they join, use "Merge" on their member card to link this and other past records to their profile.
+                    </div>
+                  </div>
                 )}
 
                 {/* Reunion fund progress for selected member */}

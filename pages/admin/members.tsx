@@ -53,6 +53,12 @@ export default function AdminMembers() {
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const [mergeTarget, setMergeTarget] = useState<any>(null);
+  const [mergeName, setMergeName] = useState('');
+  const [merging, setMerging] = useState(false);
+  const [mergeResult, setMergeResult] = useState<{ contributionsMerged: number; pledgesMerged: number } | null>(null);
+  const { data: unlinkedNames } = useSWR(mergeTarget ? '/api/members/unlinked-names' : null, fetcher);
+
   const PROFILE_URL = 'https://idagha2018alumni-beta.vercel.app/profile';
 
   const NOTIFY_TEMPLATES = [
@@ -205,6 +211,27 @@ export default function AdminMembers() {
   const approve = async (m: any) => {
     try { await api.put(`/members/${m._id}/approve`); mutate('/api/members/admin/all'); mutate('/api/members'); toast('Member approved.', 'success'); }
     catch { toast('Failed to approve.', 'error'); }
+  };
+
+  const openMerge = (m: any) => {
+    setMergeTarget(m);
+    setMergeName('');
+    setMergeResult(null);
+  };
+
+  const runMerge = async () => {
+    if (!mergeName.trim()) { toast('Enter or select the name to merge.', 'error'); return; }
+    setMerging(true);
+    try {
+      const res = await api.post(`/members/${mergeTarget._id}/merge`, { name: mergeName.trim() });
+      setMergeResult(res.data);
+      mutate('/api/contributions/admin/all');
+      mutate('/api/members/unlinked-names');
+    } catch (err: any) {
+      toast(err.response?.data?.message || 'Failed to merge records.', 'error');
+    } finally {
+      setMerging(false);
+    }
   };
 
   const sendWelcomeSelected = async () => {
@@ -400,6 +427,10 @@ export default function AdminMembers() {
                       <button className="amca-btn amca-notify" onClick={() => openNotify(m)} title="Notify by email/WhatsApp">
                         <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                         Notify
+                      </button>
+                      <button className="amca-btn amca-merge" onClick={() => openMerge(m)} title="Merge past contributions/pledges recorded before they were a member">
+                        <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17 8l4 4m0 0l-4 4m4-4H3" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                        Merge
                       </button>
                       <button
                         className="amca-btn amca-wa"
@@ -745,6 +776,65 @@ export default function AdminMembers() {
         </div>
       )}
 
+      {/* Merge Past Records Modal */}
+      {mergeTarget && (
+        <div className="modal-overlay" onClick={() => { if (!merging) { setMergeTarget(null); setMergeResult(null); } }}>
+          <div className="modal" style={{ maxWidth: 460 }} onClick={(e) => e.stopPropagation()}>
+            <p className="modal-title">Merge Past Records</p>
+            {!mergeResult ? (
+              <>
+                <p style={{ color: 'var(--text-3)', fontSize: '0.85rem', marginBottom: 16 }}>
+                  If <strong>{mergeTarget.name}</strong> had contributions or reunion support recorded under a different
+                  name before they became a member, link those records to their profile here.
+                </p>
+                <div className="form-group">
+                  <label className="form-label">Name it was recorded under</label>
+                  <input
+                    className="form-input"
+                    list="unlinked-names-list"
+                    value={mergeName}
+                    onChange={(e) => setMergeName(e.target.value)}
+                    placeholder="e.g. Emeka O. (as typed at the time)"
+                  />
+                  <datalist id="unlinked-names-list">
+                    {(Array.isArray(unlinkedNames) ? unlinkedNames : []).map((n: string) => (
+                      <option key={n} value={n} />
+                    ))}
+                  </datalist>
+                  <div style={{ fontSize: '0.72rem', color: 'var(--text-3)', marginTop: 5 }}>
+                    Matches are case-insensitive and exact. Pick from suggestions or type the name as it was entered.
+                  </div>
+                </div>
+                <div className="modal-actions">
+                  <button className="btn btn-ghost" onClick={() => setMergeTarget(null)} disabled={merging}>Cancel</button>
+                  <button className="btn btn-primary" onClick={runMerge} disabled={merging || !mergeName.trim()}>
+                    {merging ? 'Merging…' : 'Merge Records'}
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="alert alert-success" style={{ marginBottom: 14 }}>Records merged into {mergeTarget.name}.</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 18 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                    <span style={{ color: 'var(--text-3)' }}>Contributions linked</span>
+                    <strong style={{ color: 'var(--green-400)' }}>{mergeResult.contributionsMerged}</strong>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                    <span style={{ color: 'var(--text-3)' }}>Reunion pledges linked</span>
+                    <strong style={{ color: 'var(--green-400)' }}>{mergeResult.pledgesMerged}</strong>
+                  </div>
+                </div>
+                <div className="modal-actions">
+                  <button className="btn btn-ghost btn-sm" onClick={() => { setMergeResult(null); setMergeName(''); }}>Merge another name</button>
+                  <button className="btn btn-primary" onClick={() => { setMergeTarget(null); setMergeResult(null); }}>Done</button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
 
@@ -805,6 +895,8 @@ export default function AdminMembers() {
         .amca-edit:hover { background: rgba(255,255,255,0.08); color: var(--text-1); }
         .amca-notify  { flex: 1; background: rgba(59,130,246,0.1); color: #93c5fd; border-color: rgba(59,130,246,0.25); }
         .amca-notify:hover { background: rgba(59,130,246,0.18); }
+        .amca-merge   { flex: 1; background: rgba(196,181,253,0.1); color: #c4b5fd; border-color: rgba(196,181,253,0.25); }
+        .amca-merge:hover { background: rgba(196,181,253,0.18); }
         .amca-wa      { flex: 1; }
         .amca-toggle  { flex: 1; }
         .amca-deactivate { background: rgba(107,114,128,0.1); color: var(--text-3); border-color: var(--border); }
