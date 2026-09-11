@@ -56,6 +56,8 @@ export default function AdminContributions() {
 
   const NOT_A_MEMBER = '__not_a_member__';
   const [contributorMode, setContributorMode] = useState<'member' | 'other'>('member');
+  // True once the admin picks a wallet by hand — stops the category from overriding it.
+  const [walletTouched, setWalletTouched] = useState(false);
 
   const list = Array.isArray(contributions) ? contributions : [];
   const memberList = Array.isArray(members)
@@ -98,12 +100,16 @@ export default function AdminContributions() {
   // Auto-select wallet based on category
   const handleCategoryChange = (cat: string) => {
     let walletId = form.walletId;
-    if (cat === 'reunion-fund') {
-      const reunionWallet = walletList.find((w: any) => w.type === 'reunion');
-      if (reunionWallet) walletId = reunionWallet._id;
-    } else if (cat === 'monthly-dues' || cat === 'general' || cat === 'welfare' || cat === 'special') {
-      const groupWallet = walletList.find((w: any) => w.type === 'general');
-      if (groupWallet) walletId = groupWallet._id;
+    // Only auto-pick a wallet while the admin hasn't chosen one — a manual
+    // wallet selection must never be silently overridden by the category.
+    if (!walletTouched) {
+      if (cat === 'reunion-fund') {
+        const reunionWallet = walletList.find((w: any) => w.type === 'reunion');
+        if (reunionWallet) walletId = reunionWallet._id;
+      } else if (cat === 'monthly-dues' || cat === 'general' || cat === 'welfare' || cat === 'special') {
+        const groupWallet = walletList.find((w: any) => w.type === 'general');
+        if (groupWallet) walletId = groupWallet._id;
+      }
     }
     setForm({ ...form, category: cat, contributorName: '', walletId });
   };
@@ -112,6 +118,7 @@ export default function AdminContributions() {
     const groupWallet = walletList.find((w: any) => w.type === 'general');
     setEditing(null);
     setContributorMode('member');
+    setWalletTouched(false);
     setForm({ ...EMPTY, walletId: groupWallet?._id || '', category: 'monthly-dues' });
     setModal(true);
   };
@@ -120,6 +127,7 @@ export default function AdminContributions() {
     setEditing(c);
     const isKnownMember = memberList.some((m: any) => m.name === c.contributorName);
     setContributorMode(isKnownMember ? 'member' : 'other');
+    setWalletTouched(true);
     setForm({
       contributorName: c.contributorName,
       amount: String(c.amount),
@@ -623,7 +631,7 @@ export default function AdminContributions() {
               {/* ── Wallet selector ── */}
               <div className="form-group">
                 <label className="form-label">Wallet</label>
-                <select className="form-select" value={form.walletId} onChange={(e) => setForm({ ...form, walletId: e.target.value })}>
+                <select className="form-select" value={form.walletId} onChange={(e) => { setWalletTouched(true); setForm({ ...form, walletId: e.target.value }); }}>
                   <option value="">— No wallet —</option>
                   {walletList.map((w: any) => (
                     <option key={w._id} value={w._id}>
@@ -631,12 +639,12 @@ export default function AdminContributions() {
                     </option>
                   ))}
                 </select>
-                {isReunion && (
+                {isReunion && !walletTouched && (
                   <span style={{ fontSize: '0.72rem', color: 'var(--yellow)', marginTop: 4, display: 'block' }}>
                     Auto-linked to Reunion Fund Wallet
                   </span>
                 )}
-                {isMonthlyDues && (
+                {isMonthlyDues && !walletTouched && (
                   <span style={{ fontSize: '0.72rem', color: 'var(--blue)', marginTop: 4, display: 'block' }}>
                     Auto-linked to Group Wallet
                   </span>
