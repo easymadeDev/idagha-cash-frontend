@@ -10,7 +10,7 @@ const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
 export default function WelcomePopup() {
   const router = useRouter();
-  const { cleared, setCleared, setMember, ready } = useGate();
+  const { cleared, setCleared, setMember, ready, gateOpen, setGateOpen } = useGate();
   const [visible, setVisible] = useState(false);
   const [animOut, setAnimOut] = useState(false);
   const [step, setStep] = useState<Step>('pin');
@@ -33,14 +33,27 @@ export default function WelcomePopup() {
       setVisible(false);
       return;
     }
-    // Only show popup on / when not cleared
-    if (router.pathname !== '/') {
+    // "/" is the public landing page — the popup opens only when asked for
+    // (Sign in button) or after a gated page redirected here with ?signin=1
+    const asked = gateOpen || (router.pathname === '/' && router.query.signin === '1');
+    if (!asked) {
       setVisible(false);
       return;
     }
-    const t = setTimeout(() => setVisible(true), 300);
+    const t = setTimeout(() => setVisible(true), 120);
     return () => clearTimeout(t);
-  }, [router.pathname, cleared, ready]);
+  }, [router.pathname, router.query.signin, cleared, ready, gateOpen]);
+
+  // Close without signing in — back to the landing page
+  const close = () => {
+    setAnimOut(true);
+    setTimeout(() => {
+      setVisible(false);
+      setAnimOut(false);
+      setGateOpen(false);
+      if (router.query.signin) router.replace('/', undefined, { shallow: true });
+    }, 300);
+  };
 
   useEffect(() => {
     if (step === 'verify') setTimeout(() => inputRef.current?.focus(), 100);
@@ -88,6 +101,7 @@ export default function WelcomePopup() {
       setVerifyError('');
       setIsPending(false);
       setIsDeactivated(false);
+      setGateOpen(false);
       if (destination) router.push(destination);
     }, 300);
   };
@@ -147,8 +161,11 @@ export default function WelcomePopup() {
 
   return (
     <>
-      <div className={`wp-overlay${animOut ? ' wp-overlay-out' : ' wp-overlay-in'}`} />
-      <div className={popupClass} onClick={(e) => e.stopPropagation()}>
+      <div className={`wp-overlay${animOut ? ' wp-overlay-out' : ' wp-overlay-in'}`} onClick={step === 'found' ? undefined : close} />
+      <div className={popupClass} onClick={(e) => e.stopPropagation()} role="dialog" aria-modal="true" aria-label="Members sign in">
+        {step !== 'found' && (
+          <button type="button" className="wp-close" onClick={close} aria-label="Close">×</button>
+        )}
         <div className="wp-drag-handle" />
         <div className="wp-glow" />
 
@@ -489,6 +506,13 @@ export default function WelcomePopup() {
           .wp-actions { gap: 7px; }
         }
 
+        .wp-close {
+          position: absolute; top: 12px; right: 12px; z-index: 2;
+          width: 36px; height: 36px; border-radius: 50%;
+          border: 1px solid var(--border); background: rgba(255,255,255,0.04);
+          color: var(--text-3); font-size: 1.3rem; line-height: 1; cursor: pointer;
+        }
+        .wp-close:hover { color: var(--text-1); border-color: var(--border-mid); }
         .wp-drag-handle {
           width: 36px; height: 4px; border-radius: 99px;
           background: rgba(255,255,255,0.18);

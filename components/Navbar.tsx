@@ -3,52 +3,71 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { useGate } from '../lib/gate';
 
-const topLinks = [
-  { label: 'Home',    href: '/home' },
-  { label: 'Members', href: '/members' },
-  { label: 'About',   href: '/about' },
+type NavLink = { label: string; href: string };
+type NavItem = NavLink | { label: string; children: NavLink[] };
+
+const navItems: NavItem[] = [
+  { label: 'Home', href: '/home' },
+  {
+    label: 'Community',
+    children: [
+      { label: 'Members', href: '/members' },
+      { label: 'Executives', href: '/executives' },
+      { label: 'Gallery', href: '/gallery' },
+      { label: 'About', href: '/about' },
+    ],
+  },
+  { label: 'Events', href: '/events' },
+  {
+    label: 'Vote',
+    children: [
+      { label: 'Elections', href: '/elections' },
+      { label: 'Class Awards', href: '/awards' },
+    ],
+  },
+  {
+    label: 'Finances',
+    children: [
+      { label: 'Contributions', href: '/contributions' },
+      { label: 'Expenses', href: '/expenses' },
+      { label: 'Reunion Fund', href: '/reunion-fund' },
+      { label: 'Reunion Support', href: '/reunion-support' },
+      { label: 'Reports', href: '/reports' },
+    ],
+  },
 ];
 
-const financeLinks = [
-  { label: 'Contributions',   href: '/contributions' },
-  { label: 'Expenses',        href: '/expenses' },
-  { label: 'Reunion Fund',    href: '/reunion-fund' },
-  { label: 'Reunion Support', href: '/reunion-support' },
-  { label: 'Reports',         href: '/reports' },
-];
+const isActive = (pathname: string, href: string) => pathname === href || pathname.startsWith(href + '/');
 
 export default function Navbar() {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const [dropOpen, setDropOpen] = useState(false);
+  const [dropOpen, setDropOpen] = useState<string | null>(null);
   const { cleared, member, ready } = useGate();
-  const dropRef = useRef<HTMLLIElement>(null);
+  const navRef = useRef<HTMLUListElement>(null);
 
   const navigate = (href: string) => {
     setOpen(false);
-    setDropOpen(false);
+    setDropOpen(null);
     router.push(href);
   };
 
   // Close dropdown when clicking outside
   useEffect(() => {
     const handler = (e: MouseEvent) => {
-      if (dropRef.current && !dropRef.current.contains(e.target as Node)) {
-        setDropOpen(false);
-      }
+      if (navRef.current && !navRef.current.contains(e.target as Node)) setDropOpen(null);
     };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
   const firstName = member?.name?.split(' ')[0] || '';
-  const isFinancePage = financeLinks.some(l => router.pathname === l.href);
 
   return (
     <nav className="navbar">
       <div className="navbar-glow" />
       <div className="nav-inner">
-        <div className="nav-logo" onClick={() => { if (ready) navigate('/home'); }}>
+        <div className="nav-logo" onClick={() => { if (ready) navigate(cleared ? '/home' : '/'); }}>
           <div className="nav-logo-img">
             <Image src="/logo.png" alt="IDAGHA Alumni Logo" width={44} height={44}
               style={{ objectFit: 'contain', borderRadius: 6 }} priority />
@@ -59,78 +78,60 @@ export default function Navbar() {
           </div>
         </div>
 
-        <ul className={`nav-links ${open ? 'mobile-open' : ''}`}>
-          {cleared && (
-            <>
-              {topLinks.map((l) => (
-                <li key={l.href}>
-                  <a className={router.pathname === l.href ? 'active' : ''}
-                    onClick={() => navigate(l.href)} style={{ cursor: 'pointer' }}>
-                    {l.label}
+        <ul ref={navRef} className={`nav-links ${open ? 'mobile-open' : ''}`}>
+          {cleared && navItems.map((item) => {
+            if ('href' in item) {
+              return (
+                <li key={item.href}>
+                  <a className={isActive(router.pathname, item.href) ? 'active' : ''}
+                    onClick={() => navigate(item.href)} style={{ cursor: 'pointer' }}>
+                    {item.label}
                   </a>
                 </li>
-              ))}
-
-              {/* Finances dropdown */}
-              <li ref={dropRef} className="nav-dropdown-trigger" style={{ position: 'relative' }}>
+              );
+            }
+            const groupActive = item.children.some((c) => isActive(router.pathname, c.href));
+            const isOpen = dropOpen === item.label;
+            return (
+              <li key={item.label} style={{ position: 'relative' }}>
+                {/* Desktop dropdown trigger */}
                 <a
-                  className={isFinancePage ? 'active' : ''}
-                  onClick={() => setDropOpen(p => !p)}
-                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 4 }}
+                  className={`nav-dropdown-trigger ${groupActive ? 'active' : ''}`}
+                  onClick={() => setDropOpen(isOpen ? null : item.label)}
+                  style={{ cursor: 'pointer', alignItems: 'center', gap: 4 }}
+                  aria-expanded={isOpen}
                 >
-                  Finances
-                  <svg
-                    width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5"
-                    viewBox="0 0 24 24"
-                    style={{ transition: 'transform 0.2s', transform: dropOpen ? 'rotate(180deg)' : 'rotate(0deg)', flexShrink: 0 }}
-                  >
+                  {item.label}
+                  <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"
+                    style={{ transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none', flexShrink: 0 }}>
                     <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
                   </svg>
                 </a>
-
-                {dropOpen && (
-                  <ul style={{
-                    position: 'absolute', top: 'calc(100% + 10px)', left: '50%', transform: 'translateX(-50%)',
-                    background: 'linear-gradient(160deg,#0d2010,#060d08)',
-                    border: '1px solid rgba(34,197,94,0.18)',
-                    borderRadius: 12, padding: '6px 0', minWidth: 190,
-                    boxShadow: '0 16px 48px rgba(0,0,0,0.55)',
-                    listStyle: 'none', margin: 0, zIndex: 9000,
-                  }}>
-                    {financeLinks.map((l) => (
-                      <li key={l.href}>
-                        <a
-                          onClick={() => navigate(l.href)}
-                          style={{
-                            display: 'block', padding: '9px 18px',
-                            fontSize: '0.875rem', fontWeight: router.pathname === l.href ? 700 : 500,
-                            color: router.pathname === l.href ? 'var(--green-400)' : 'var(--text-2)',
-                            cursor: 'pointer', borderRadius: 8, margin: '1px 4px',
-                            background: router.pathname === l.href ? 'rgba(34,197,94,0.08)' : 'transparent',
-                            transition: 'all 0.15s',
-                          }}
-                          onMouseEnter={e => { if (router.pathname !== l.href) (e.currentTarget as HTMLElement).style.background = 'rgba(255,255,255,0.04)'; }}
-                          onMouseLeave={e => { if (router.pathname !== l.href) (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
-                        >
-                          {l.label}
-                        </a>
-                      </li>
-                    ))}
+                {isOpen && (
+                  <ul className="nav-dropdown">
+                    {item.children.map((l) => {
+                      const on = isActive(router.pathname, l.href);
+                      return (
+                        <li key={l.href}>
+                          <a onClick={() => navigate(l.href)} className={on ? 'on' : ''}>{l.label}</a>
+                        </li>
+                      );
+                    })}
                   </ul>
                 )}
+                {/* Mobile: group label + flat links */}
+                <div className="nav-mobile-group">
+                  <span>{item.label}</span>
+                  {item.children.map((l) => (
+                    <a key={l.href} className={isActive(router.pathname, l.href) ? 'active' : ''}
+                      onClick={() => navigate(l.href)} style={{ cursor: 'pointer' }}>
+                      {l.label}
+                    </a>
+                  ))}
+                </div>
               </li>
-
-              {/* Mobile-only: show finance links flat */}
-              {financeLinks.map((l) => (
-                <li key={`m-${l.href}`} className="nav-mobile-finance">
-                  <a className={router.pathname === l.href ? 'active' : ''}
-                    onClick={() => navigate(l.href)} style={{ cursor: 'pointer' }}>
-                    {l.label}
-                  </a>
-                </li>
-              ))}
-            </>
-          )}
+            );
+          })}
 
           {!member && (
             <li>
@@ -141,7 +142,7 @@ export default function Navbar() {
             </li>
           )}
           {member && (
-            <li>
+            <li className="nav-mobile-only">
               <a className={router.pathname === '/profile' ? 'active' : ''}
                 onClick={() => navigate('/profile')} style={{ cursor: 'pointer' }}>
                 My Profile
@@ -188,11 +189,34 @@ export default function Navbar() {
       </div>
 
       <style>{`
-        .nav-mobile-finance { display: none !important; }
-        .nav-dropdown-trigger { display: list-item; }
+        .nav-dropdown-trigger { display: flex; }
+        .nav-dropdown {
+          position: absolute; top: calc(100% + 10px); left: 50%; transform: translateX(-50%);
+          background: linear-gradient(160deg,#0d2010,#060d08);
+          border: 1px solid rgba(34,197,94,0.18);
+          border-radius: 12px; padding: 6px 0; min-width: 190px;
+          box-shadow: 0 16px 48px rgba(0,0,0,0.55);
+          list-style: none; margin: 0; z-index: 9000;
+          animation: navDrop 0.16s ease-out;
+        }
+        .nav-dropdown a {
+          display: block; padding: 9px 18px; margin: 1px 4px; border-radius: 8px;
+          font-size: 0.875rem; font-weight: 500; color: var(--text-2); cursor: pointer;
+          transition: background 0.15s;
+        }
+        .nav-dropdown a:hover { background: rgba(255,255,255,0.04); }
+        .nav-dropdown a.on { font-weight: 700; color: var(--green-400); background: rgba(34,197,94,0.08); }
+        @keyframes navDrop { from { opacity: 0; transform: translate(-50%, -4px); } to { opacity: 1; transform: translate(-50%, 0); } }
+        .nav-mobile-group { display: none; }
+        .nav-mobile-only { display: none !important; }
         @media (max-width: 768px) {
-          .nav-mobile-finance { display: list-item !important; }
-          .nav-dropdown-trigger { display: none !important; }
+          .nav-dropdown-trigger, .nav-dropdown { display: none !important; }
+          .nav-mobile-group { display: flex; flex-direction: column; }
+          .nav-mobile-group span {
+            font-size: 0.68rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+            color: var(--text-3); padding: 12px 16px 4px;
+          }
+          .nav-mobile-only { display: list-item !important; }
         }
       `}</style>
     </nav>

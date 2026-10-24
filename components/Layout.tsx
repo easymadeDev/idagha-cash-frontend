@@ -10,16 +10,19 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <footer className="footer">
         <div className="footer-inner">
           <div>
-            <div className="footer-logo">Idagha Group</div>
-            <p className="footer-copy" style={{ marginTop: 6 }}>Public Financial Transparency Portal</p>
+            <div className="footer-logo">IDAGHA Class of 2018</div>
+            <p className="footer-copy" style={{ marginTop: 6 }}>Alumni Association Portal</p>
           </div>
           <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
             {[
               { label: 'Home', href: '/home' },
               { label: 'Members', href: '/members' },
-              { label: 'Contributions', href: '/contributions' },
+              { label: 'Events', href: '/events' },
+              { label: 'Elections', href: '/elections' },
+              { label: 'Awards', href: '/awards' },
+              { label: 'Gallery', href: '/gallery' },
               { label: 'Reports', href: '/reports' },
-              { label: 'About', href: '/about' },
+              { label: 'Landing Page', href: '/' },
               { label: 'Admin Login', href: '/admin' },
             ].map((l) => (
               <span key={l.href}
@@ -32,7 +35,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </span>
             ))}
           </div>
-          <p className="footer-copy">&copy; {new Date().getFullYear()} Idagha Group. All rights reserved.</p>
+          <p className="footer-copy">&copy; {new Date().getFullYear()} IDAGHA Class of 2018 Alumni. All rights reserved.</p>
         </div>
       </footer>
     </>

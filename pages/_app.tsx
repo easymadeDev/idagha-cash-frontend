@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import '../styles/globals.css';
+import '../styles/alumni.css';
 import WelcomePopup from '../components/WelcomePopup';
 import WhatsAppPrompt from '../components/WhatsAppPrompt';
 import { GateContext, SessionMember } from '../lib/gate';
@@ -53,6 +54,7 @@ export default function App({ Component, pageProps }: AppProps) {
   const [cleared, setClearedState] = useState(false);
   const [member, setMemberState] = useState<SessionMember | null>(null);
   const [ready, setReady] = useState(false); // true after sessionStorage is read
+  const [gateOpen, setGateOpen] = useState(false);
 
   useEffect(() => {
     const memberToken  = getMemberToken();
@@ -108,20 +110,28 @@ export default function App({ Component, pageProps }: AppProps) {
     const gateToken   = sessionStorage.getItem(GATE_TOKEN_KEY);
 
     if (GATE_ONLY(router.pathname)) {
-      if (!isTokenValid(gateToken)) router.replace('/');
+      if (!isTokenValid(gateToken)) router.replace('/?signin=1');
       return;
     }
 
     if (!isTokenValid(memberToken) && registered !== '1') {
       // Save intended destination so login can redirect back to it
       sessionStorage.setItem('idagha_redirect_after_login', router.asPath);
-      router.replace('/');
+      router.replace('/?signin=1');
     }
   }, [router.pathname, ready, cleared]);
 
   return (
     <ToastProvider>
-      <GateContext.Provider value={{ cleared, setCleared, member, setMember, ready }}>
+      <GateContext.Provider value={{ cleared, setCleared, member, setMember, ready, gateOpen, setGateOpen }}>
+        {/* Shared crest-shield clip path used to mask photographs site-wide */}
+        <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
+          <defs>
+            <clipPath id="shield-clip" clipPathUnits="objectBoundingBox">
+              <path d="M0,0 H1 V0.56 C1,0.79 0.76,0.92 0.5,1 C0.24,0.92 0,0.79 0,0.56 Z" />
+            </clipPath>
+          </defs>
+        </svg>
         <WelcomePopup />
         <WhatsAppPrompt />
         <Component {...pageProps} />

@@ -15,6 +15,12 @@ export const GateContext = createContext<{
   member: SessionMember | null;
   setMember: (m: SessionMember | null) => void;
   ready: boolean;
-}>({ cleared: false, setCleared: () => {}, member: null, setMember: () => {}, ready: false });
+  // PIN / verify popup — opened from the public landing page or after a gated redirect
+  gateOpen: boolean;
+  setGateOpen: (v: boolean) => void;
+}>({
+  cleared: false, setCleared: () => {}, member: null, setMember: () => {}, ready: false,
+  gateOpen: false, setGateOpen: () => {},
+});
 
 export const useGate = () => useContext(GateContext);
