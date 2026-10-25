@@ -23,9 +23,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ref={mainRef}
         className="page-wrap"
         key={router.pathname}
-        initial={reduce ? false : { opacity: 0, y: 18 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.55, ease: EASE }}
+        initial={reduce ? false : { opacity: 0, y: 40, scale: 0.985 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{ duration: 0.7, ease: EASE }}
       >
         {children}
       </motion.div>

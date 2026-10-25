@@ -120,9 +120,9 @@ export default function PledgesPage() {
         {stats && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 14, marginBottom: 32 }}>
             <PledgeStat label="Total Support" value={formatNaira(stats.totalPledged)} color="#c99412" />
-            <PledgeStat label="Fulfilled" value={formatNaira(stats.totalFulfilled)} color="#22c55e" />
-            <PledgeStat label="Pending" value={formatNaira(stats.totalPending)} color="#fbbf24" />
-            <PledgeStat label="Members" value={String(stats.count)} color="#60a5fa" />
+            <PledgeStat label="Fulfilled" value={formatNaira(stats.totalFulfilled)} color="#1b6a3d" />
+            <PledgeStat label="Pending" value={formatNaira(stats.totalPending)} color="#b5860f" />
+            <PledgeStat label="Members" value={String(stats.count)} color="#1d4f91" />
           </div>
         )}
 
@@ -134,7 +134,7 @@ export default function PledgesPage() {
             {fulfilledList.length > 0 && (
               <section style={{ marginBottom: 32 }}>
                 <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-1)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#22c55e', display: 'inline-block' }} />
+                  <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#1b6a3d', display: 'inline-block' }} />
                   Fulfilled Support ({fulfilledList.length})
                 </h2>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(260px,1fr))', gap: 14 }}>
@@ -146,7 +146,7 @@ export default function PledgesPage() {
             {/* Pending pledges */}
             <section>
               <h2 style={{ fontSize: '1.05rem', fontWeight: 700, color: 'var(--text-1)', marginBottom: 14, display: 'flex', alignItems: 'center', gap: 8 }}>
-                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#fbbf24', display: 'inline-block' }} />
+                <span style={{ width: 10, height: 10, borderRadius: '50%', background: '#b5860f', display: 'inline-block' }} />
                 Pending Support ({pendingList.length})
               </h2>
               {pendingList.length === 0 ? (
@@ -259,7 +259,7 @@ function PledgeCard({ pledge }: { pledge: any }) {
           <div style={{
             width: 36, height: 36, borderRadius: 10, flexShrink: 0,
             background: isFulfilled ? 'rgba(22,101,52,0.15)' : 'rgba(217,165,32,0.15)',
-            color: isFulfilled ? '#22c55e' : '#c99412',
+            color: isFulfilled ? '#1b6a3d' : '#c99412',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '.8rem', fontWeight: 800,
           }}>
@@ -274,14 +274,14 @@ function PledgeCard({ pledge }: { pledge: any }) {
         </div>
         <span style={{
           background: isFulfilled ? 'rgba(22,101,52,0.15)' : 'rgba(251,191,36,0.15)',
-          color: isFulfilled ? '#22c55e' : '#fbbf24',
+          color: isFulfilled ? '#1b6a3d' : '#b5860f',
           borderRadius: 99, padding: '3px 10px', fontSize: '.75rem', fontWeight: 700,
         }}>
           {isFulfilled ? 'Fulfilled' : 'Pending'}
         </span>
       </div>
 
-      <div style={{ fontSize: '1.2rem', fontWeight: 800, color: isFulfilled ? '#22c55e' : '#c99412', marginBottom: 6 }}>
+      <div style={{ fontSize: '1.2rem', fontWeight: 800, color: isFulfilled ? '#1b6a3d' : '#c99412', marginBottom: 6 }}>
         {formatNaira(pledge.amount)}
       </div>
 
@@ -296,7 +296,7 @@ function PledgeCard({ pledge }: { pledge: any }) {
         </div>
       )}
       {isFulfilled && pledge.fulfilledAt && (
-        <div style={{ fontSize: '.76rem', color: '#22c55e', marginTop: 6 }}>
+        <div style={{ fontSize: '.76rem', color: '#1b6a3d', marginTop: 6 }}>
           Fulfilled {formatDate(pledge.fulfilledAt)}
         </div>
       )}

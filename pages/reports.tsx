@@ -95,12 +95,12 @@ export default function ReportsPage() {
               <AreaChart data={chartData} margin={{ top: 4, right: 4, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="gradGreen" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#22c55e" stopOpacity={0.2}/>
-                    <stop offset="95%" stopColor="#22c55e" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#1b6a3d" stopOpacity={0.2}/>
+                    <stop offset="95%" stopColor="#1b6a3d" stopOpacity={0}/>
                   </linearGradient>
                   <linearGradient id="gradRed" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#f87171" stopOpacity={0.15}/>
-                    <stop offset="95%" stopColor="#f87171" stopOpacity={0}/>
+                    <stop offset="5%" stopColor="#b42318" stopOpacity={0.15}/>
+                    <stop offset="95%" stopColor="#b42318" stopOpacity={0}/>
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="rgba(15,61,34,0.04)" vertical={false}/>
@@ -108,8 +108,8 @@ export default function ReportsPage() {
                 <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₦${(v/1000).toFixed(0)}k`}/>
                 <Tooltip content={<CustomTooltip />} />
                 <Legend wrapperStyle={{ paddingTop: 20, fontSize: '0.82rem', color: '#64748b' }}/>
-                <Area type="monotone" dataKey="Contributions" stroke="#22c55e" strokeWidth={2.5} fill="url(#gradGreen)" dot={false} activeDot={{ r: 5, fill: '#22c55e', strokeWidth: 0 }}/>
-                <Area type="monotone" dataKey="Expenses" stroke="#f87171" strokeWidth={2.5} fill="url(#gradRed)" dot={false} activeDot={{ r: 5, fill: '#f87171', strokeWidth: 0 }}/>
+                <Area type="monotone" dataKey="Contributions" stroke="#1b6a3d" strokeWidth={2.5} fill="url(#gradGreen)" dot={false} activeDot={{ r: 5, fill: '#1b6a3d', strokeWidth: 0 }}/>
+                <Area type="monotone" dataKey="Expenses" stroke="#b42318" strokeWidth={2.5} fill="url(#gradRed)" dot={false} activeDot={{ r: 5, fill: '#b42318', strokeWidth: 0 }}/>
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -130,7 +130,7 @@ export default function ReportsPage() {
                 <XAxis dataKey="month" tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false}/>
                 <YAxis tick={{ fill: '#64748b', fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={(v) => `₦${(v/1000).toFixed(0)}k`}/>
                 <Tooltip content={<CustomTooltip />}/>
-                <Bar dataKey="Net" fill="#16a34a" radius={[6, 6, 0, 0]}
+                <Bar dataKey="Net" fill="#0f4a2a" radius={[6, 6, 0, 0]}
                   label={false}
                   // negative bars red
                 />

@@ -22,7 +22,7 @@ const EMPTY_FORM = {
 };
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string }> = {
-  pending:   { label: 'Pending',   color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',  border: 'rgba(251,191,36,0.3)' },
+  pending:   { label: 'Pending',   color: '#b5860f', bg: 'rgba(251,191,36,0.1)',  border: 'rgba(251,191,36,0.3)' },
   fulfilled: { label: 'Fulfilled', color: 'var(--green-400)', bg: 'rgba(22,101,52,0.1)',  border: 'rgba(22,101,52,0.3)' },
   cancelled: { label: 'Cancelled', color: 'var(--red)',  bg: 'rgba(248,113,113,0.1)', border: 'rgba(248,113,113,0.3)' },
 };
@@ -162,10 +162,10 @@ export default function AdminPledges() {
           <div className="pledges-stats-grid">
             <StatCard label="Total Support" value={formatNaira(stats.totalPledged)} color="#c99412" />
             <StatCard label="Fulfilled" value={formatNaira(stats.totalFulfilled)} color="var(--green-400)" />
-            <StatCard label="Pending" value={formatNaira(stats.totalPending)} color="#fbbf24" />
+            <StatCard label="Pending" value={formatNaira(stats.totalPending)} color="#b5860f" />
             <StatCard label="Count" value={String(stats.count)} color="var(--blue)" />
             <StatCard label="Fulfilled" value={String(stats.fulfilledCount)} color="var(--green-400)" sub="records" />
-            <StatCard label="Pending" value={String(stats.pendingCount)} color="#fbbf24" sub="records" />
+            <StatCard label="Pending" value={String(stats.pendingCount)} color="#b5860f" sub="records" />
           </div>
         )}
 
@@ -180,7 +180,7 @@ export default function AdminPledges() {
             >
               {t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1)}
               {t !== 'all' && (
-                <span style={{ marginLeft: 5, background: t === 'pending' ? 'rgba(251,191,36,0.15)' : 'rgba(22,101,52,0.15)', color: t === 'pending' ? '#fbbf24' : 'var(--green-400)', borderRadius: 99, padding: '1px 7px', fontSize: '0.72rem', fontWeight: 700 }}>
+                <span style={{ marginLeft: 5, background: t === 'pending' ? 'rgba(251,191,36,0.15)' : 'rgba(22,101,52,0.15)', color: t === 'pending' ? '#b5860f' : 'var(--green-400)', borderRadius: 99, padding: '1px 7px', fontSize: '0.72rem', fontWeight: 700 }}>
                   {list.filter((p) => p.status === t).length}
                 </span>
               )}

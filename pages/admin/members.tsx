@@ -693,7 +693,7 @@ export default function AdminMembers() {
                     >
                       <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       Email
-                      {!notifyTarget.email && <span style={{ fontSize: '0.65rem', color: '#f87171' }}>(no email)</span>}
+                      {!notifyTarget.email && <span style={{ fontSize: '0.65rem', color: '#b42318' }}>(no email)</span>}
                     </button>
                     {/* WhatsApp toggle */}
                     <button
@@ -702,15 +702,15 @@ export default function AdminMembers() {
                       style={{
                         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                         padding: '9px 12px', borderRadius: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
-                        border: notifyChannels.includes('whatsapp') ? '2px solid #22c55e' : '2px solid rgba(15,61,34,0.1)',
+                        border: notifyChannels.includes('whatsapp') ? '2px solid #1b6a3d' : '2px solid rgba(15,61,34,0.1)',
                         background: notifyChannels.includes('whatsapp') ? 'rgba(22,101,52,0.1)' : 'transparent',
-                        color: notifyChannels.includes('whatsapp') ? '#4ade80' : 'var(--text-3)',
+                        color: notifyChannels.includes('whatsapp') ? '#2f7d4f' : 'var(--text-3)',
                         transition: 'all 0.15s',
                       }}
                     >
                       <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       WhatsApp
-                      {!notifyTarget.phone && !notifyTarget.whatsapp && <span style={{ fontSize: '0.65rem', color: '#f87171' }}>(no phone)</span>}
+                      {!notifyTarget.phone && !notifyTarget.whatsapp && <span style={{ fontSize: '0.65rem', color: '#b42318' }}>(no phone)</span>}
                     </button>
                   </div>
                 </div>
@@ -737,9 +737,9 @@ export default function AdminMembers() {
                 {notifyDone.sent ? (
                   <>
                     <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(22,101,52,0.1)', border: '2px solid rgba(22,101,52,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                      <svg width="24" height="24" fill="none" stroke="#4ade80" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <svg width="24" height="24" fill="none" stroke="#2f7d4f" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
-                    <p style={{ color: '#4ade80', fontWeight: 700, margin: '0 0 10px', fontSize: '1.05rem' }}>Message sent!</p>
+                    <p style={{ color: '#2f7d4f', fontWeight: 700, margin: '0 0 10px', fontSize: '1.05rem' }}>Message sent!</p>
                     <div style={{ display: 'flex', justifyContent: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 10 }}>
                       {notifyDone.channels?.includes('email') && (
                         <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 99, background: 'rgba(59,130,246,0.12)', border: '1px solid rgba(59,130,246,0.3)', color: '#93c5fd', fontSize: '0.78rem', fontWeight: 600 }}>
@@ -748,7 +748,7 @@ export default function AdminMembers() {
                         </span>
                       )}
                       {notifyDone.channels?.includes('whatsapp') && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 99, background: 'rgba(22,101,52,0.12)', border: '1px solid rgba(22,101,52,0.3)', color: '#4ade80', fontSize: '0.78rem', fontWeight: 600 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 99, background: 'rgba(22,101,52,0.12)', border: '1px solid rgba(22,101,52,0.3)', color: '#2f7d4f', fontSize: '0.78rem', fontWeight: 600 }}>
                           <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           WhatsApp
                         </span>
@@ -763,9 +763,9 @@ export default function AdminMembers() {
                 ) : (
                   <>
                     <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(248,113,113,0.1)', border: '2px solid rgba(248,113,113,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                      <svg width="24" height="24" fill="none" stroke="#f87171" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      <svg width="24" height="24" fill="none" stroke="#b42318" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
-                    <p style={{ color: '#f87171', fontWeight: 700, margin: '0 0 5px' }}>Failed to send</p>
+                    <p style={{ color: '#b42318', fontWeight: 700, margin: '0 0 5px' }}>Failed to send</p>
                     <p style={{ color: '#9ca3af', fontSize: '0.82rem', margin: 0 }}>{notifyDone.errors?.join(' · ') || 'Unknown error'}</p>
                   </>
                 )}

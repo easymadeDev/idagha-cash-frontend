@@ -5,6 +5,7 @@ import useSWR from 'swr';
 import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
 import { renderPoster } from '../lib/poster';
+import { CountUp } from '../components/motion';
 
 // Found pictures stand in until the class uploads its own to the gallery.
 // They show secondary-school life in Nigeria — never presented as Idagha's own.
@@ -43,6 +44,21 @@ function useCrossfade(count: number, hold = 5500) {
     return () => clearInterval(t);
   }, [count, hold]);
   return [index, setIndex] as const;
+}
+
+// Splits a heading into words that rise one after another (each word clipped by its own box)
+function Words({ text, base = 0 }: { text: string; base?: number }) {
+  const words = text.split(' ');
+  return (
+    <>
+      {words.map((w, i) => (
+        <span key={i}>
+          <span className="w"><span className="wi" style={{ ['--w' as any]: i + base }}>{w}</span></span>
+          {i < words.length - 1 && ' '}
+        </span>
+      ))}
+    </>
+  );
 }
 
 const fmtDay = (d: string) =>
@@ -123,9 +139,33 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
     const io = new IntersectionObserver((entries) => {
       entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); } });
     }, { rootMargin: '0px 0px -8% 0px' });
-    root.querySelectorAll('.lp-rise').forEach((el) => io.observe(el));
+    root.querySelectorAll('.lp-rise, .lp-blocks, .lp-split').forEach((el) => io.observe(el));
     return () => io.disconnect();
   }, [events, execs, awards, elections]);
+
+  // Parallax: elements marked data-par drift against the scroll by their factor.
+  // Uses the CSS `translate` property so it never fights a reveal's `transform`.
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const els = Array.from(root.querySelectorAll<HTMLElement>('[data-par]'));
+    let raf = 0;
+    const tick = () => {
+      raf = 0;
+      const vh = window.innerHeight;
+      for (const el of els) {
+        const r = el.getBoundingClientRect();
+        if (r.bottom < -200 || r.top > vh + 200) continue;
+        const offset = (r.top + r.height / 2 - vh / 2) * Number(el.dataset.par);
+        el.style.translate = `0 ${offset.toFixed(1)}px`;
+      }
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(tick); };
+    tick();
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); cancelAnimationFrame(raf); };
+  }, []);
 
   const yearsOut = new Date().getFullYear() - GRAD_YEAR;
 
@@ -156,10 +196,10 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
       {/* ── Hero: printed card beside the room ── */}
       <header className="lp-hero">
         <div className="lp-card">
-          <div className="lp-stripe" aria-hidden="true">{STRIPES.map((_, i) => <i key={i} />)}</div>
+          <div className="lp-stripe" aria-hidden="true">{STRIPES.map((_, i) => <i key={i} style={{ ['--b' as any]: i }} />)}</div>
           <div className="lp-card-body">
             <img className="lp-crest" src="/logo.png" alt="IDAGHA Secondary School, Class of 2018 Alumni crest" width={190} height={190} />
-            <h1>Idagha Class of 2018</h1>
+            <h1 className="lp-hero-title"><Words text="Idagha Class of 2018" /></h1>
             <p className="lp-hero-sub">
               The home of our set from Idagha Secondary School: reunions, elections, class awards,
               our photographs, and every naira accounted for.
@@ -180,7 +220,7 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
 
         <div className="lp-room" aria-label="Photographs">
           <p className="lp-room-caption">{heroPhotos[heroIdx]?.caption}</p>
-          <div className="lp-room-shield shield lp-fade">
+          <div className="lp-room-shield shield lp-fade" data-par="-0.08">
             {heroPhotos.map((p: any, i: number) => (
               <img key={i} src={p.src} alt={p.caption || 'Class photograph'} className={i === heroIdx ? 'is-on' : ''} style={{ objectPosition: p.focus }} />
             ))}
@@ -188,11 +228,22 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
         </div>
       </header>
 
+      {/* ── A moving band of our photographs ── */}
+      <div className="lp-marquee" aria-hidden="true">
+        <div className="lp-marquee-track">
+          {[...photos, ...photos].map((p: any, i: number) => (
+            <figure key={i} className="lp-marquee-item">
+              <img src={p.src} alt="" loading="lazy" style={{ objectPosition: p.focus }} />
+            </figure>
+          ))}
+        </div>
+      </div>
+
       {/* ── Our story ── */}
       <section className="lp-about" id="story" aria-labelledby="story-h">
         <div>
-          <h2 id="story-h" className="lp-rise">{yearsOut} years out, still one set</h2>
-          <figure className="lp-about-photo shield lp-rise" style={{ ['--i' as any]: 2 }}>
+          <h2 id="story-h" className="lp-split"><Words text={`${yearsOut} years out, still one set`} /></h2>
+          <figure className="lp-about-photo shield lp-rise" style={{ ['--i' as any]: 2 }} data-par="0.06">
             <img src={photos[0].src} alt={photos[0].caption} loading="lazy" style={{ objectPosition: photos[0].focus }} />
           </figure>
         </div>
@@ -221,7 +272,7 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
       {/* ── Reunions ── */}
       <section className="lp-section lp-wrap" id="reunions" aria-labelledby="reunions-h">
         <div className="lp-reunions-head lp-rise">
-          <h2 id="reunions-h" className="lp-h2">Reunions and gatherings</h2>
+          <h2 id="reunions-h" className="lp-h2 lp-split"><Words text="Reunions and gatherings" /></h2>
         </div>
 
         {next ? (
@@ -231,10 +282,10 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
               <p className="lp-next-meta">{fmtDay(next.date)}{next.venue ? ` · ${next.venue}` : ''}</p>
               {clock && (
                 <div className="lp-clock" aria-label="Time until the event">
-                  <div><b>{clock.days}</b><span>days</span></div>
-                  <div><b>{clock.hours}</b><span>hours</span></div>
-                  <div><b>{clock.minutes}</b><span>minutes</span></div>
-                  <div><b>{clock.seconds}</b><span>seconds</span></div>
+                  <div><b key={`d${clock.days}`}>{clock.days}</b><span>days</span></div>
+                  <div><b key={`h${clock.hours}`}>{clock.hours}</b><span>hours</span></div>
+                  <div><b key={`m${clock.minutes}`}>{clock.minutes}</b><span>minutes</span></div>
+                  <div><b key={`s${clock.seconds}`}>{clock.seconds}</b><span>seconds</span></div>
                 </div>
               )}
             </div>
@@ -298,7 +349,7 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
         </div>
         <div className="lp-elect-text">
           <div>
-            <h2 id="elect-h">Run for office, or choose who does</h2>
+            <h2 id="elect-h" className="lp-split"><Words text="Run for office, or choose who does" /></h2>
             <div className="lp-tabs" role="tablist" aria-label="Elections" style={{ marginTop: 28 }}>
               <button role="tab" aria-selected={electTab === 'positions'} onClick={() => setElectTab('positions')}>Positions</button>
               <button role="tab" aria-selected={electTab === 'how'} onClick={() => setElectTab('how')}>How it works</button>
@@ -355,7 +406,7 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
       <section className="lp-section lp-wrap" id="executives" aria-labelledby="exec-h">
         <div className="lp-board">
           <div className="lp-tile lp-tile--head lp-rise">
-            <h2 id="exec-h">Your executive</h2>
+            <h2 id="exec-h" className="lp-split"><Words text="Your executive" /></h2>
             <p>Elected by members, accountable to members. Past executives are kept on record in the portal.</p>
           </div>
           {execList.length === 0 ? (
@@ -377,7 +428,7 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
       <section className="lp-section lp-wrap" id="awards" aria-labelledby="awards-h">
         <div className="lp-awards">
           <div className="lp-awards-intro lp-rise">
-            <h2 id="awards-h" className="lp-h2">The class awards</h2>
+            <h2 id="awards-h" className="lp-h2 lp-split"><Words text="The class awards" /></h2>
             <p className="lp-lead">
               Best online. Best talker. Most active. Nominate a classmate, back the one you think deserves it,
               and watch the board move.
@@ -421,7 +472,7 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
             <p className="lp-frame-cap">{photos[frameIdx]?.caption}</p>
           </div>
           <div className="lp-gallery-text lp-rise">
-            <h2 id="mem-h" className="lp-h2">Our memories</h2>
+            <h2 id="mem-h" className="lp-h2 lp-split"><Words text="Our memories" /></h2>
             <p className="lp-lead">
               Assembly mornings, inter-house sports, the last day of WAEC, and every reunion since.
               Members add their own photographs; the Secretary files them into albums.
@@ -434,20 +485,20 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
       {/* ── The set in numbers ── */}
       <section className="lp-section lp-wrap" aria-labelledby="nums-h">
         <div className="lp-stats">
-          <h2 id="nums-h" className="lp-stats-head lp-rise">The set in numbers</h2>
+          <h2 id="nums-h" className="lp-stats-head lp-split"><Words text="The set in numbers" /></h2>
           <div className="lp-stat lp-stat--a lp-rise">
-            <b>{memberCount?.count ?? '—'}</b>
+            <b>{memberCount?.count != null ? <CountUp value={memberCount.count} /> : '—'}</b>
             <span>classmates verified on the register</span>
           </div>
           <div className="lp-stat lp-stat--b lp-rise" style={{ ['--i' as any]: 1 }}>
-            <b>{yearsOut}</b>
+            <b><CountUp value={yearsOut} /></b>
             <span>years since our final exams</span>
           </div>
           <div className="lp-stat lp-stat--c lp-rise" style={{ ['--i' as any]: 2 }}>
             {gallery?.total ? (
-              <><b>{gallery.total}</b><span>photographs in the gallery</span></>
+              <><b><CountUp value={gallery.total} /></b><span>photographs in the gallery</span></>
             ) : (
-              <><b>{upcoming.length}</b><span>gatherings on the calendar</span></>
+              <><b><CountUp value={upcoming.length} /></b><span>gatherings on the calendar</span></>
             )}
           </div>
         </div>
@@ -456,10 +507,10 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
       {/* ── Closing call ── */}
       <section className="lp-cta" aria-labelledby="cta-h">
         <div className="lp-cta-shield" aria-hidden="true">
-          <div className="shield"><img src="/logo.png" alt="" /></div>
+          <div className="shield" data-par="0.1"><img src="/logo.png" alt="" /></div>
         </div>
         <div className="lp-cta-text">
-          <h2 id="cta-h">Not on the register yet?</h2>
+          <h2 id="cta-h" className="lp-split"><Words text="Not on the register yet?" /></h2>
           <p>Add your name, phone and photo. The Secretary confirms you, and the portal opens.</p>
           <p className="lp-cta-fact">Registration is free.</p>
           <div><button className="lp-btn lp-btn--gold" onClick={() => router.push('/register')}>Register as a member</button></div>
@@ -469,9 +520,9 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: { src: str
       {/* ── Footer ── */}
       <footer className="lp-footer">
         <div className="lp-blocks" aria-label="Idagha 2018">
-          {'IDAGHA'.split('').map((c, i) => <span key={i} style={{ height: `${[100, 78, 92, 66, 86, 72][i]}%` }}>{c}</span>)}
+          {'IDAGHA'.split('').map((c, i) => <span key={i} style={{ height: `${[100, 78, 92, 66, 86, 72][i]}%`, ['--k' as any]: i }}>{c}</span>)}
           <span className="lp-blocks-gap" />
-          {'18'.split('').map((c, i) => <span key={`y${i}`} style={{ height: `${[96, 82][i]}%` }}>{c}</span>)}
+          {'18'.split('').map((c, i) => <span key={`y${i}`} style={{ height: `${[96, 82][i]}%`, ['--k' as any]: i + 7 }}>{c}</span>)}
         </div>
         <div className="lp-footer-cols">
           <div className="lp-footer-links">

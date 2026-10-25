@@ -213,6 +213,11 @@ tbody tr:hover td { background: rgba(217,165,32,0.07); }
 @media (max-width: 900px) {
   .navbar { height: 68px !important; }
   .nav-inner { padding: 0 16px; }
+  .nav-logo { gap: 10px; }
+  .nav-logo-img { width: 38px !important; height: 38px !important; flex-shrink: 0; }
+  .nav-logo-img img { width: 38px !important; height: 38px !important; }
+  .wallet-cards-grid { grid-template-columns: minmax(0, 1fr) !important; }
+  .fin-tabs { mask-image: linear-gradient(90deg, #000 85%, transparent); -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); }
   .nav-logo-text { display: block !important; }
   .nav-logo-title { font-size: 1.15rem !important; }
   .nav-links.mobile-open {
@@ -241,15 +246,57 @@ tbody tr:hover td { background: rgba(217,165,32,0.07); }
 .admin-content { background: var(--bg-base); }
 
 /* ── Motion: scroll reveal applied by the Layout to cards site-wide ── */
-.rv { opacity: 0; transform: translateY(26px) scale(0.985); }
+.rv { opacity: 0; transform: translateY(54px) rotate(0.8deg) scale(0.95); }
 .rv.rv-in {
   opacity: 1; transform: none;
-  transition: opacity 0.7s var(--ease), transform 0.8s var(--ease);
-  transition-delay: calc(var(--rv-i, 0) * 70ms);
+  transition: opacity 0.85s var(--ease), transform 1s var(--ease);
+  transition-delay: calc(var(--rv-i, 0) * 90ms);
 }
+
+/* Page titles wipe up into place; their line and stripe follow */
+.page-header h1 { animation: headWipe 1s var(--ease) both; }
+.page-header p { animation: headFade 0.9s var(--ease) 0.25s both; }
+.page-header > div:first-child { animation: headFade 0.7s var(--ease) both; }
+@keyframes headWipe {
+  from { opacity: 0; transform: translateY(48px) skewY(3deg); clip-path: inset(0 0 100% 0); }
+  to   { opacity: 1; transform: none; clip-path: inset(0 0 -20% 0); }
+}
+@keyframes headFade { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: none; } }
+
+/* Navbar drops in on first load */
+.navbar { animation: navDropIn 0.7s var(--ease) both; }
+@keyframes navDropIn { from { transform: translateY(-100%); } to { transform: none; } }
+
+/* Finance and home headers: the shield floats, figures rise in sequence */
+.fin-shield, .hm-greet-shield { animation: shieldFloat 7s ease-in-out infinite; }
+@keyframes shieldFloat { 0%, 100% { translate: 0 0; rotate: 0deg; } 50% { translate: 0 -14px; rotate: -2deg; } }
+.fin-figures > div { animation: headFade 0.8s var(--ease) both; }
+.fin-figures > div:nth-child(2) { animation-delay: 0.1s; }
+.fin-figures > div:nth-child(3) { animation-delay: 0.2s; }
+.fin-figures > div:nth-child(4) { animation-delay: 0.3s; }
+.hm-greet h1 { animation: headWipe 1s var(--ease) 0.15s both; }
+
+/* Cards answer the pointer */
+.event-card, .exec-card, .award-card, .contrib-card, .stat-card, .hm-panel { will-change: transform; }
+.hm-panel { transition: transform 0.45s var(--ease), box-shadow 0.45s var(--ease); }
+.hm-panel:hover { transform: translateY(-5px); box-shadow: var(--shadow-lift); }
+.table-wrap tbody tr { transition: background-color 0.2s, transform 0.3s var(--ease); }
+.table-wrap tbody tr:hover { transform: translateX(4px); }
+
+/* Admin: sidebar items slide in one after another */
+.admin-nav-item { animation: adminItemIn 0.5s var(--ease) both; }
+.admin-nav > div:nth-child(1) .admin-nav-item { animation-delay: 0.05s; }
+.admin-nav > div:nth-child(2) .admin-nav-item { animation-delay: 0.12s; }
+.admin-nav > div:nth-child(3) .admin-nav-item { animation-delay: 0.19s; }
+.admin-nav > div:nth-child(4) .admin-nav-item { animation-delay: 0.26s; }
+.admin-nav > div:nth-child(5) .admin-nav-item { animation-delay: 0.33s; }
+.admin-nav > div:nth-child(6) .admin-nav-item { animation-delay: 0.4s; }
+@keyframes adminItemIn { from { opacity: 0; transform: translateX(-24px); } to { opacity: 1; transform: none; } }
+
 @media (prefers-reduced-motion: reduce) {
   .rv { opacity: 1 !important; transform: none !important; }
-  .page-header::after { animation: none; }
+  .page-header::after, .page-header h1, .page-header p, .page-header > div:first-child, .navbar,
+  .fin-shield, .hm-greet-shield, .fin-figures > div, .hm-greet h1, .admin-nav-item { animation: none !important; }
 }
 
 /* ── Finance section shell ────────────────────── */

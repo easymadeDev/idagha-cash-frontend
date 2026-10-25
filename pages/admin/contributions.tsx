@@ -77,7 +77,7 @@ export default function AdminContributions() {
   const filtered = filterCat === 'all' ? approvedList : approvedList.filter((c: any) => c.category === filterCat);
 
   const getWalletName = (walletId: string) => walletList.find((w: any) => w._id === walletId)?.name ?? null;
-  const getWalletColor = (walletId: string) => walletList.find((w: any) => w._id === walletId)?.color ?? '#22c55e';
+  const getWalletColor = (walletId: string) => walletList.find((w: any) => w._id === walletId)?.color ?? '#1b6a3d';
 
   // How much has a member already paid toward reunion fund (from existing records)
   const reunionPaidByMember = useMemo(() => {

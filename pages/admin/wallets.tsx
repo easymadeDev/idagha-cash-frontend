@@ -6,7 +6,7 @@ import { useToast } from '../../components/Toast';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
-const EMPTY = { name: '', description: '', color: '#22c55e', type: 'general' };
+const EMPTY = { name: '', description: '', color: '#1b6a3d', type: 'general' };
 const TYPES = ['general', 'reunion', 'pledge', 'custom'];
 
 export default function AdminWallets() {
@@ -29,7 +29,7 @@ export default function AdminWallets() {
   const openAdd = () => { setEditing(null); setForm(EMPTY); setModal(true); };
   const openEdit = (w: any) => {
     setEditing(w);
-    setForm({ name: w.name, description: w.description ?? '', color: w.color ?? '#22c55e', type: w.type ?? 'general' });
+    setForm({ name: w.name, description: w.description ?? '', color: w.color ?? '#1b6a3d', type: w.type ?? 'general' });
     setModal(true);
   };
 
@@ -74,7 +74,7 @@ export default function AdminWallets() {
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: 14 }}>
             {list.map((w: any) => {
               const s = getStats(w._id);
-              const color = w.color || '#22c55e';
+              const color = w.color || '#1b6a3d';
               const isPledge = w.type === 'pledge';
 
               const rows = isPledge ? [
@@ -176,7 +176,7 @@ export default function AdminWallets() {
                     />
                     <input className="form-input" value={form.color}
                       onChange={(e) => setForm({ ...form, color: e.target.value })}
-                      placeholder="#22c55e"
+                      placeholder="#1b6a3d"
                       style={{ fontFamily: 'monospace', fontSize: '0.85rem' }} />
                   </div>
                 </div>

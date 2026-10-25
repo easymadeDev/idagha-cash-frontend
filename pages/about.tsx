@@ -25,7 +25,7 @@ export default function AboutPage() {
               <span className="badge badge-green" style={{ marginBottom: 12, display: 'inline-flex' }}><span className="badge-dot" />Est. 2018 · Active</span>
               <h1 style={{ fontFamily: 'var(--font-d)', fontSize: 'clamp(1.5rem, 6vw, 2.4rem)', fontWeight: 900, letterSpacing: '-0.04em', margin: '0 0 12px', lineHeight: 1.15 }}>
                 IDAGHA Secondary School<br />
-                <span style={{ background: 'linear-gradient(135deg, #4ade80, #22c55e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                <span style={{ background: 'linear-gradient(135deg, #2f7d4f, #1b6a3d)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                   Class of 2018 Alumni
                 </span>
               </h1>

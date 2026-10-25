@@ -95,7 +95,20 @@ export function useAutoReveal(rootRef: React.RefObject<HTMLElement>, key: string
       entries.forEach((en) => {
         if (en.isIntersecting) { en.target.classList.add('rv-in'); io.unobserve(en.target); }
       });
-    }, { rootMargin: '0px 0px -6% 0px' });
+    }, { rootMargin: '0px 0px 8% 0px' });
+
+    // Fast flick-scrolls on phones can skip an element past the observer:
+    // after scrolling settles, reveal everything at or above the bottom of the screen
+    let settle: ReturnType<typeof setTimeout> | undefined;
+    const onScroll = () => {
+      clearTimeout(settle);
+      settle = setTimeout(() => {
+        root.querySelectorAll('.rv:not(.rv-in)').forEach((el) => {
+          if (el.getBoundingClientRect().top < window.innerHeight) el.classList.add('rv-in');
+        });
+      }, 120);
+    };
+    window.addEventListener('scroll', onScroll, { passive: true });
 
     const scan = () => {
       const fresh = Array.from(root.querySelectorAll<HTMLElement>(REVEAL_SELECTOR))
@@ -115,6 +128,6 @@ export function useAutoReveal(rootRef: React.RefObject<HTMLElement>, key: string
       const r = el.getBoundingClientRect();
       if (r.top < window.innerHeight) el.classList.add('rv-in');
     }), 2500);
-    return () => { io.disconnect(); mo.disconnect(); clearTimeout(t); };
+    return () => { io.disconnect(); mo.disconnect(); clearTimeout(t); clearTimeout(settle); window.removeEventListener('scroll', onScroll); };
   }, [rootRef, key]);
 }
