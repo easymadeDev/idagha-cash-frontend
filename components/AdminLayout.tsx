@@ -87,7 +87,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               alt="IDAGHA Alumni"
               width={40}
               height={40}
-              style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(34,197,94,0.4))' }}
+              style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 8px rgba(22,101,52,0.4))' }}
             />
             <div>
               <div className="admin-sidebar-name">IDAGHA Admin</div>

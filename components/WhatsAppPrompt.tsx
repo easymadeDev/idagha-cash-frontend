@@ -111,7 +111,7 @@ export default function WhatsAppPrompt() {
       <div style={{
         position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
         width: 'min(420px, calc(100vw - 32px))',
-        background: 'linear-gradient(160deg,#0a1f0e,#061008)',
+        background: 'var(--bg-card)',
         border: `1px solid ${phase === 'confirmed' ? 'rgba(37,211,102,0.6)' : 'rgba(37,211,102,0.3)'}`,
         borderRadius: 20, padding: '24px 24px 20px',
         boxShadow: '0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(37,211,102,0.1)',
@@ -123,7 +123,7 @@ export default function WhatsAppPrompt() {
         {phase === 'idle' && (
           <button onClick={() => close()} style={{
             position: 'absolute', top: 14, right: 14,
-            background: 'rgba(255,255,255,0.06)', border: 'none',
+            background: 'rgba(15,61,34,0.06)', border: 'none',
             borderRadius: '50%', width: 28, height: 28,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             cursor: 'pointer', color: 'rgba(255,255,255,0.5)',
@@ -196,7 +196,7 @@ export default function WhatsAppPrompt() {
               </a>
               <button onClick={() => close()} style={{
                 padding: '12px 16px', borderRadius: 10,
-                background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)',
+                background: 'rgba(15,61,34,0.05)', border: '1px solid rgba(15,61,34,0.1)',
                 color: '#6b7280', fontWeight: 600, fontSize: '0.82rem', cursor: 'pointer',
                 whiteSpace: 'nowrap',
               }}>
@@ -233,8 +233,8 @@ export default function WhatsAppPrompt() {
               ))}
             </div>
             <button onClick={() => close()} style={{
-              padding: '8px 20px', borderRadius: 8, border: '1px solid rgba(255,255,255,0.1)',
-              background: 'rgba(255,255,255,0.04)', color: '#6b7280',
+              padding: '8px 20px', borderRadius: 8, border: '1px solid rgba(15,61,34,0.1)',
+              background: 'rgba(15,61,34,0.04)', color: '#6b7280',
               fontSize: '0.78rem', cursor: 'pointer',
             }}>
               I'll do it later

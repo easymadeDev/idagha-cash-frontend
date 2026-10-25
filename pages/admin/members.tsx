@@ -17,7 +17,7 @@ const EMPTY = {
 const POSITIONS = ['Member', 'Secretary', 'President', 'Vice President', 'Treasurer', 'PRO', 'Welfare Officer', 'Financial Secretary'];
 
 const AVATAR_COLORS = [
-  ['rgba(34,197,94,0.15)', 'var(--green-400)'],
+  ['rgba(22,101,52,0.15)', 'var(--green-400)'],
   ['rgba(96,165,250,0.15)', 'var(--blue)'],
   ['rgba(251,191,36,0.15)', 'var(--yellow)'],
   ['rgba(248,113,113,0.15)', 'var(--red)'],
@@ -286,7 +286,7 @@ export default function AdminMembers() {
                 }}>
                   <div style={{
                     width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-                    overflow: 'hidden', background: 'rgba(34,197,94,0.1)',
+                    overflow: 'hidden', background: 'rgba(22,101,52,0.1)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     border: '1px solid var(--border-mid)',
                   }}>
@@ -481,8 +481,8 @@ export default function AdminMembers() {
                     type="button" onClick={() => fileRef.current?.click()}
                     style={{
                       width: 80, height: 80, borderRadius: '50%',
-                      background: photoPreview ? 'transparent' : 'rgba(34,197,94,0.06)',
-                      border: `2px dashed ${photoPreview ? 'rgba(34,197,94,0.5)' : 'rgba(34,197,94,0.3)'}`,
+                      background: photoPreview ? 'transparent' : 'rgba(22,101,52,0.06)',
+                      border: `2px dashed ${photoPreview ? 'rgba(22,101,52,0.5)' : 'rgba(22,101,52,0.3)'}`,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       cursor: 'pointer', overflow: 'hidden', padding: 0, transition: 'all 0.2s',
                     }}
@@ -685,7 +685,7 @@ export default function AdminMembers() {
                       style={{
                         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                         padding: '9px 12px', borderRadius: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
-                        border: notifyChannels.includes('email') ? '2px solid #3b82f6' : '2px solid rgba(255,255,255,0.1)',
+                        border: notifyChannels.includes('email') ? '2px solid #3b82f6' : '2px solid rgba(15,61,34,0.1)',
                         background: notifyChannels.includes('email') ? 'rgba(59,130,246,0.12)' : 'transparent',
                         color: notifyChannels.includes('email') ? '#93c5fd' : 'var(--text-3)',
                         transition: 'all 0.15s',
@@ -702,8 +702,8 @@ export default function AdminMembers() {
                       style={{
                         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                         padding: '9px 12px', borderRadius: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
-                        border: notifyChannels.includes('whatsapp') ? '2px solid #22c55e' : '2px solid rgba(255,255,255,0.1)',
-                        background: notifyChannels.includes('whatsapp') ? 'rgba(34,197,94,0.1)' : 'transparent',
+                        border: notifyChannels.includes('whatsapp') ? '2px solid #22c55e' : '2px solid rgba(15,61,34,0.1)',
+                        background: notifyChannels.includes('whatsapp') ? 'rgba(22,101,52,0.1)' : 'transparent',
                         color: notifyChannels.includes('whatsapp') ? '#4ade80' : 'var(--text-3)',
                         transition: 'all 0.15s',
                       }}
@@ -736,7 +736,7 @@ export default function AdminMembers() {
               <div style={{ textAlign: 'center', padding: '20px 0' }}>
                 {notifyDone.sent ? (
                   <>
-                    <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(34,197,94,0.1)', border: '2px solid rgba(34,197,94,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+                    <div style={{ width: 52, height: 52, borderRadius: '50%', background: 'rgba(22,101,52,0.1)', border: '2px solid rgba(22,101,52,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
                       <svg width="24" height="24" fill="none" stroke="#4ade80" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     </div>
                     <p style={{ color: '#4ade80', fontWeight: 700, margin: '0 0 10px', fontSize: '1.05rem' }}>Message sent!</p>
@@ -748,7 +748,7 @@ export default function AdminMembers() {
                         </span>
                       )}
                       {notifyDone.channels?.includes('whatsapp') && (
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 99, background: 'rgba(34,197,94,0.12)', border: '1px solid rgba(34,197,94,0.3)', color: '#4ade80', fontSize: '0.78rem', fontWeight: 600 }}>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '4px 12px', borderRadius: 99, background: 'rgba(22,101,52,0.12)', border: '1px solid rgba(22,101,52,0.3)', color: '#4ade80', fontSize: '0.78rem', fontWeight: 600 }}>
                           <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" strokeLinecap="round" strokeLinejoin="round"/></svg>
                           WhatsApp
                         </span>
@@ -878,7 +878,7 @@ export default function AdminMembers() {
           display: flex; flex-direction: column; gap: 5px;
           padding: 9px 11px;
           border-top: 1px solid var(--border);
-          background: rgba(6,13,8,0.4);
+          background: var(--bg-card);
         }
         .amca-row {
           display: flex; gap: 5px; align-items: center;
@@ -891,8 +891,8 @@ export default function AdminMembers() {
           cursor: pointer; border: 1px solid transparent; transition: all 0.15s; white-space: nowrap;
           font-family: var(--font); line-height: 1;
         }
-        .amca-edit    { flex: 1; background: rgba(255,255,255,0.04); color: var(--text-2); border-color: var(--border); }
-        .amca-edit:hover { background: rgba(255,255,255,0.08); color: var(--text-1); }
+        .amca-edit    { flex: 1; background: rgba(15,61,34,0.04); color: var(--text-2); border-color: var(--border); }
+        .amca-edit:hover { background: rgba(15,61,34,0.08); color: var(--text-1); }
         .amca-notify  { flex: 1; background: rgba(59,130,246,0.1); color: #93c5fd; border-color: rgba(59,130,246,0.25); }
         .amca-notify:hover { background: rgba(59,130,246,0.18); }
         .amca-merge   { flex: 1; background: rgba(196,181,253,0.1); color: #c4b5fd; border-color: rgba(196,181,253,0.25); }
@@ -901,8 +901,8 @@ export default function AdminMembers() {
         .amca-toggle  { flex: 1; }
         .amca-deactivate { background: rgba(107,114,128,0.1); color: var(--text-3); border-color: var(--border); }
         .amca-deactivate:hover { background: rgba(248,113,113,0.1); color: var(--red); border-color: rgba(248,113,113,0.3); }
-        .amca-activate   { background: rgba(34,197,94,0.1); color: var(--green-400); border-color: rgba(34,197,94,0.25); }
-        .amca-activate:hover { background: rgba(34,197,94,0.18); }
+        .amca-activate   { background: rgba(22,101,52,0.1); color: var(--green-400); border-color: rgba(22,101,52,0.25); }
+        .amca-activate:hover { background: rgba(22,101,52,0.18); }
         .amca-delete  { flex: 1; background: rgba(248,113,113,0.08); color: var(--red); border-color: rgba(248,113,113,0.2); }
         .amca-delete:hover { background: rgba(248,113,113,0.18); }
 

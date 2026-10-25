@@ -50,7 +50,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
 function ToastItem({ toast, onClose }: { toast: Toast; onClose: () => void }) {
   const colors = {
-    success: { bg: 'rgba(21,128,61,0.95)', border: 'rgba(34,197,94,0.4)', icon: '✓' },
+    success: { bg: 'rgba(21,128,61,0.95)', border: 'rgba(22,101,52,0.4)', icon: '✓' },
     error:   { bg: 'rgba(185,28,28,0.95)', border: 'rgba(239,68,68,0.4)',  icon: '✕' },
     info:    { bg: 'rgba(30,64,175,0.95)', border: 'rgba(96,165,250,0.4)', icon: 'ℹ' },
   };

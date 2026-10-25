@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app';
 import { useRouter } from 'next/router';
 import '../styles/globals.css';
 import '../styles/alumni.css';
+import '../styles/theme.css';
 import WelcomePopup from '../components/WelcomePopup';
 import WhatsAppPrompt from '../components/WhatsAppPrompt';
 import { GateContext, SessionMember } from '../lib/gate';

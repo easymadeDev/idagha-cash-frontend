@@ -28,7 +28,7 @@ export default function ActivityTicker() {
       position: 'fixed', top: 68, left: 0, right: 0, zIndex: 199,
       height: 34,
       background: 'rgba(3,9,6,0.95)',
-      borderBottom: '1px solid rgba(34,197,94,0.12)',
+      borderBottom: '1px solid rgba(22,101,52,0.12)',
       display: 'flex', alignItems: 'center',
       overflow: 'hidden',
     }}>
@@ -37,9 +37,9 @@ export default function ActivityTicker() {
         flexShrink: 0,
         display: 'flex', alignItems: 'center', gap: 6,
         padding: '0 14px',
-        borderRight: '1px solid rgba(34,197,94,0.15)',
+        borderRight: '1px solid rgba(22,101,52,0.15)',
         height: '100%',
-        background: 'rgba(34,197,94,0.07)',
+        background: 'rgba(22,101,52,0.07)',
       }}>
         <span style={{
           width: 6, height: 6, borderRadius: '50%',
@@ -65,7 +65,7 @@ export default function ActivityTicker() {
             <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0 28px' }}>
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: item.dot, flexShrink: 0, display: 'inline-block' }} />
               <span style={{ fontSize: '0.75rem', color: item.color, fontWeight: 600 }}>{item.text}</span>
-              <span style={{ color: 'rgba(255,255,255,0.1)', marginLeft: 12 }}>|</span>
+              <span style={{ color: 'rgba(15,61,34,0.1)', marginLeft: 12 }}>|</span>
             </span>
           ))}
         </div>

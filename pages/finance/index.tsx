@@ -1,0 +1,836 @@
+import FinanceLayout from '../../components/FinanceLayout';
+import useSWR from 'swr';
+import { useRouter } from 'next/router';
+import { useEffect, useState, useRef } from 'react';
+import Image from 'next/image';
+import { formatNaira, formatDate } from '../../lib/api';
+
+const walletColor = (w: any) =>
+  w?.type === 'reunion' ? '#b5860f' : w?.type === 'pledge' ? '#1d4f91' : '#0f3d22';
+
+// Wallet detail modal — shows contributions + expenses for one wallet
+function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
+  const { data: allContribs } = useSWR('/api/contributions', fetcher);
+  const { data: allExpenses } = useSWR('/api/expenses', fetcher);
+  const { data: allPledges } = useSWR(ws.wallet?.type === 'pledge' ? '/api/pledges' : null, fetcher);
+  const { data: pledgeStatsRaw } = useSWR(ws.wallet?.type === 'pledge' ? '/api/pledges/stats' : null, fetcher, { refreshInterval: 15000 });
+
+  const w = ws.wallet;
+  const color = walletColor(w);
+  const isPledgeWallet = w?.type === 'pledge';
+
+  const contribs = Array.isArray(allContribs)
+    ? allContribs.filter((c: any) => c.walletId === w._id)
+    : [];
+  const expenses = Array.isArray(allExpenses)
+    ? allExpenses.filter((e: any) => e.walletId === w._id)
+    : [];
+  const pledges = Array.isArray(allPledges) ? allPledges : [];
+
+  const contributorMap: Record<string, number> = {};
+  contribs.forEach((c: any) => {
+    contributorMap[c.contributorName] = (contributorMap[c.contributorName] || 0) + c.amount;
+  });
+  const contributors = Object.entries(contributorMap).sort((a, b) => b[1] - a[1]);
+
+  const transactions = [
+    ...contribs.map((c: any) => ({ ...c, _type: 'credit' })),
+    ...expenses.map((e: any) => ({ ...e, _type: 'debit' })),
+  ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 8000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }} onClick={onClose}>
+      {/* Backdrop */}
+      <div style={{ position: 'absolute', inset: 0, background: 'rgba(3,9,6,0.85)', backdropFilter: 'blur(6px)', animation: 'fadeIn 0.2s ease' }} />
+
+      {/* Sheet — full width on mobile, max 680px on desktop */}
+      <div style={{
+        position: 'relative', zIndex: 1,
+        width: '100%', maxWidth: 680,
+        maxHeight: '80vh',
+        background: 'var(--bg-card)',
+        border: `1px solid ${color}33`,
+        borderBottom: 'none',
+        borderRadius: '20px 20px 0 0',
+        overflow: 'hidden',
+        display: 'flex', flexDirection: 'column',
+        animation: 'slideUp 0.3s cubic-bezier(0.4,0,0.2,1)',
+      }} onClick={e => e.stopPropagation()}>
+
+        {/* Color bar */}
+        <div style={{ height: 4, background: color, flexShrink: 0 }} />
+
+        {/* Drag handle */}
+        <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 2, flexShrink: 0 }}>
+          <div style={{ width: 36, height: 4, borderRadius: 99, background: 'rgba(15,61,34,0.12)' }} />
+        </div>
+
+        {/* Header */}
+        <div style={{ padding: '12px 16px 14px', flexShrink: 0, borderBottom: `1px solid ${color}18` }}>
+          {/* Title row */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+              <div style={{
+                width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+                background: `${color}18`, border: `1px solid ${color}33`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                <svg width="16" height="16" fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24">
+                  <path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </div>
+              <div style={{ minWidth: 0 }}>
+                <div style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: 'clamp(0.92rem,3vw,1.1rem)', color: 'var(--text-1)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{w.name}</div>
+                <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', textTransform: 'capitalize' }}>{w.type} wallet{w.description ? ` · ${w.description}` : ''}</div>
+              </div>
+            </div>
+            <button onClick={onClose} style={{
+              width: 32, height: 32, borderRadius: '50%', border: '1px solid var(--border)',
+              background: 'rgba(15,61,34,0.04)', cursor: 'pointer', color: 'var(--text-3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0, marginLeft: 8,
+            }}>×</button>
+          </div>
+
+          {/* Balance row — always 3 columns, text shrinks */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 8 }}>
+            {(isPledgeWallet
+              ? (() => { const ps = ws.pledgeStats ?? pledgeStatsRaw; return [
+                  { label: 'Total Support', val: formatNaira(ps?.totalPledged ?? 0), col: color },
+                  { label: 'Fulfilled',     val: formatNaira(ps?.totalFulfilled ?? 0), col: 'var(--green-400)' },
+                  { label: 'Pending',       val: formatNaira(ps?.totalPending ?? 0), col: 'var(--yellow)' },
+                ]; })()
+              : [
+                  { label: 'Balance', val: formatNaira(ws.balance), col: ws.balance >= 0 ? color : 'var(--red)' },
+                  { label: 'Income',  val: formatNaira(ws.income),  col: 'var(--green-400)' },
+                  { label: 'Spent',   val: formatNaira(ws.spent),   col: 'var(--red)' },
+                ]
+            ).map(s => (
+              <div key={s.label} style={{ background: 'rgba(15,61,34,0.03)', borderRadius: 9, padding: '9px 10px', border: '1px solid var(--border)' }}>
+                <div style={{ fontSize: '0.6rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>{s.label}</div>
+                <div style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: 'clamp(0.72rem,2.5vw,0.95rem)', color: s.col, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.val}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Scrollable body */}
+        <div style={{ overflowY: 'auto', flex: 1, padding: '16px 16px 32px', WebkitOverflowScrolling: 'touch' } as any}>
+
+          {/* Pledge wallet — show pledge list */}
+          {isPledgeWallet && (
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontWeight: 700, fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+                Reunion Support ({pledges.length})
+              </div>
+              {pledges.length === 0 ? (
+                <p style={{ color: 'var(--text-3)', fontSize: '0.84rem' }}>No reunion support yet.</p>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  {pledges.map((p: any) => (
+                    <div key={p._id} style={{
+                      display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '9px 12px', borderRadius: 9,
+                      background: 'rgba(15,61,34,0.02)', border: '1px solid var(--border)', gap: 8,
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
+                        <div style={{
+                          width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                          background: `${color}22`, color,
+                          display: 'flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: '0.6rem', fontWeight: 800,
+                        }}>
+                          {p.memberName.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
+                        </div>
+                        <div style={{ minWidth: 0 }}>
+                          <div style={{ fontWeight: 600, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.memberName}</div>
+                          <div style={{ fontSize: '0.67rem', color: 'var(--text-3)' }}>{p.status === 'fulfilled' ? 'Fulfilled' : 'Pending'}</div>
+                        </div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                        <span style={{
+                          fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px', borderRadius: 99,
+                          background: p.status === 'fulfilled' ? 'rgba(22,101,52,0.12)' : 'rgba(251,191,36,0.12)',
+                          color: p.status === 'fulfilled' ? 'var(--green-400)' : 'var(--yellow)',
+                        }}>{p.status === 'fulfilled' ? '✓' : '⏳'}</span>
+                        <div style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: '0.85rem', color: p.status === 'fulfilled' ? 'var(--green-400)' : color }}>
+                          {formatNaira(p.amount)}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Contributors */}
+          {!isPledgeWallet && <div style={{ marginBottom: 24 }}>
+            <div style={{ fontWeight: 700, fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+              Contributors ({contributors.length})
+            </div>
+            {contributors.length === 0 ? (
+              <p style={{ color: 'var(--text-3)', fontSize: '0.84rem' }}>No contributions yet.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                {contributors.map(([name, total]) => (
+                  <div key={name} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '9px 12px', borderRadius: 9,
+                    background: 'rgba(15,61,34,0.02)', border: '1px solid var(--border)',
+                    gap: 8,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
+                      <div style={{
+                        width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
+                        background: `${color}22`, color,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: '0.6rem', fontWeight: 800,
+                      }}>
+                        {name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2)}
+                      </div>
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.82rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</div>
+                        <div style={{ fontSize: '0.67rem', color: 'var(--text-3)' }}>
+                          {contribs.filter((c: any) => c.contributorName === name).length} payment(s)
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: '0.85rem', color: 'var(--green-400)', flexShrink: 0 }}>
+                      {formatNaira(total)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>}
+
+          {/* Transactions — only for non-pledge wallets */}
+          {!isPledgeWallet && <div>
+            <div style={{ fontWeight: 700, fontSize: '0.75rem', color: 'var(--text-2)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+              All Transactions ({transactions.length})
+            </div>
+            {transactions.length === 0 ? (
+              <p style={{ color: 'var(--text-3)', fontSize: '0.84rem' }}>No transactions yet.</p>
+            ) : (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                {transactions.map((tx: any) => (
+                  <div key={tx._id} style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    padding: '9px 12px', borderRadius: 9,
+                    background: 'rgba(15,61,34,0.015)', border: '1px solid var(--border)',
+                    gap: 8,
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
+                      <div style={{ width: 7, height: 7, borderRadius: '50%', flexShrink: 0, background: tx._type === 'credit' ? 'var(--green-400)' : 'var(--red)' }} />
+                      <div style={{ minWidth: 0 }}>
+                        <div style={{ fontWeight: 600, fontSize: '0.8rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {tx._type === 'credit' ? tx.contributorName : tx.title}
+                        </div>
+                        <div style={{ fontSize: '0.65rem', color: 'var(--text-3)' }}>
+                          {formatDate(tx.date)} · {tx.category || (tx._type === 'debit' ? 'expense' : 'contribution')}
+                        </div>
+                      </div>
+                    </div>
+                    <div style={{ fontFamily: 'var(--font-d)', fontWeight: 700, fontSize: '0.82rem', color: tx._type === 'credit' ? 'var(--green-400)' : 'var(--red)', flexShrink: 0 }}>
+                      {tx._type === 'credit' ? '+' : '−'}{formatNaira(tx.amount)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes slideUp {
+          from { transform: translateY(100%); opacity: 0; }
+          to   { transform: translateY(0); opacity: 1; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+function getGreeting(): { title: string; content: string; icon: string } {
+  const h = new Date().getHours();
+  if (h >= 5 && h < 12)  return { icon: '🌅', title: 'Good Morning!', content: 'Welcome back to the IDAGHA Class of 2018 Alumni Portal. Have a wonderful and productive morning!' };
+  if (h >= 12 && h < 17) return { icon: '☀️', title: 'Good Afternoon!', content: 'Hope your day is going great. Stay connected with your fellow alumni right here.' };
+  if (h >= 17 && h < 21) return { icon: '🌇', title: 'Good Evening!', content: 'Welcome back! Unwind and catch up on the latest from your alumni family.' };
+  return { icon: '🌙', title: 'Good Night!', content: 'Still up? The IDAGHA Alumni Portal is always here for you. Rest well tonight.' };
+}
+
+function AnnouncementSlider({ announcements }: { announcements: any[] }) {
+  const greeting = getGreeting();
+  const greetingSlide = { _id: '__greeting__', title: greeting.title, content: greeting.content, _icon: greeting.icon };
+  const slides = [greetingSlide, ...announcements];
+
+  const [idx, setIdx] = useState(0);
+  const [expanded, setExpanded] = useState(false);
+  const timerRef = useRef<any>(null);
+
+  const restart = (next: number) => {
+    clearInterval(timerRef.current);
+    setIdx(next);
+    setExpanded(false);
+    timerRef.current = setInterval(() => { setIdx(i => (i + 1) % slides.length); setExpanded(false); }, 4500);
+  };
+
+  const pause = () => clearInterval(timerRef.current);
+
+  useEffect(() => {
+    timerRef.current = setInterval(() => { setIdx(i => (i + 1) % slides.length); setExpanded(false); }, 4500);
+    return () => clearInterval(timerRef.current);
+  }, [slides.length]);
+
+  const a = slides[idx];
+  const isGreeting = a._id === '__greeting__';
+
+  const navBtn = (onClick: () => void, d: string) => (
+    <button onClick={onClick} style={{ background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 4, lineHeight: 1, display: 'flex' }}>
+      <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d={d} strokeLinecap="round" strokeLinejoin="round"/></svg>
+    </button>
+  );
+
+  return (
+    <div style={{ paddingTop: 12 }}>
+      <div className="announce-bar">
+        {/* Top row: icon + text + (desktop-only) nav */}
+        <div className="announce-top-row">
+          <div className="announce-icon" style={{ fontSize: isGreeting ? '1rem' : undefined }}>
+            {isGreeting ? (a as any)._icon : (
+              <svg width="16" height="16" fill="none" stroke="var(--green-400)" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M11 5.882V19.24a1.76 1.76 0 01-3.417.592l-2.147-6.15M18 13a3 3 0 100-6M5.436 13.683A4.001 4.001 0 017 6h1.832c4.1 0 7.625-1.234 9.168-3v14c-1.543-1.766-5.067-3-9.168-3H7a3.988 3.988 0 01-1.564-.317z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            )}
+          </div>
+
+          <div className="announce-content-wrap"
+            style={{ cursor: 'pointer', ...(expanded ? { height: 'auto' } : {}) }}
+            onClick={() => { pause(); setExpanded(e => !e); }}>
+            <div key={a._id} style={{ animation: 'announceSlide 0.35s cubic-bezier(0.4,0,0.2,1) both' }}>
+              <div className="announce-title">{a.title}</div>
+              <div className="announce-body" style={expanded ? { WebkitLineClamp: 'unset', display: 'block' } : undefined}>{a.content}</div>
+              {!expanded && <span style={{ fontSize: '0.68rem', color: 'var(--green-400)', opacity: 0.7 }}>tap to read more</span>}
+            </div>
+          </div>
+
+          {slides.length > 1 && (
+            <div className="announce-nav announce-nav-desktop">
+              {navBtn(() => restart((idx - 1 + slides.length) % slides.length), 'M15 18l-6-6 6-6')}
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontWeight: 700, minWidth: 26, textAlign: 'center' }}>{idx + 1}/{slides.length}</span>
+              {navBtn(() => restart((idx + 1) % slides.length), 'M9 18l6-6-6-6')}
+            </div>
+          )}
+        </div>
+
+        {/* Bottom row (mobile): dots + nav */}
+        {slides.length > 1 && (
+          <div className="announce-bottom-row">
+            <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+              {slides.map((_, i) => (
+                <button key={i} onClick={() => restart(i)} style={{
+                  width: i === idx ? 18 : 5, height: 5, borderRadius: 99,
+                  border: 'none', cursor: 'pointer', padding: 0,
+                  background: i === idx ? 'var(--green-400)' : 'rgba(22,101,52,0.2)',
+                  transition: 'all 0.3s ease',
+                }} />
+              ))}
+            </div>
+            <div className="announce-nav announce-nav-mobile">
+              {navBtn(() => restart((idx - 1 + slides.length) % slides.length), 'M15 18l-6-6 6-6')}
+              <span style={{ fontSize: '0.65rem', color: 'var(--text-3)', fontWeight: 700, minWidth: 26, textAlign: 'center' }}>{idx + 1}/{slides.length}</span>
+              {navBtn(() => restart((idx + 1) % slides.length), 'M9 18l6-6-6-6')}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        @keyframes announceSlide {
+          from { opacity: 0; transform: translateX(20px); }
+          to   { opacity: 1; transform: translateX(0); }
+        }
+        .announce-top-row { display: flex; align-items: flex-start; gap: 12px; }
+        .announce-nav { display: flex; align-items: center; gap: 4px; flex-shrink: 0; }
+        .announce-bottom-row { display: none; justify-content: space-between; align-items: center; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(22,101,52,0.12); }
+        .announce-nav-mobile { display: none; }
+        @media (max-width: 640px) {
+          .announce-top-row { align-items: flex-start; }
+          .announce-nav-desktop { display: none; }
+          .announce-bottom-row { display: flex; }
+          .announce-nav-mobile { display: flex; }
+        }
+      `}</style>
+    </div>
+  );
+}
+
+const fetcher = (url: string) => fetch(url).then((r) => r.json());
+
+function useCountUp(target: number, duration = 1400) {
+  const [val, setVal] = useState(0);
+  useEffect(() => {
+    if (!target) return;
+    let start = 0;
+    const step = target / (duration / 16);
+    const timer = setInterval(() => {
+      start += step;
+      if (start >= target) { setVal(target); clearInterval(timer); }
+      else setVal(Math.floor(start));
+    }, 16);
+    return () => clearInterval(timer);
+  }, [target, duration]);
+  return val;
+}
+
+function AnimatedNaira({ amount }: { amount: number }) {
+  const val = useCountUp(amount);
+  return <>{formatNaira(val)}</>;
+}
+
+function timeAgo(date: string) {
+  const diff = Date.now() - new Date(date).getTime();
+  const m = Math.floor(diff / 60000);
+  const h = Math.floor(m / 60);
+  const d = Math.floor(h / 24);
+  if (d > 30) return formatDate(date);
+  if (d > 0) return `${d}d ago`;
+  if (h > 0) return `${h}h ago`;
+  if (m > 0) return `${m}m ago`;
+  return 'Just now';
+}
+
+function ActivityIcon({ type }: { type: string }) {
+  if (type === 'contribution') return (
+    <svg width="16" height="16" fill="none" stroke="var(--green-400)" strokeWidth="2" viewBox="0 0 24 24">
+      <path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  if (type === 'expense') return (
+    <svg width="16" height="16" fill="none" stroke="var(--red)" strokeWidth="2" viewBox="0 0 24 24">
+      <path d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+  return (
+    <svg width="16" height="16" fill="none" stroke="var(--blue)" strokeWidth="2" viewBox="0 0 24 24">
+      <path d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+export default function FinanceOverview() {
+  const router = useRouter();
+  const { data: stats }       = useSWR('/api/stats/summary', fetcher);
+  const { data: walletStats } = useSWR('/api/stats/wallets', fetcher, { refreshInterval: 15000, revalidateOnFocus: true });
+  const { data: pledgeStatsRaw } = useSWR('/api/pledges/stats', fetcher, { refreshInterval: 15000, revalidateOnFocus: true });
+  const { data: contributions } = useSWR('/api/contributions', fetcher);
+  const { data: announcements } = useSWR('/api/announcements', fetcher);
+  const { data: activityRaw } = useSWR('/api/activity?limit=25', fetcher, { refreshInterval: 30000 });
+
+  const [activeWallet, setActiveWallet] = useState<any>(null);
+  const [visibleCount, setVisibleCount] = useState(3);
+
+  const recentContribs = Array.isArray(contributions) ? contributions.slice(0, 6) : [];
+  const activityFeed   = Array.isArray(activityRaw) ? activityRaw : [];
+  const visibleFeed    = activityFeed.slice(0, visibleCount);
+  const hasMore        = visibleCount < activityFeed.length;
+  const pct = stats?.reunionFund?.percentage ?? 0;
+  const walletCards = Array.isArray(walletStats) ? walletStats : [];
+
+  const getInitials = (name: string) =>
+    name.split(' ').map((n: string) => n[0]).join('').toUpperCase().slice(0, 2);
+
+  const avatarColors = [
+    'rgba(22,101,52,0.15)', 'rgba(96,165,250,0.15)',
+    'rgba(251,191,36,0.15)', 'rgba(248,113,113,0.15)',
+    'rgba(167,139,250,0.15)', 'rgba(251,146,60,0.15)',
+  ];
+
+  return (
+    <FinanceLayout>
+      {activeWallet && <WalletModal ws={activeWallet} onClose={() => setActiveWallet(null)} />}
+
+      <div className="container">
+
+        {/* ── Wallet Cards ── */}
+        {walletCards.length > 0 && (
+          <div style={{ marginBottom: 48 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+              <div>
+                <h2 style={{ fontFamily: 'var(--font-d)', fontSize: '1.2rem', fontWeight: 800, letterSpacing: '-0.03em', margin: 0, marginBottom: 4 }}>
+                  Wallet Balances
+                </h2>
+                <p style={{ margin: 0, fontSize: '0.8rem', color: 'var(--text-3)' }}>Live balance for each group wallet</p>
+              </div>
+            </div>
+            <div className="wallet-cards-grid">
+              {walletCards.map((ws: any) => {
+                const w = ws.wallet;
+                const color = walletColor(w);
+                return (
+                  <div key={w?._id} onClick={() => setActiveWallet(ws)} className="wallet-card-wrap" style={{
+                    background: 'var(--bg-card)',
+                    border: `1px solid ${color}33`,
+                    position: 'relative', overflow: 'hidden',
+                    cursor: 'pointer', transition: 'transform 0.15s, box-shadow 0.15s',
+                  }}
+                    onMouseEnter={e => { (e.currentTarget as HTMLElement).style.transform = 'translateY(-3px)'; (e.currentTarget as HTMLElement).style.boxShadow = `0 8px 32px ${color}22`; }}
+                    onMouseLeave={e => { (e.currentTarget as HTMLElement).style.transform = ''; (e.currentTarget as HTMLElement).style.boxShadow = ''; }}
+                  >
+                    {/* Color accent */}
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: 3, background: color }} />
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: 120, height: 120, borderRadius: '50%', background: `${color}08`, transform: 'translate(30%, -30%)' }} />
+
+                    <div className="wallet-card-header">
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 9, flexShrink: 0,
+                        background: `${color}18`, border: `1px solid ${color}33`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      }}>
+                        <svg width="17" height="17" fill="none" stroke={color} strokeWidth="2" viewBox="0 0 24 24">
+                          <path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </div>
+                      <div>
+                        <div className="wallet-card-name">{w?.name || 'Wallet'}</div>
+                        <div className="wallet-card-type">{w?.type} wallet</div>
+                      </div>
+                    </div>
+
+                    {/* Balance / Pledge summary */}
+                    {w?.type === 'pledge' ? (() => {
+                      const ps = ws.pledgeStats ?? pledgeStatsRaw;
+                      return (
+                      <>
+                        <div style={{ marginBottom: 12 }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Total Support</div>
+                          <div className="wallet-card-balance" style={{ color }}>
+                            <AnimatedNaira amount={ps?.totalPledged ?? 0} />
+                          </div>
+                        </div>
+                        <div className="wallet-card-sub">
+                          <div className="wallet-card-sub-item" style={{ background: 'rgba(22,101,52,0.06)', border: '1px solid rgba(22,101,52,0.12)' }}>
+                            <div className="wallet-card-sub-label">Fulfilled</div>
+                            <div className="wallet-card-sub-value" style={{ color: 'var(--green-400)' }}>{formatNaira(ps?.totalFulfilled ?? 0)}</div>
+                          </div>
+                          <div className="wallet-card-sub-item" style={{ background: 'rgba(251,191,36,0.06)', border: '1px solid rgba(251,191,36,0.12)' }}>
+                            <div className="wallet-card-sub-label">Pending</div>
+                            <div className="wallet-card-sub-value" style={{ color: 'var(--yellow)' }}>{formatNaira(ps?.totalPending ?? 0)}</div>
+                          </div>
+                        </div>
+                      </>
+                      );
+                    })() : (
+                      <>
+                        <div style={{ marginBottom: 12 }}>
+                          <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4 }}>Balance</div>
+                          <div className="wallet-card-balance" style={{ color: ws.balance >= 0 ? color : 'var(--red)' }}>
+                            <AnimatedNaira amount={Math.abs(ws.balance)} />
+                            {ws.balance < 0 && <span style={{ fontSize: '0.85em' }}> deficit</span>}
+                          </div>
+                        </div>
+                        <div className="wallet-card-sub">
+                          <div className="wallet-card-sub-item" style={{ background: 'rgba(22,101,52,0.06)', border: '1px solid rgba(22,101,52,0.12)' }}>
+                            <div className="wallet-card-sub-label">Income</div>
+                            <div className="wallet-card-sub-value" style={{ color: 'var(--green-400)' }}>{formatNaira(ws.income)}</div>
+                          </div>
+                          <div className="wallet-card-sub-item" style={{ background: 'rgba(248,113,113,0.06)', border: '1px solid rgba(248,113,113,0.12)' }}>
+                            <div className="wallet-card-sub-label">Spent</div>
+                            <div className="wallet-card-sub-value" style={{ color: 'var(--red)' }}>{formatNaira(ws.spent)}</div>
+                          </div>
+                        </div>
+                      </>
+                    )}
+                    <div className="wallet-card-link" style={{ color }}>
+                      View details
+                      <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                        <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* ══════════════════════════════════════════
+            LIVE ACTIVITY FEED  — full redesign
+        ══════════════════════════════════════════ */}
+        <div style={{ marginBottom: 52 }}>
+
+          {/* Section header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 6 }}>
+                <h2 style={{ fontFamily: 'var(--font-d)', fontSize: '1.35rem', fontWeight: 800, letterSpacing: '-0.03em', margin: 0 }}>
+                  Activity Feed
+                </h2>
+                {/* Pulsing LIVE badge */}
+                <div style={{
+                  display: 'flex', alignItems: 'center', gap: 6,
+                  padding: '4px 12px',
+                  background: 'rgba(22,101,52,0.08)',
+                  border: '1px solid rgba(22,101,52,0.3)',
+                  borderRadius: 99,
+                  fontSize: '0.68rem', fontWeight: 800,
+                  color: 'var(--green-400)',
+                  letterSpacing: '0.1em', textTransform: 'uppercase',
+                }}>
+                  <span style={{
+                    width: 7, height: 7, borderRadius: '50%',
+                    background: 'var(--green-400)',
+                    boxShadow: '0 0 8px var(--green-400)',
+                    animation: 'livePing 1.5s ease-in-out infinite',
+                    display: 'block',
+                  }} />
+                  Live
+                </div>
+              </div>
+              <p style={{ margin: 0, fontSize: '0.82rem', color: 'var(--text-3)' }}>
+                Every contribution, expense & new member — fully transparent
+              </p>
+            </div>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', background: 'rgba(15,61,34,0.03)', border: '1px solid var(--border)', borderRadius: 8, padding: '5px 12px' }}>
+              {activityFeed.length} recent events
+            </div>
+          </div>
+
+          {/* Feed container */}
+          {activityFeed.length === 0 ? (
+            <div style={{
+              padding: '56px 24px', textAlign: 'center',
+              background: 'var(--bg-card)',
+              border: '1px solid var(--border)', borderRadius: 'var(--radius)',
+              color: 'var(--text-3)',
+            }}>
+              <svg width="48" height="48" fill="none" stroke="currentColor" strokeWidth="1.2" viewBox="0 0 24 24" style={{ margin: '0 auto 14px', opacity: 0.3, display: 'block' }}>
+                <path d="M13 10V3L4 14h7v7l9-11h-7z" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+              <div style={{ fontWeight: 600, marginBottom: 6 }}>No activity yet</div>
+              <div style={{ fontSize: '0.8rem' }}>Transactions and member events will appear here in real time</div>
+            </div>
+          ) : (
+            <div style={{
+              background: 'transparent',
+              border: '1px solid var(--border)',
+              borderRadius: 'var(--radius)',
+              overflow: 'hidden',
+              backdropFilter: 'blur(12px)',
+            }}>
+              {visibleFeed.map((item: any, i: number) => {
+                const isContrib = item.type === 'contribution';
+                const isExpense = item.type === 'expense';
+
+                const dotColor  = isContrib ? 'var(--green-400)' : isExpense ? 'var(--red)' : 'var(--blue)';
+                const iconBg    = isContrib ? 'rgba(22,101,52,0.1)' : isExpense ? 'rgba(248,113,113,0.08)' : 'rgba(96,165,250,0.08)';
+                const amountColor = isExpense ? 'var(--red)' : 'var(--green-400)';
+
+                // Category pill text
+                const cat = (item.category || '').toLowerCase();
+                const catLabel = cat === 'reunion-fund' ? 'Reunion Fund' : cat === 'dues' ? 'Monthly Dues' : cat === 'general' ? 'General' : item.category || '';
+
+                return (
+                  <div key={item.id} className="feed-item" style={{
+                    borderBottom: i < visibleFeed.length - 1 ? '1px solid rgba(22,101,52,0.06)' : 'none',
+                    animation: `fadeUp 0.4s cubic-bezier(0.4,0,0.2,1) ${Math.min(i * 0.05, 0.3)}s both`,
+                  }}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = 'rgba(22,101,52,0.03)')}
+                    onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
+                  >
+                    {/* Timeline dot + line */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, gap: 0 }}>
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 10,
+                        background: iconBg,
+                        border: `1px solid ${dotColor}22`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                        boxShadow: `0 0 12px ${dotColor}18`,
+                      }}>
+                        <ActivityIcon type={item.type} />
+                      </div>
+                    </div>
+
+                    {/* Text block */}
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 3 }}>
+                        <span style={{ fontWeight: 700, fontSize: '0.875rem', color: 'var(--text-1)', lineHeight: 1.3 }}>
+                          {item.title}
+                        </span>
+                        {catLabel && isContrib && (
+                          <span style={{
+                            fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px',
+                            borderRadius: 99, letterSpacing: '0.05em', textTransform: 'uppercase',
+                            background: cat === 'reunion-fund' ? 'rgba(251,191,36,0.1)' : 'rgba(22,101,52,0.1)',
+                            color: cat === 'reunion-fund' ? 'var(--yellow)' : 'var(--green-400)',
+                            border: `1px solid ${cat === 'reunion-fund' ? 'rgba(251,191,36,0.2)' : 'rgba(22,101,52,0.2)'}`,
+                          }}>
+                            {catLabel}
+                          </span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: '90%' }}>
+                        {item.subtitle}
+                      </div>
+                    </div>
+
+                    {/* Right: amount + time */}
+                    <div className="feed-item-right">
+                      {item.amount != null && (
+                        <div style={{
+                          fontFamily: 'var(--font-d)', fontWeight: 800,
+                          fontSize: '0.95rem', color: amountColor,
+                          letterSpacing: '-0.02em', lineHeight: 1.2,
+                          textShadow: `0 0 16px ${amountColor}44`,
+                        }}>
+                          {isExpense ? '−' : '+'}{formatNaira(item.amount)}
+                        </div>
+                      )}
+                      <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', marginTop: 3, fontWeight: 500 }}>
+                        {timeAgo(item.date)}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Load More / Footer */}
+              <div className="feed-footer" style={{ flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+                {hasMore ? (
+                  <button
+                    onClick={() => setVisibleCount(c => c + 3)}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 7,
+                      padding: '9px 22px',
+                      background: 'rgba(22,101,52,0.07)',
+                      border: '1px solid rgba(22,101,52,0.25)',
+                      borderRadius: 99,
+                      color: 'var(--green-400)',
+                      fontSize: '0.8rem', fontWeight: 700,
+                      cursor: 'pointer', fontFamily: 'var(--font)',
+                      transition: 'all 0.2s',
+                      width: '100%', justifyContent: 'center',
+                    }}
+                    onMouseEnter={e => (e.currentTarget.style.background = 'rgba(22,101,52,0.13)')}
+                    onMouseLeave={e => (e.currentTarget.style.background = 'rgba(22,101,52,0.07)')}
+                  >
+                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                      <path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Load More ({activityFeed.length - visibleCount} remaining)
+                  </button>
+                ) : (
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>All {activityFeed.length} events shown</span>
+                )}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: 8 }}>
+                  <span style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>Auto-refreshes every 30s · Showing {visibleFeed.length} of {activityFeed.length}</span>
+                  <div className="feed-legend">
+                    <span style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 5, color: 'var(--green-400)' }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--green-400)', display: 'inline-block' }} /> Contributions
+                    </span>
+                    <span style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 5, color: 'var(--red)' }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--red)', display: 'inline-block' }} /> Expenses
+                    </span>
+                    <span style={{ fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: 5, color: 'var(--blue)' }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: 'var(--blue)', display: 'inline-block' }} /> Members
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* ── Reunion Progress ── */}
+        {stats?.reunionFund && (
+          <div className="card reunion-card" style={{ marginBottom: 28 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 10, marginBottom: 14 }}>
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
+                  <div className="section-title" style={{ fontSize: 'clamp(0.9rem, 3vw, 1.1rem)' }}>2026 Reunion Fund</div>
+                  <span className="badge badge-yellow"><span className="badge-dot" />Active</span>
+                </div>
+                <p style={{ color: 'var(--text-3)', fontSize: 'clamp(0.72rem, 2.5vw, 0.82rem)' }}>
+                  Target: <strong style={{ color: 'var(--text-2)' }}>{formatNaira(stats.reunionFund.targetAmount)}</strong>
+                </p>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontFamily: 'var(--font-d)', fontSize: 'clamp(1.4rem, 5vw, 1.9rem)', fontWeight: 800, color: 'var(--yellow)', letterSpacing: '-0.03em' }}>{pct}%</div>
+                <div style={{ fontSize: '0.72rem', color: 'var(--text-3)' }}>funded</div>
+              </div>
+            </div>
+            <div className="progress-track" style={{ height: 10, marginBottom: 10 }}>
+              <div className="progress-fill" style={{ width: `${pct}%` }} />
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 'clamp(0.7rem, 2.5vw, 0.8rem)', marginBottom: 14, flexWrap: 'wrap', gap: 4 }}>
+              <span style={{ color: 'var(--text-3)' }}>Raised: <strong style={{ color: 'var(--green-400)' }}>{formatNaira(stats.reunionFund.raisedAmount)}</strong></span>
+              <span style={{ color: 'var(--text-3)' }}>Remaining: <strong style={{ color: 'var(--yellow)' }}>{formatNaira(stats.reunionFund.remaining)}</strong></span>
+            </div>
+            <button className="btn btn-ghost btn-sm" onClick={() => router.push('/reunion-fund')}>
+              View Full Details
+              <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7" strokeLinecap="round" />
+              </svg>
+            </button>
+          </div>
+        )}
+
+        {/* ── Support banner ── */}
+        <div className="support-banner">
+          <div>
+            <div style={{ fontFamily: 'var(--font-d)', fontSize: 'clamp(0.95rem, 3vw, 1.15rem)', fontWeight: 800, marginBottom: 4, letterSpacing: '-0.02em' }}>
+              Support the Group Wallet
+            </div>
+            <p style={{ color: 'var(--text-2)', fontSize: 'clamp(0.75rem, 2.5vw, 0.85rem)', maxWidth: 420 }}>
+              Any member or well-wisher can contribute any amount. Every payment is recorded publicly.
+            </p>
+          </div>
+          <button className="btn btn-primary btn-sm" onClick={() => router.push('/contributions?view=contribute')}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24">
+              <path d="M12 4v16m8-8H4" strokeLinecap="round" />
+            </svg>
+            Make a Contribution
+          </button>
+        </div>
+
+        {/* ── Recent Contributions ── */}
+        <div style={{ marginBottom: 48 }}>
+          <div className="section-header">
+            <div>
+              <div className="section-title">Recent Contributions</div>
+              <div className="section-sub">Latest payments to the group</div>
+            </div>
+            <button className="btn btn-ghost btn-sm" onClick={() => router.push('/contributions')}>View All</button>
+          </div>
+          {recentContribs.length === 0 ? (
+            <div className="card" style={{ textAlign: 'center', padding: '48px', color: 'var(--text-3)' }}>
+              <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" style={{ margin: '0 auto 12px', opacity: 0.4, display: 'block' }}>
+                <path d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" strokeLinecap="round" />
+              </svg>
+              No contributions yet.
+            </div>
+          ) : (
+            <div className="contrib-grid">
+              {recentContribs.map((c: any, i: number) => (
+                <div key={c._id} className="contrib-card">
+                  <div className="contrib-avatar" style={{ background: avatarColors[i % avatarColors.length] }}>
+                    {getInitials(c.contributorName)}
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="contrib-name">{c.contributorName}</div>
+                    <div className="contrib-date">{formatDate(c.date)}</div>
+                    {c.note && <div style={{ fontSize: '0.75rem', color: 'var(--text-3)', marginTop: 3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{c.note}</div>}
+                  </div>
+                  <div className="contrib-amount">{formatNaira(c.amount)}</div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+              </div>
+    </FinanceLayout>
+  );
+}

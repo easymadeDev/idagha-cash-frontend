@@ -23,7 +23,7 @@ export default function TestPage() {
         TAP HERE
       </button>
       {clicked && (
-        <div style={{ marginTop: 20, padding: 16, background: '#0d2010', border: '1px solid #22c55e', borderRadius: 8 }}>
+        <div style={{ marginTop: 20, padding: 16, background: 'var(--bg-card)', border: '1px solid #22c55e', borderRadius: 8 }}>
           React hydration is working on your iPhone!
         </div>
       )}

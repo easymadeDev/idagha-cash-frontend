@@ -1,4 +1,4 @@
-import Layout from '../components/Layout';
+import FinanceLayout from '../components/FinanceLayout';
 import useSWR from 'swr';
 import { formatNaira, formatDate } from '../lib/api';
 
@@ -14,14 +14,14 @@ function MemberPaymentCard({ member, memberTarget, index }: { member: any; membe
 
   return (
     <div style={{
-      background: 'linear-gradient(160deg, #0a1a0d, #060d08)',
-      border: `1px solid ${member.completed ? 'rgba(34,197,94,0.35)' : 'var(--border)'}`,
+      background: 'var(--bg-card)',
+      border: `1px solid ${member.completed ? 'rgba(22,101,52,0.35)' : 'var(--border)'}`,
       borderRadius: 'var(--radius-sm)', padding: '18px 20px',
       transition: 'all 0.25s var(--ease)',
       animation: 'fadeUp 0.5s var(--ease) both',
     }}
       onMouseEnter={(e) => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.borderColor = 'var(--border-mid)'; }}
-      onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = member.completed ? 'rgba(34,197,94,0.35)' : 'var(--border)'; }}
+      onMouseLeave={(e) => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = member.completed ? 'rgba(22,101,52,0.35)' : 'var(--border)'; }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 12 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -58,7 +58,7 @@ function MemberPaymentCard({ member, memberTarget, index }: { member: any; membe
 
       {/* Progress bar */}
       <div style={{ marginBottom: 8 }}>
-        <div style={{ height: 7, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden' }}>
+        <div style={{ height: 7, background: 'rgba(15,61,34,0.06)', borderRadius: 99, overflow: 'hidden' }}>
           <div style={{
             height: '100%', borderRadius: 99,
             width: `${pct}%`,
@@ -102,7 +102,7 @@ export default function ReunionFundPage() {
   ];
 
   return (
-    <Layout>
+    <FinanceLayout>
       <div className="container">
         <div className="page-header">
           <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
@@ -115,7 +115,7 @@ export default function ReunionFundPage() {
 
         {/* Main progress card */}
         <div className="rf-progress-card">
-          <div style={{ position: 'absolute', top: -80, right: -80, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(34,197,94,0.12), transparent)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: -80, right: -80, width: 300, height: 300, borderRadius: '50%', background: 'radial-gradient(circle, rgba(22,101,52,0.12), transparent)', pointerEvents: 'none' }} />
 
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 24, marginBottom: 32, position: 'relative' }}>
             <div>
@@ -157,7 +157,7 @@ export default function ReunionFundPage() {
               { label: 'Completed', val: `${completedCount} members`, color: 'var(--green-400)' },
               { label: 'Contributing', val: `${paidCount} members`, color: 'var(--blue)' },
             ].map((item) => (
-              <div key={item.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-sm)', padding: '14px 16px', border: '1px solid var(--border)' }}>
+              <div key={item.label} style={{ background: 'rgba(15,61,34,0.03)', borderRadius: 'var(--radius-sm)', padding: '14px 16px', border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 6 }}>{item.label}</div>
                 <div style={{ fontFamily: 'var(--font-d)', fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.02em', color: item.color }}>{item.val}</div>
               </div>
@@ -173,7 +173,7 @@ export default function ReunionFundPage() {
             { icon: '✓', title: 'Fully transparent', desc: 'Every payment is publicly recorded. Everyone can see who has paid and how much.' },
           ].map((item, i) => (
             <div key={i} style={{ flex: 1, minWidth: 180, display: 'flex', gap: 12, alignItems: 'flex-start' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(34,197,94,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--green-400)', fontWeight: 900, fontSize: '0.9rem' }}>
+              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(22,101,52,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: 'var(--green-400)', fontWeight: 900, fontSize: '0.9rem' }}>
                 {item.icon}
               </div>
               <div>
@@ -208,7 +208,7 @@ export default function ReunionFundPage() {
                   <span>Group completion</span>
                   <span>{Math.round((completedCount / totalExpected) * 100)}% of members fully paid</span>
                 </div>
-                <div style={{ height: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ height: 8, background: 'rgba(15,61,34,0.06)', borderRadius: 99, overflow: 'hidden' }}>
                   <div style={{
                     height: '100%', borderRadius: 99,
                     width: `${Math.min(100, Math.round((completedCount / totalExpected) * 100))}%`,
@@ -282,6 +282,6 @@ export default function ReunionFundPage() {
           </div>
         </div>
       </div>
-    </Layout>
+    </FinanceLayout>
   );
 }

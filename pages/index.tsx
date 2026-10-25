@@ -49,7 +49,12 @@ const fmtDay = (d: string) =>
   new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
 const fmtShort = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
-export default function Landing() {
+export async function getStaticProps() {
+  const { getClassPhotos } = await import('../lib/classPhotos');
+  return { props: { classPhotos: getClassPhotos() } };
+}
+
+export default function Landing({ classPhotos = [] }: { classPhotos?: { src: string; caption: string; focus: string }[] }) {
   const router = useRouter();
   const { cleared, ready, setGateOpen } = useGate();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -61,15 +66,20 @@ export default function Landing() {
   const { data: gallery } = useSWR('/api/gallery?page=1', fetcher);
   const { data: memberCount } = useSWR('/api/members/count', fetcher);
 
+  // Our own photographs first (curated in public/img/class), then members' gallery
+  // uploads; the found stand-ins only when the class has nothing of its own yet
   const photos = useMemo(() => {
-    const own = Array.isArray(gallery?.items)
-      ? gallery.items.slice(0, 6).map((p: any) => ({ src: p.image, caption: p.caption || p.album }))
+    const uploads = Array.isArray(gallery?.items)
+      ? gallery.items.slice(0, 6).map((p: any) => ({ src: p.image, caption: p.caption || p.album, focus: '50% 30%' }))
       : [];
-    return own.length >= 2 ? own : [...own, ...FALLBACK_PHOTOS];
-  }, [gallery]);
-  const usingFallback = !(Array.isArray(gallery?.items) && gallery.items.length >= 2);
+    const own = [...classPhotos, ...uploads];
+    return own.length >= 2 ? own : [...own, ...FALLBACK_PHOTOS.map((p) => ({ ...p, focus: '50% 40%' }))];
+  }, [gallery, classPhotos]);
+  const usingFallback = classPhotos.length + (Array.isArray(gallery?.items) ? gallery.items.length : 0) < 2;
 
-  const [heroIdx] = useCrossfade(photos.length);
+  // The whole-class photo (first) anchors "Our story"; the tall hero shield starts with the close-ups
+  const heroPhotos = photos.length > 1 ? [...photos.slice(1), photos[0]] : photos;
+  const [heroIdx] = useCrossfade(heroPhotos.length);
   const [frameIdx, setFrameIdx] = useCrossfade(photos.length, 3000);
 
   const upcoming = useMemo(
@@ -169,10 +179,10 @@ export default function Landing() {
         </div>
 
         <div className="lp-room" aria-label="Photographs">
-          <p className="lp-room-caption">{photos[heroIdx]?.caption}</p>
+          <p className="lp-room-caption">{heroPhotos[heroIdx]?.caption}</p>
           <div className="lp-room-shield shield lp-fade">
-            {photos.map((p: any, i: number) => (
-              <img key={i} src={p.src} alt={p.caption || 'Class photograph'} className={i === heroIdx ? 'is-on' : ''} />
+            {heroPhotos.map((p: any, i: number) => (
+              <img key={i} src={p.src} alt={p.caption || 'Class photograph'} className={i === heroIdx ? 'is-on' : ''} style={{ objectPosition: p.focus }} />
             ))}
           </div>
         </div>
@@ -183,7 +193,7 @@ export default function Landing() {
         <div>
           <h2 id="story-h" className="lp-rise">{yearsOut} years out, still one set</h2>
           <figure className="lp-about-photo shield lp-rise" style={{ ['--i' as any]: 2 }}>
-            <img src={photos[photos.length > 2 ? 1 : 0].src} alt={photos[photos.length > 2 ? 1 : 0].caption} loading="lazy" />
+            <img src={photos[0].src} alt={photos[0].caption} loading="lazy" style={{ objectPosition: photos[0].focus }} />
           </figure>
         </div>
         <div className="lp-about-text">
@@ -203,7 +213,7 @@ export default function Landing() {
           </div>
           <div className="lp-rise" style={{ ['--i' as any]: 3 }}>
             <button className="lp-btn lp-btn--gold" onClick={() => go('/about')}>Read about the association</button>
-            {usingFallback && <p className="lp-about-cap">{photos[photos.length > 2 ? 1 : 0].caption}.</p>}
+            {usingFallback && <p className="lp-about-cap">{photos[0].caption}.</p>}
           </div>
         </div>
       </section>
@@ -405,7 +415,7 @@ export default function Landing() {
           <div>
             <button className="lp-frame shield lp-fade" onClick={() => setFrameIdx((frameIdx + 1) % photos.length)} aria-label="Next photograph">
               {photos.map((p: any, i: number) => (
-                <img key={i} src={p.src} alt={p.caption || 'Class photograph'} className={i === frameIdx ? 'is-on' : ''} loading="lazy" />
+                <img key={i} src={p.src} alt={p.caption || 'Class photograph'} className={i === frameIdx ? 'is-on' : ''} loading="lazy" style={{ objectPosition: p.focus }} />
               ))}
             </button>
             <p className="lp-frame-cap">{photos[frameIdx]?.caption}</p>

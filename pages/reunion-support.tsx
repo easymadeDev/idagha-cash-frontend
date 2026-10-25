@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
+import FinanceLayout from '../components/FinanceLayout';
 import useSWR from 'swr';
 import { pledgeApi, formatNaira, formatDate } from '../lib/api';
 import { useToast } from '../components/Toast';
@@ -82,11 +82,11 @@ export default function PledgesPage() {
   };
 
   return (
-    <Layout>
+    <FinanceLayout>
       <div style={{ maxWidth: 900, margin: '0 auto', padding: '32px 16px' }}>
         {/* Hero */}
         <div style={{
-          background: 'linear-gradient(135deg,#4c1d95,#7c3aed)',
+          background: 'linear-gradient(135deg,#4c1d95,#8a6408)',
           borderRadius: 16,
           padding: '36px 32px',
           marginBottom: 32,
@@ -103,7 +103,7 @@ export default function PledgesPage() {
             </p>
             <button onClick={() => setModal(true)} style={{
               background: '#fff',
-              color: '#7c3aed',
+              color: '#8a6408',
               border: 'none',
               borderRadius: 10,
               padding: '12px 28px',
@@ -119,7 +119,7 @@ export default function PledgesPage() {
         {/* Stats row */}
         {stats && (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(140px,1fr))', gap: 14, marginBottom: 32 }}>
-            <PledgeStat label="Total Support" value={formatNaira(stats.totalPledged)} color="#a855f7" />
+            <PledgeStat label="Total Support" value={formatNaira(stats.totalPledged)} color="#c99412" />
             <PledgeStat label="Fulfilled" value={formatNaira(stats.totalFulfilled)} color="#22c55e" />
             <PledgeStat label="Pending" value={formatNaira(stats.totalPending)} color="#fbbf24" />
             <PledgeStat label="Members" value={String(stats.count)} color="#60a5fa" />
@@ -176,8 +176,8 @@ export default function PledgesPage() {
             </p>
 
             {/* Member identity — always from session, never re-entered */}
-            <div style={{ background: 'rgba(168,85,247,0.08)', border: '1px solid rgba(168,85,247,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 18 }}>
-              <div style={{ fontSize: '.75rem', color: '#a855f7', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.05em' }}>Supporting as</div>
+            <div style={{ background: 'rgba(217,165,32,0.08)', border: '1px solid rgba(217,165,32,0.2)', borderRadius: 10, padding: '12px 16px', marginBottom: 18 }}>
+              <div style={{ fontSize: '.75rem', color: '#c99412', fontWeight: 600, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '.05em' }}>Supporting as</div>
               <div style={{ fontWeight: 700, color: '#f9fafb', fontSize: '.95rem' }}>{form.memberName}</div>
               {form.memberEmail && <div style={{ fontSize: '.8rem', color: '#9ca3af', marginTop: 2 }}>{form.memberEmail}</div>}
               {form.memberPhone && <div style={{ fontSize: '.8rem', color: '#9ca3af' }}>{form.memberPhone}</div>}
@@ -203,16 +203,16 @@ export default function PledgesPage() {
               onClick={() => setAgreed(!agreed)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 14, width: '100%',
-                background: agreed ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.04)',
-                border: `2px solid ${agreed ? '#7c3aed' : 'rgba(255,255,255,0.1)'}`,
+                background: agreed ? 'rgba(124,58,237,0.12)' : 'rgba(15,61,34,0.04)',
+                border: `2px solid ${agreed ? '#8a6408' : 'rgba(15,61,34,0.1)'}`,
                 borderRadius: 10, padding: '12px 14px', cursor: 'pointer',
                 textAlign: 'left', margin: '4px 0 20px', transition: 'all 0.15s',
               }}
             >
               <div style={{
                 width: 22, height: 22, borderRadius: 6, flexShrink: 0,
-                border: `2px solid ${agreed ? '#7c3aed' : 'rgba(255,255,255,0.2)'}`,
-                background: agreed ? '#7c3aed' : 'transparent',
+                border: `2px solid ${agreed ? '#8a6408' : 'rgba(15,61,34,0.2)'}`,
+                background: agreed ? '#8a6408' : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.15s',
               }}>
@@ -241,7 +241,7 @@ export default function PledgesPage() {
           </div>
         </div>
       )}
-    </Layout>
+    </FinanceLayout>
   );
 }
 
@@ -249,8 +249,8 @@ function PledgeCard({ pledge }: { pledge: any }) {
   const isFulfilled = pledge.status === 'fulfilled';
   return (
     <div style={{
-      background: 'linear-gradient(160deg,#0a1a0d,#060d08)',
-      border: `1px solid ${isFulfilled ? 'rgba(34,197,94,0.3)' : 'rgba(168,85,247,0.2)'}`,
+      background: 'var(--bg-card)',
+      border: `1px solid ${isFulfilled ? 'rgba(22,101,52,0.3)' : 'rgba(217,165,32,0.2)'}`,
       borderRadius: 12,
       padding: '18px 20px',
     }}>
@@ -258,8 +258,8 @@ function PledgeCard({ pledge }: { pledge: any }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <div style={{
             width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-            background: isFulfilled ? 'rgba(34,197,94,0.15)' : 'rgba(168,85,247,0.15)',
-            color: isFulfilled ? '#22c55e' : '#a855f7',
+            background: isFulfilled ? 'rgba(22,101,52,0.15)' : 'rgba(217,165,32,0.15)',
+            color: isFulfilled ? '#22c55e' : '#c99412',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontSize: '.8rem', fontWeight: 800,
           }}>
@@ -273,7 +273,7 @@ function PledgeCard({ pledge }: { pledge: any }) {
           </div>
         </div>
         <span style={{
-          background: isFulfilled ? 'rgba(34,197,94,0.15)' : 'rgba(251,191,36,0.15)',
+          background: isFulfilled ? 'rgba(22,101,52,0.15)' : 'rgba(251,191,36,0.15)',
           color: isFulfilled ? '#22c55e' : '#fbbf24',
           borderRadius: 99, padding: '3px 10px', fontSize: '.75rem', fontWeight: 700,
         }}>
@@ -281,7 +281,7 @@ function PledgeCard({ pledge }: { pledge: any }) {
         </span>
       </div>
 
-      <div style={{ fontSize: '1.2rem', fontWeight: 800, color: isFulfilled ? '#22c55e' : '#a855f7', marginBottom: 6 }}>
+      <div style={{ fontSize: '1.2rem', fontWeight: 800, color: isFulfilled ? '#22c55e' : '#c99412', marginBottom: 6 }}>
         {formatNaira(pledge.amount)}
       </div>
 
@@ -307,7 +307,7 @@ function PledgeCard({ pledge }: { pledge: any }) {
 function PledgeStat({ label, value, color }: { label: string; value: string; color: string }) {
   return (
     <div style={{
-      background: 'linear-gradient(160deg,#0a1a0d,#060d08)',
+      background: 'var(--bg-card)',
       border: '1px solid var(--border)',
       borderRadius: 12,
       padding: '16px 18px',
@@ -328,8 +328,8 @@ const overlay: React.CSSProperties = {
 };
 
 const modalBox: React.CSSProperties = {
-  background: '#111827',
-  border: '1px solid rgba(168,85,247,0.25)',
+  background: 'var(--bg-card)',
+  border: '1px solid var(--border-mid)',
   borderRadius: 14, padding: 28,
   width: '100%', maxWidth: 520, maxHeight: '90vh', overflowY: 'auto',
   boxShadow: '0 24px 60px rgba(0,0,0,0.6)',
@@ -346,13 +346,13 @@ const lbl: React.CSSProperties = {
 };
 
 const inp: React.CSSProperties = {
-  width: '100%', padding: '9px 12px', border: '1px solid rgba(255,255,255,0.12)',
+  width: '100%', padding: '9px 12px', border: '1px solid rgba(15,61,34,0.12)',
   borderRadius: 8, background: '#1f2937', color: '#f9fafb',
   fontSize: '.9rem', boxSizing: 'border-box',
 };
 
 const btnPrimary: React.CSSProperties = {
-  background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff',
+  background: 'linear-gradient(135deg,#8a6408,#c99412)', color: '#fff',
   border: 'none', borderRadius: 8, padding: '9px 20px', cursor: 'pointer',
   fontWeight: 600, fontSize: '.9rem',
 };

@@ -12,14 +12,14 @@ export default function AboutPage() {
         {/* ── Hero ── */}
         <div style={{
           textAlign: 'center', padding: '48px 24px 40px',
-          background: 'linear-gradient(160deg, rgba(34,197,94,0.07), rgba(6,13,8,0.4))',
-          border: '1px solid rgba(34,197,94,0.15)', borderRadius: 'var(--radius)',
+          background: 'linear-gradient(160deg, rgba(22,101,52,0.07), var(--bg-card))',
+          border: '1px solid rgba(22,101,52,0.15)', borderRadius: 'var(--radius)',
           marginBottom: 32, position: 'relative', overflow: 'hidden',
         }}>
-          <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: 400, height: 300, background: 'radial-gradient(ellipse, rgba(34,197,94,0.12), transparent 70%)', pointerEvents: 'none' }} />
+          <div style={{ position: 'absolute', top: -80, left: '50%', transform: 'translateX(-50%)', width: 400, height: 300, background: 'radial-gradient(ellipse, rgba(22,101,52,0.12), transparent 70%)', pointerEvents: 'none' }} />
           <div style={{ position: 'relative', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
-            <div style={{ width: 100, height: 100, borderRadius: '50%', background: 'rgba(34,197,94,0.08)', border: '2px solid rgba(34,197,94,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-              <Image src="/logo.png" alt="IDAGHA Alumni" width={88} height={88} style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 16px rgba(34,197,94,0.5))' }} priority />
+            <div style={{ width: 100, height: 100, borderRadius: '50%', background: 'rgba(22,101,52,0.08)', border: '2px solid rgba(22,101,52,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
+              <Image src="/logo.png" alt="IDAGHA Alumni" width={88} height={88} style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 16px rgba(22,101,52,0.5))' }} priority />
             </div>
             <div>
               <span className="badge badge-green" style={{ marginBottom: 12, display: 'inline-flex' }}><span className="badge-dot" />Est. 2018 · Active</span>
@@ -45,7 +45,7 @@ export default function AboutPage() {
           {[
             {
               icon: 'M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z',
-              color: 'var(--green-400)', bg: 'rgba(34,197,94,0.1)',
+              color: 'var(--green-400)', bg: 'rgba(22,101,52,0.1)',
               title: 'Our Purpose',
               body: 'This platform promotes transparency, accountability, and trust in all financial activities. Every contribution is recorded publicly so all members stay informed.',
             },
@@ -77,9 +77,9 @@ export default function AboutPage() {
         </div>
 
         {/* ── Transparency commitment ── */}
-        <div className="card" style={{ marginBottom: 24, borderColor: 'rgba(34,197,94,0.2)', background: 'linear-gradient(160deg, rgba(34,197,94,0.05), rgba(34,197,94,0.01))' }}>
+        <div className="card" style={{ marginBottom: 24, borderColor: 'rgba(22,101,52,0.2)', background: 'linear-gradient(160deg, rgba(22,101,52,0.05), rgba(22,101,52,0.01))' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
-            <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(34,197,94,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(22,101,52,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
               <svg width="21" height="21" fill="none" stroke="var(--green-400)" strokeWidth="2" viewBox="0 0 24 24">
                 <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -99,7 +99,7 @@ export default function AboutPage() {
               'No member needs an account to view data',
             ].map((item, i) => (
               <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                <div style={{ width: 20, height: 20, borderRadius: 6, background: 'rgba(34,197,94,0.15)', border: '1px solid rgba(34,197,94,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
+                <div style={{ width: 20, height: 20, borderRadius: 6, background: 'rgba(22,101,52,0.15)', border: '1px solid rgba(22,101,52,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 2 }}>
                   <svg width="10" height="10" fill="none" stroke="var(--green-400)" strokeWidth="3" viewBox="0 0 24 24">
                     <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -141,8 +141,8 @@ export default function AboutPage() {
 
         {/* ── CTA ── */}
         <div className="about-cta-card" style={{
-          background: 'linear-gradient(135deg, rgba(34,197,94,0.08), rgba(34,197,94,0.02))',
-          border: '1px solid rgba(34,197,94,0.2)', borderRadius: 'var(--radius)',
+          background: 'linear-gradient(135deg, rgba(22,101,52,0.08), rgba(22,101,52,0.02))',
+          border: '1px solid rgba(22,101,52,0.2)', borderRadius: 'var(--radius)',
           textAlign: 'center', marginBottom: 24,
         }}>
           <div style={{ fontFamily: 'var(--font-d)', fontSize: 'clamp(1.1rem, 4vw, 1.4rem)', fontWeight: 800, letterSpacing: '-0.03em', marginBottom: 12 }}>

@@ -80,7 +80,7 @@ export default function AdminSettings() {
     day !== undefined ? `${minute} ${hour} * * ${day}` : `${minute} ${hour} * * *`;
 
   const handleAdd = () =>
-    setAccountsForm([...accountsForm, { bank: '', accountName: 'IDAGHA CLASS 2018 ALUMNI', accountNumber: '', icon: '🏦', color: 'rgba(34,197,94,0.12)', border: 'rgba(34,197,94,0.3)' }]);
+    setAccountsForm([...accountsForm, { bank: '', accountName: 'IDAGHA CLASS 2018 ALUMNI', accountNumber: '', icon: '🏦', color: 'rgba(22,101,52,0.12)', border: 'rgba(22,101,52,0.3)' }]);
 
   const handleRemove = (i: number) => setAccountsForm(accountsForm.filter((_, idx) => idx !== i));
   const handleChange = (i: number, field: string, value: string) => {
@@ -208,7 +208,7 @@ export default function AdminSettings() {
                         <span style={{ fontSize: '0.825rem', fontWeight: 700 }}>Birthday Wishes</span>
                         <span style={{
                           fontSize: '0.65rem', fontWeight: 700, padding: '2px 6px', borderRadius: 99,
-                          background: cronForm.birthdayEnabled ? 'rgba(34,197,94,0.12)' : 'rgba(155,155,155,0.12)',
+                          background: cronForm.birthdayEnabled ? 'rgba(22,101,52,0.12)' : 'rgba(155,155,155,0.12)',
                           color: cronForm.birthdayEnabled ? 'var(--green-400)' : 'var(--text-3)',
                         }}>
                           {cronForm.birthdayEnabled ? 'ON' : 'OFF'}
@@ -239,7 +239,7 @@ export default function AdminSettings() {
                           {Array.from({ length: 60 }, (_, i) => <option key={i} value={i}>{String(i).padStart(2, '0')}</option>)}
                         </select>
                       </div>
-                      <div style={{ flex: 2, padding: '7px 10px', background: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.18)', borderRadius: 7, fontSize: '0.75rem' }}>
+                      <div style={{ flex: 2, padding: '7px 10px', background: 'rgba(22,101,52,0.07)', border: '1px solid rgba(22,101,52,0.18)', borderRadius: 7, fontSize: '0.75rem' }}>
                         <span style={{ color: 'var(--text-3)' }}>Sends daily at </span>
                         <span style={{ fontWeight: 700, color: 'var(--green-400)' }}>
                           {String(parseCronTime(cronForm.birthdayTime).hour).padStart(2, '0')}:{String(parseCronTime(cronForm.birthdayTime).minute).padStart(2, '0')}
@@ -279,7 +279,7 @@ export default function AdminSettings() {
                               </div>
                               <span style={{
                                 fontSize: '0.65rem', fontWeight: 700, padding: '2px 7px', borderRadius: 99, flexShrink: 0,
-                                background: b.daysUntil === 0 ? 'rgba(34,197,94,0.15)' : b.daysUntil <= 3 ? 'rgba(251,146,60,0.15)' : 'rgba(155,155,155,0.1)',
+                                background: b.daysUntil === 0 ? 'rgba(22,101,52,0.15)' : b.daysUntil <= 3 ? 'rgba(251,146,60,0.15)' : 'rgba(155,155,155,0.1)',
                                 color: b.daysUntil === 0 ? 'var(--green-400)' : b.daysUntil <= 3 ? '#fb923c' : 'var(--text-3)',
                               }}>
                                 {b.daysUntil === 0 ? 'Today!' : b.daysUntil === 1 ? 'Tomorrow' : `${b.daysUntil}d`}

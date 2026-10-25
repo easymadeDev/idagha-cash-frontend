@@ -23,7 +23,7 @@ const EMPTY_FORM = {
 
 const STATUS_META: Record<string, { label: string; color: string; bg: string; border: string }> = {
   pending:   { label: 'Pending',   color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',  border: 'rgba(251,191,36,0.3)' },
-  fulfilled: { label: 'Fulfilled', color: 'var(--green-400)', bg: 'rgba(34,197,94,0.1)',  border: 'rgba(34,197,94,0.3)' },
+  fulfilled: { label: 'Fulfilled', color: 'var(--green-400)', bg: 'rgba(22,101,52,0.1)',  border: 'rgba(22,101,52,0.3)' },
   cancelled: { label: 'Cancelled', color: 'var(--red)',  bg: 'rgba(248,113,113,0.1)', border: 'rgba(248,113,113,0.3)' },
 };
 
@@ -150,7 +150,7 @@ export default function AdminPledges() {
               <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" strokeLinecap="round" strokeLinejoin="round"/></svg>
               Reminders
             </button>
-            <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', border: 'none' }} onClick={openAdd}>
+            <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#8a6408,#c99412)', color: '#fff', border: 'none' }} onClick={openAdd}>
               <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 4v16m8-8H4" strokeLinecap="round"/></svg>
               Add Support
             </button>
@@ -160,7 +160,7 @@ export default function AdminPledges() {
         {/* Stats grid */}
         {stats && (
           <div className="pledges-stats-grid">
-            <StatCard label="Total Support" value={formatNaira(stats.totalPledged)} color="#a855f7" />
+            <StatCard label="Total Support" value={formatNaira(stats.totalPledged)} color="#c99412" />
             <StatCard label="Fulfilled" value={formatNaira(stats.totalFulfilled)} color="var(--green-400)" />
             <StatCard label="Pending" value={formatNaira(stats.totalPending)} color="#fbbf24" />
             <StatCard label="Count" value={String(stats.count)} color="var(--blue)" />
@@ -176,11 +176,11 @@ export default function AdminPledges() {
               key={t}
               onClick={() => setActiveTab(t)}
               className="pledge-tab"
-              style={{ color: activeTab === t ? '#a855f7' : 'var(--text-3)', borderBottom: activeTab === t ? '2px solid #a855f7' : '2px solid transparent', fontWeight: activeTab === t ? 700 : 400 }}
+              style={{ color: activeTab === t ? '#c99412' : 'var(--text-3)', borderBottom: activeTab === t ? '2px solid #c99412' : '2px solid transparent', fontWeight: activeTab === t ? 700 : 400 }}
             >
               {t === 'all' ? 'All' : t.charAt(0).toUpperCase() + t.slice(1)}
               {t !== 'all' && (
-                <span style={{ marginLeft: 5, background: t === 'pending' ? 'rgba(251,191,36,0.15)' : 'rgba(34,197,94,0.15)', color: t === 'pending' ? '#fbbf24' : 'var(--green-400)', borderRadius: 99, padding: '1px 7px', fontSize: '0.72rem', fontWeight: 700 }}>
+                <span style={{ marginLeft: 5, background: t === 'pending' ? 'rgba(251,191,36,0.15)' : 'rgba(22,101,52,0.15)', color: t === 'pending' ? '#fbbf24' : 'var(--green-400)', borderRadius: 99, padding: '1px 7px', fontSize: '0.72rem', fontWeight: 700 }}>
                   {list.filter((p) => p.status === t).length}
                 </span>
               )}
@@ -221,12 +221,12 @@ export default function AdminPledges() {
                       )}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5, flexShrink: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: '1rem', color: '#a855f7' }}>{formatNaira(pledge.amount)}</div>
+                      <div style={{ fontWeight: 800, fontSize: '1rem', color: '#c99412' }}>{formatNaira(pledge.amount)}</div>
                       <div style={{ display: 'flex', gap: 5 }}>
                         <span style={{ fontSize: '0.68rem', fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: sm.bg, color: sm.color, border: `1px solid ${sm.border}` }}>
                           {sm.label}
                         </span>
-                        <span style={{ fontSize: '0.68rem', fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: pledge.addedBy === 'admin' ? 'rgba(96,165,250,0.1)' : 'rgba(168,85,247,0.1)', color: pledge.addedBy === 'admin' ? 'var(--blue)' : '#c084fc', border: '1px solid var(--border)' }}>
+                        <span style={{ fontSize: '0.68rem', fontWeight: 600, padding: '2px 8px', borderRadius: 99, background: pledge.addedBy === 'admin' ? 'rgba(96,165,250,0.1)' : 'rgba(217,165,32,0.1)', color: pledge.addedBy === 'admin' ? 'var(--blue)' : '#d9a520', border: '1px solid var(--border)' }}>
                           {pledge.addedBy === 'admin' ? 'Admin' : 'Self'}
                         </span>
                       </div>
@@ -313,7 +313,7 @@ export default function AdminPledges() {
 
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={() => setModal(false)}>Cancel</button>
-              <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', border: 'none' }} onClick={handleSave} disabled={saving}>
+              <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#8a6408,#c99412)', color: '#fff', border: 'none' }} onClick={handleSave} disabled={saving}>
                 {saving ? 'Saving…' : editing ? 'Save Changes' : 'Add Support'}
               </button>
             </div>
@@ -331,7 +331,7 @@ export default function AdminPledges() {
             </p>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={() => setFulfillId(null)}>Cancel</button>
-              <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', border: 'none' }} onClick={handleFulfill} disabled={fulfilling}>
+              <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#8a6408,#c99412)', color: '#fff', border: 'none' }} onClick={handleFulfill} disabled={fulfilling}>
                 {fulfilling ? 'Marking…' : 'Confirm Fulfill'}
               </button>
             </div>
@@ -365,7 +365,7 @@ export default function AdminPledges() {
             </p>
             <div className="modal-actions">
               <button className="btn btn-ghost" onClick={() => setReminderModal(false)}>Cancel</button>
-              <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#7c3aed,#a855f7)', color: '#fff', border: 'none' }} onClick={handleSendReminder} disabled={sendingReminder}>
+              <button className="btn btn-sm" style={{ background: 'linear-gradient(135deg,#8a6408,#c99412)', color: '#fff', border: 'none' }} onClick={handleSendReminder} disabled={sendingReminder}>
                 {sendingReminder ? 'Sending…' : 'Send Now'}
               </button>
             </div>
@@ -402,7 +402,7 @@ export default function AdminPledges() {
           display: flex; gap: 5px; align-items: center;
           padding: 9px 12px;
           border-top: 1px solid var(--border);
-          background: rgba(6,13,8,0.4);
+          background: var(--bg-card);
           flex-wrap: wrap;
         }
         .pa-btn {
@@ -412,10 +412,10 @@ export default function AdminPledges() {
           font-family: var(--font); white-space: nowrap;
         }
         .pa-btn:last-child { margin-left: auto; }
-        .pa-green  { background: rgba(34,197,94,0.1); color: var(--green-400); border-color: rgba(34,197,94,0.25); }
-        .pa-green:hover { background: rgba(34,197,94,0.18); }
-        .pa-ghost  { background: rgba(255,255,255,0.04); color: var(--text-2); border-color: var(--border); }
-        .pa-ghost:hover { background: rgba(255,255,255,0.08); color: var(--text-1); }
+        .pa-green  { background: rgba(22,101,52,0.1); color: var(--green-400); border-color: rgba(22,101,52,0.25); }
+        .pa-green:hover { background: rgba(22,101,52,0.18); }
+        .pa-ghost  { background: rgba(15,61,34,0.04); color: var(--text-2); border-color: var(--border); }
+        .pa-ghost:hover { background: rgba(15,61,34,0.08); color: var(--text-1); }
         .pa-red    { width: 28px; padding: 5px; background: rgba(248,113,113,0.08); color: var(--red); border-color: rgba(248,113,113,0.2); border-radius: 6px; justify-content: center; flex-shrink: 0; }
         .pa-red:hover { background: rgba(248,113,113,0.18); }
 

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import Layout from '../components/Layout';
+import FinanceLayout from '../components/FinanceLayout';
 import useSWR from 'swr';
 import { formatNaira, formatDate } from '../lib/api';
 
@@ -34,7 +34,7 @@ export default function ExpensesPage() {
   };
 
   return (
-    <Layout>
+    <FinanceLayout>
       <div className="container">
         <div className="page-header">
           <div style={{ marginBottom: 14 }}>
@@ -122,6 +122,6 @@ export default function ExpensesPage() {
           </div>
         )}
       </div>
-    </Layout>
+    </FinanceLayout>
   );
 }

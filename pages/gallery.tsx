@@ -54,16 +54,26 @@ function SubmitModal({ albums, onClose }: { albums: string[]; onClose: () => voi
   );
 }
 
-export default function GalleryPage() {
+const SCHOOL = '__school_days__';
+
+export async function getStaticProps() {
+  const { getClassPhotos } = await import('../lib/classPhotos');
+  return { props: { classPhotos: getClassPhotos() } };
+}
+
+export default function GalleryPage({ classPhotos = [] }: { classPhotos?: { src: string; caption: string; focus: string }[] }) {
   const [album, setAlbum] = useState('');
   const [page, setPage] = useState(1);
   const [open, setOpen] = useState<any>(null);
   const [sharing, setSharing] = useState(false);
   const { data: albums } = useSWR('/api/gallery/albums', fetcher);
-  const { data, isLoading } = useSWR(`/api/gallery?page=${page}${album ? `&album=${encodeURIComponent(album)}` : ''}`, fetcher);
+  const { data, isLoading } = useSWR(album === SCHOOL ? null : `/api/gallery?page=${page}${album ? `&album=${encodeURIComponent(album)}` : ''}`, fetcher);
 
   const albumList = Array.isArray(albums) ? albums : [];
-  const items = data?.items || [];
+  // Our own class photographs form a built-in "School days" album, shown with the uploads
+  const school = classPhotos.map((p, i) => ({ _id: `class-${i}`, image: p.src, caption: p.caption, album: 'School days', focus: p.focus }));
+  const uploads = album === SCHOOL ? [] : data?.items || [];
+  const items = album === SCHOOL ? school : !album && page === 1 ? [...uploads, ...school] : uploads;
 
   return (
     <Layout>
@@ -79,6 +89,9 @@ export default function GalleryPage() {
         <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'center', marginBottom: 20 }}>
           <div className="pill-tabs" style={{ marginBottom: 0 }}>
             <button className={!album ? 'active' : ''} onClick={() => { setAlbum(''); setPage(1); }}>All</button>
+            {school.length > 0 && (
+              <button className={album === SCHOOL ? 'active' : ''} onClick={() => { setAlbum(SCHOOL); setPage(1); }}>School days ({school.length})</button>
+            )}
             {albumList.map((a: any) => (
               <button key={a.name} className={album === a.name ? 'active' : ''} onClick={() => { setAlbum(a.name); setPage(1); }}>
                 {a.name} ({a.count})
@@ -88,7 +101,7 @@ export default function GalleryPage() {
           <button className="btn btn-primary btn-sm" onClick={() => setSharing(true)}>+ Share a photo</button>
         </div>
 
-        {isLoading ? (
+        {isLoading && items.length === 0 ? (
           <div className="masonry">{[...Array(8)].map((_, i) => <div key={i} className="skeleton" style={{ height: 160 + (i % 3) * 60, marginBottom: 12 }} />)}</div>
         ) : items.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: 56, color: 'var(--text-3)' }}>No photos yet. Be the first to share a memory.</div>

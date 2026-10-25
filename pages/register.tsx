@@ -104,7 +104,7 @@ export default function RegisterPage() {
       <Layout>
         <div className="container" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ textAlign: 'center', maxWidth: 500, padding: '40px 0' }}>
-            <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(34,197,94,0.12)', border: '2px solid rgba(34,197,94,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+            <div style={{ width: 72, height: 72, borderRadius: '50%', background: 'rgba(22,101,52,0.12)', border: '2px solid rgba(22,101,52,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
               <svg width="32" height="32" fill="none" stroke="var(--green-400)" strokeWidth="2.5" viewBox="0 0 24 24">
                 <path d="M5 13l4 4L19 7" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
@@ -164,7 +164,7 @@ export default function RegisterPage() {
         {/* Header */}
         <div style={{ textAlign: 'center', marginBottom: 28 }}>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
-            <Image src="/logo.png" alt="IDAGHA Alumni" width={64} height={64} style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 14px rgba(34,197,94,0.4))' }} />
+            <Image src="/logo.png" alt="IDAGHA Alumni" width={64} height={64} style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 14px rgba(22,101,52,0.4))' }} />
           </div>
           <span className="badge badge-green" style={{ marginBottom: 10, display: 'inline-flex' }}><span className="badge-dot" />Membership Registration</span>
           <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: 8 }}>Join IDAGHA Class of 2018</h1>
@@ -313,7 +313,7 @@ export default function RegisterPage() {
           </div>
 
           {/* Privacy notice */}
-          <div style={{ display: 'flex', gap: 10, padding: '13px 16px', background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.12)', borderRadius: 'var(--radius-sm)', marginBottom: 24, fontSize: '0.8rem', color: 'var(--text-3)', lineHeight: 1.6 }}>
+          <div style={{ display: 'flex', gap: 10, padding: '13px 16px', background: 'rgba(22,101,52,0.04)', border: '1px solid rgba(22,101,52,0.12)', borderRadius: 'var(--radius-sm)', marginBottom: 24, fontSize: '0.8rem', color: 'var(--text-3)', lineHeight: 1.6 }}>
             <svg width="16" height="16" fill="none" stroke="var(--green-400)" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0, marginTop: 1 }}><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round"/></svg>
             <span>Your registration will be reviewed by the Secretary before appearing on the public directory. Your phone and WhatsApp numbers will <strong style={{ color: 'var(--text-2)' }}>not</strong> be shown publicly.</span>
           </div>
@@ -365,21 +365,21 @@ export default function RegisterPage() {
           .reg-photo-upload-btn {
             display: flex; align-items: center; gap: 16px;
             width: 100%; padding: 16px 18px;
-            background: rgba(34,197,94,0.04);
-            border: 2px dashed rgba(34,197,94,0.3);
+            background: rgba(22,101,52,0.04);
+            border: 2px dashed rgba(22,101,52,0.3);
             border-radius: var(--radius-sm);
             cursor: pointer; text-align: left;
             transition: border-color 0.2s, background 0.2s;
             margin-bottom: 14px;
           }
           .reg-photo-upload-btn:hover {
-            border-color: rgba(34,197,94,0.6);
-            background: rgba(34,197,94,0.07);
+            border-color: rgba(22,101,52,0.6);
+            background: rgba(22,101,52,0.07);
           }
           .reg-photo-upload-avatar {
             width: 60px; height: 60px; border-radius: 50%;
-            background: rgba(34,197,94,0.1);
-            border: 2px solid rgba(34,197,94,0.3);
+            background: rgba(22,101,52,0.1);
+            border: 2px solid rgba(22,101,52,0.3);
             display: flex; align-items: center; justify-content: center;
             flex-shrink: 0; position: relative;
           }
@@ -396,8 +396,8 @@ export default function RegisterPage() {
           /* Photo preview (photo selected) */
           .reg-photo-preview-wrap {
             margin-bottom: 14px;
-            background: rgba(34,197,94,0.04);
-            border: 1px solid rgba(34,197,94,0.25);
+            background: rgba(22,101,52,0.04);
+            border: 1px solid rgba(22,101,52,0.25);
             border-radius: var(--radius-sm);
             padding: 16px;
           }
@@ -407,7 +407,7 @@ export default function RegisterPage() {
           .reg-photo-img {
             width: 72px; height: 72px; border-radius: 14px;
             object-fit: cover; flex-shrink: 0;
-            border: 2px solid rgba(34,197,94,0.4);
+            border: 2px solid rgba(22,101,52,0.4);
           }
           .reg-photo-preview-info { flex: 1; min-width: 0; }
 

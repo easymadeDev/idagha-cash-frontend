@@ -7,7 +7,7 @@ import { useState } from 'react';
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
 const avatarColors = [
-  ['rgba(34,197,94,0.18)', 'var(--green-400)'],
+  ['rgba(22,101,52,0.18)', 'var(--green-400)'],
   ['rgba(96,165,250,0.18)', 'var(--blue)'],
   ['rgba(251,191,36,0.18)', 'var(--yellow)'],
   ['rgba(248,113,113,0.18)', 'var(--red)'],
@@ -137,7 +137,7 @@ export default function MembersPage() {
                   <div className="member-card-top">
                     <div className="member-card-avatar" style={{
                       background: bg, color: fg,
-                      border: m.photo ? '2px solid rgba(34,197,94,0.3)' : 'none',
+                      border: m.photo ? '2px solid rgba(22,101,52,0.3)' : 'none',
                     }}>
                       {m.photo ? (
                         <img src={m.photo} alt={m.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -156,7 +156,7 @@ export default function MembersPage() {
                         {m.position && <span className="badge badge-green" style={{ fontSize: '0.66rem', padding: '2px 7px' }}>{m.position}</span>}
                         {m.gender && <span className="badge badge-blue" style={{ fontSize: '0.66rem', padding: '2px 7px' }}>{m.gender}</span>}
                         {contrib.count > 0 && (
-                          <span className="badge" style={{ fontSize: '0.66rem', padding: '2px 7px', background: 'rgba(34,197,94,0.1)', color: 'var(--green-400)', borderColor: 'rgba(34,197,94,0.25)' }}>
+                          <span className="badge" style={{ fontSize: '0.66rem', padding: '2px 7px', background: 'rgba(22,101,52,0.1)', color: 'var(--green-400)', borderColor: 'rgba(22,101,52,0.25)' }}>
                             {contrib.count} payment{contrib.count > 1 ? 's' : ''}
                           </span>
                         )}
@@ -207,15 +207,15 @@ export default function MembersPage() {
           </div>
         )}
 
-        <div style={{ marginTop: 28, padding: '14px 18px', background: 'rgba(34,197,94,0.04)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-3)', textAlign: 'center' }}>
+        <div style={{ marginTop: 28, padding: '14px 18px', background: 'rgba(22,101,52,0.04)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-3)', textAlign: 'center' }}>
           Member information is publicly visible for group transparency. Contact the Secretary to register or update your details.
         </div>
       </div>
       <style>{`
         .members-cta-bar {
           margin-bottom: 28px; padding: 18px 20px;
-          background: linear-gradient(135deg, rgba(34,197,94,0.1), rgba(34,197,94,0.03));
-          border: 1px solid rgba(34,197,94,0.22); border-radius: var(--radius);
+          background: linear-gradient(135deg, rgba(22,101,52,0.1), rgba(22,101,52,0.03));
+          border: 1px solid rgba(22,101,52,0.22); border-radius: var(--radius);
           display: flex; align-items: center; justify-content: space-between;
           flex-wrap: wrap; gap: 14px;
           animation: fadeUp 0.6s var(--ease) 0.3s both;
@@ -249,7 +249,7 @@ export default function MembersPage() {
           border-top: 1px solid var(--border);
           padding: 10px 14px;
           display: flex; justify-content: space-between; align-items: center;
-          background: rgba(6,13,8,0.5);
+          background: var(--bg-card);
         }
         .member-card-contrib-value {
           font-family: var(--font-d); font-size: clamp(0.85rem, 3vw, 1rem);

@@ -1,4 +1,4 @@
-﻿import { formatNaira } from '../lib/api';
+import { formatNaira } from '../lib/api';
 
 const TYPE_LABEL: Record<string, string> = {
   reunion: 'Reunion', meeting: 'Meeting', social: 'Social', outreach: 'Outreach', other: 'Event',
@@ -28,7 +28,7 @@ export default function EventCard({ e, onClick }: { e: any; onClick: () => void 
         <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>{e.title}</div>
         {e.venue && <div style={{ fontSize: '0.82rem', color: 'var(--text-3)' }}>{e.venue}</div>}
         <div style={{ marginTop: 'auto', fontSize: '0.8rem', color: 'var(--green-400)', fontWeight: 700 }}>
-          {e.rsvp?.going || 0} going{e.rsvp?.maybe ? ` Â· ${e.rsvp.maybe} maybe` : ''}
+          {e.rsvp?.going || 0} going{e.rsvp?.maybe ? ` · ${e.rsvp.maybe} maybe` : ''}
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
+import FinanceLayout from '../components/FinanceLayout';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
 import api, { formatNaira, formatDate } from '../lib/api';
@@ -21,7 +21,7 @@ const STEPS = [
 ];
 
 const avatarColors = [
-  'rgba(34,197,94,0.15)', 'rgba(96,165,250,0.15)',
+  'rgba(22,101,52,0.15)', 'rgba(96,165,250,0.15)',
   'rgba(251,191,36,0.15)', 'rgba(248,113,113,0.15)',
   'rgba(167,139,250,0.15)', 'rgba(251,146,60,0.15)',
 ];
@@ -116,7 +116,7 @@ export default function ContributionsPage() {
   };
 
   return (
-    <Layout>
+    <FinanceLayout>
       <div className="container" style={{ paddingBottom: view === 'contribute' ? 80 : undefined }}>
         <div className="page-header">
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
@@ -150,7 +150,7 @@ export default function ContributionsPage() {
             <div className="card" style={{ textAlign: 'center', padding: '56px 32px', maxWidth: 560, margin: '0 auto' }}>
               <div style={{
                 width: 72, height: 72, borderRadius: '50%', margin: '0 auto 20px',
-                background: 'rgba(34,197,94,0.12)', border: '2px solid rgba(34,197,94,0.3)',
+                background: 'rgba(22,101,52,0.12)', border: '2px solid rgba(22,101,52,0.3)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
                 <svg width="32" height="32" fill="none" stroke="var(--green-400)" strokeWidth="2.5" viewBox="0 0 24 24">
@@ -183,7 +183,7 @@ export default function ContributionsPage() {
                       <div key={i} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
                         <div style={{
                           width: 36, height: 36, borderRadius: 10, flexShrink: 0,
-                          background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)',
+                          background: 'rgba(22,101,52,0.08)', border: '1px solid rgba(22,101,52,0.2)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: '0.72rem', color: 'var(--green-400)',
                         }}>{s.n}</div>
@@ -285,8 +285,8 @@ export default function ContributionsPage() {
                       <label style={{
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                         padding: '16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
-                        border: `2px dashed ${receiptPreview ? 'rgba(34,197,94,0.5)' : 'var(--border)'}`,
-                        background: receiptPreview ? 'rgba(34,197,94,0.05)' : 'rgba(255,255,255,0.02)',
+                        border: `2px dashed ${receiptPreview ? 'rgba(22,101,52,0.5)' : 'var(--border)'}`,
+                        background: receiptPreview ? 'rgba(22,101,52,0.05)' : 'rgba(15,61,34,0.02)',
                         fontSize: '0.82rem', color: 'var(--text-3)', flexDirection: receiptPreview ? 'column' : 'row',
                       }}>
                         {receiptPreview ? (
@@ -346,7 +346,7 @@ export default function ContributionsPage() {
                 {(['cards', 'table'] as const).map((v) => (
                   <button key={v} onClick={() => setView(v)} style={{
                     padding: '5px 12px', borderRadius: 5, border: 'none', cursor: 'pointer',
-                    background: view === v ? 'rgba(34,197,94,0.12)' : 'transparent',
+                    background: view === v ? 'rgba(22,101,52,0.12)' : 'transparent',
                     color: view === v ? 'var(--green-400)' : 'var(--text-3)',
                     fontSize: '0.78rem', fontWeight: 600, fontFamily: 'var(--font)',
                     transition: 'all 0.2s',
@@ -415,7 +415,7 @@ export default function ContributionsPage() {
                 </table>
               </div>
             )}
-            <div style={{ marginTop: 24, padding: '16px 20px', background: 'rgba(34,197,94,0.04)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-3)', textAlign: 'center' }}>
+            <div style={{ marginTop: 24, padding: '16px 20px', background: 'rgba(22,101,52,0.04)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-3)', textAlign: 'center' }}>
               All contribution records are publicly visible. Contact the Secretary to make a contribution or report a discrepancy.
             </div>
           </>
@@ -442,6 +442,6 @@ export default function ContributionsPage() {
           .contribute-layout { gap: 18px; }
         }
       `}</style>
-    </Layout>
+    </FinanceLayout>
   );
 }

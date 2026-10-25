@@ -289,7 +289,7 @@ export default function AdminExpenses() {
                     }} style={{
                       fontSize: '0.73rem', fontWeight: 700, padding: '4px 11px', borderRadius: 99, cursor: 'pointer',
                       border: splitMode ? '1px solid rgba(251,191,36,0.5)' : '1px solid var(--border)',
-                      background: splitMode ? 'rgba(251,191,36,0.1)' : 'rgba(255,255,255,0.03)',
+                      background: splitMode ? 'rgba(251,191,36,0.1)' : 'rgba(15,61,34,0.03)',
                       color: splitMode ? 'var(--yellow)' : 'var(--text-3)',
                     }}>
                       {splitMode ? 'Single wallet' : 'Split across wallets'}
@@ -412,11 +412,11 @@ export default function AdminExpenses() {
                         {Math.abs(splitTotal - totalAmount) <= 1 && ' ✓'}
                       </div>
                       <div style={{ display: 'flex', gap: 8 }}>
-                        <button type="button" onClick={autoFill} style={{ fontSize: '0.72rem', fontWeight: 700, padding: '4px 10px', borderRadius: 8, cursor: 'pointer', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.03)', color: 'var(--text-3)' }}>
+                        <button type="button" onClick={autoFill} style={{ fontSize: '0.72rem', fontWeight: 700, padding: '4px 10px', borderRadius: 8, cursor: 'pointer', border: '1px solid var(--border)', background: 'rgba(15,61,34,0.03)', color: 'var(--text-3)' }}>
                           Auto-fill
                         </button>
                         {walletList.length > splits.length && (
-                          <button type="button" onClick={addSplit} style={{ fontSize: '0.72rem', fontWeight: 700, padding: '4px 10px', borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(34,197,94,0.4)', background: 'rgba(34,197,94,0.08)', color: 'var(--green-400)' }}>
+                          <button type="button" onClick={addSplit} style={{ fontSize: '0.72rem', fontWeight: 700, padding: '4px 10px', borderRadius: 8, cursor: 'pointer', border: '1px solid rgba(22,101,52,0.4)', background: 'rgba(22,101,52,0.08)', color: 'var(--green-400)' }}>
                             + Add wallet
                           </button>
                         )}

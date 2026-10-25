@@ -151,7 +151,7 @@ function FormsPanel({ election }: { election: any }) {
                 {view === 'rejected' && <button className="btn btn-ghost btn-sm" disabled={busy === f._id} onClick={() => setPayment(f, 'pending')}>Move to pending</button>}
               </div>
               {view === 'approved' && (
-                <div style={{ padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)' }}>
+                <div style={{ padding: 12, borderRadius: 10, background: 'rgba(15,61,34,0.02)', border: '1px solid var(--border)' }}>
                   <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap' }}>
                     <span style={{ fontSize: '0.8rem', fontWeight: 700 }}>Screening:</span>
                     <span className={`badge ${f.applicationStatus === 'cleared' ? 'badge-green' : f.applicationStatus === 'disqualified' ? 'badge-red' : f.applicationStatus === 'submitted' ? 'badge-blue' : 'badge-yellow'}`}>

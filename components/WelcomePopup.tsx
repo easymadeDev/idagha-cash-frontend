@@ -338,7 +338,7 @@ export default function WelcomePopup() {
             </p>
             <p className="wp-sub">You are a verified member of the IDAGHA Class of 2018 Alumni. Welcome to your portal!</p>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginTop: 8, color: 'var(--green-400)', fontSize: '0.82rem', fontWeight: 600 }}>
-              <div className="wp-spinner" style={{ borderTopColor: 'var(--green-400)', borderColor: 'rgba(34,197,94,0.25)' }} />
+              <div className="wp-spinner" style={{ borderTopColor: 'var(--green-400)', borderColor: 'rgba(22,101,52,0.25)' }} />
               Opening portal…
             </div>
           </>
@@ -441,10 +441,10 @@ export default function WelcomePopup() {
           box-sizing: border-box;
           position: fixed;
           z-index: 9001;
-          background: linear-gradient(160deg, #0d2010 0%, #060d08 100%);
-          border: 1px solid rgba(34,197,94,0.25);
+          background: var(--bg-card);
+          border: 1px solid rgba(22,101,52,0.25);
           text-align: center;
-          box-shadow: 0 0 0 1px rgba(34,197,94,0.06), 0 32px 80px rgba(0,0,0,0.75), 0 0 60px rgba(34,197,94,0.08);
+          box-shadow: 0 0 0 1px rgba(22,101,52,0.06), 0 32px 80px rgba(0,0,0,0.75), 0 0 60px rgba(22,101,52,0.08);
           overflow-y: auto;
           overflow-x: hidden;
           -webkit-overflow-scrolling: touch;
@@ -509,20 +509,20 @@ export default function WelcomePopup() {
         .wp-close {
           position: absolute; top: 12px; right: 12px; z-index: 2;
           width: 36px; height: 36px; border-radius: 50%;
-          border: 1px solid var(--border); background: rgba(255,255,255,0.04);
+          border: 1px solid var(--border); background: rgba(15,61,34,0.04);
           color: var(--text-3); font-size: 1.3rem; line-height: 1; cursor: pointer;
         }
         .wp-close:hover { color: var(--text-1); border-color: var(--border-mid); }
         .wp-drag-handle {
           width: 36px; height: 4px; border-radius: 99px;
-          background: rgba(255,255,255,0.18);
+          background: rgba(15,61,34,0.18);
           margin: 10px auto 18px;
         }
 
         .wp-glow {
           position: absolute; top: -60px; left: 50%; transform: translateX(-50%);
           width: 280px; height: 180px;
-          background: radial-gradient(ellipse, rgba(34,197,94,0.2) 0%, transparent 70%);
+          background: radial-gradient(ellipse, rgba(22,101,52,0.2) 0%, transparent 70%);
           pointer-events: none;
         }
         .wp-logo-wrap {
@@ -537,13 +537,13 @@ export default function WelcomePopup() {
           position: absolute; inset: -7px; border-radius: 50%;
           border: 3px solid transparent;
           border-top-color: #4ade80;
-          border-right-color: rgba(34,197,94,0.4);
+          border-right-color: rgba(22,101,52,0.4);
           animation: wp-spin 1.8s linear infinite;
         }
         .wp-badge {
           display: inline-flex; align-items: center; gap: 6px;
           padding: 4px 12px;
-          background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25);
+          background: rgba(22,101,52,0.1); border: 1px solid rgba(22,101,52,0.25);
           border-radius: 99px; font-size: 0.68rem; font-weight: 600;
           letter-spacing: 0.06em; text-transform: uppercase; color: var(--green-400);
           margin-bottom: 10px;
@@ -570,20 +570,20 @@ export default function WelcomePopup() {
           background: var(--grad-green); border: none; border-radius: var(--radius-sm);
           color: #fff; font-weight: 700; font-size: 0.92rem;
           cursor: pointer; font-family: var(--font);
-          box-shadow: 0 0 24px rgba(34,197,94,0.28);
+          box-shadow: 0 0 24px rgba(22,101,52,0.28);
           transition: all 0.2s var(--ease);
         }
         .wp-btn-yes:disabled { opacity: 0.6; cursor: not-allowed; }
-        .wp-btn-yes:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 0 36px rgba(34,197,94,0.42); }
+        .wp-btn-yes:not(:disabled):hover { transform: translateY(-2px); box-shadow: 0 0 36px rgba(22,101,52,0.42); }
         .wp-btn-no {
           display: flex; align-items: center; justify-content: center; gap: 8px;
           padding: 13px 20px; min-height: 48px;
-          background: rgba(34,197,94,0.07); border: 1px solid rgba(34,197,94,0.25);
+          background: rgba(22,101,52,0.07); border: 1px solid rgba(22,101,52,0.25);
           border-radius: var(--radius-sm); color: var(--green-400);
           font-weight: 600; font-size: 0.92rem; cursor: pointer; font-family: var(--font);
           transition: all 0.2s var(--ease);
         }
-        .wp-btn-no:hover { background: rgba(34,197,94,0.13); border-color: rgba(34,197,94,0.45); }
+        .wp-btn-no:hover { background: rgba(22,101,52,0.13); border-color: rgba(22,101,52,0.45); }
         .wp-btn-back {
           background: none; border: 1px solid var(--border);
           border-radius: var(--radius-sm); color: var(--text-3);
@@ -599,13 +599,13 @@ export default function WelcomePopup() {
         }
         .wp-input {
           width: 100%; padding: 13px 14px 13px 40px;
-          background: rgba(255,255,255,0.04); border: 1px solid var(--border-mid);
+          background: rgba(15,61,34,0.04); border: 1px solid var(--border-mid);
           border-radius: var(--radius-sm); color: var(--text-1);
           font-family: var(--font); font-size: 16px;
           outline: none; transition: all 0.2s var(--ease);
         }
         .wp-input::placeholder { color: var(--text-3); }
-        .wp-input:focus { border-color: var(--green-500); background: rgba(34,197,94,0.05); box-shadow: 0 0 0 3px rgba(34,197,94,0.1); }
+        .wp-input:focus { border-color: var(--green-500); background: rgba(22,101,52,0.05); box-shadow: 0 0 0 3px rgba(22,101,52,0.1); }
         .wp-input:disabled { opacity: 0.6; }
         .wp-note { font-size: 0.75rem; color: var(--text-3); margin: 0; }
         .wp-link { color: var(--green-400); cursor: pointer; }
@@ -618,7 +618,7 @@ export default function WelcomePopup() {
         .wp-avatar {
           width: 72px; height: 72px; border-radius: 50%;
           margin: 0 auto 4px;
-          background: rgba(34,197,94,0.1); border: 2px solid rgba(34,197,94,0.35);
+          background: rgba(22,101,52,0.1); border: 2px solid rgba(22,101,52,0.35);
           display: flex; align-items: center; justify-content: center;
           overflow: hidden; position: relative;
         }
@@ -626,7 +626,7 @@ export default function WelcomePopup() {
         .wp-avatar-tick {
           position: absolute; bottom: 2px; right: 2px;
           width: 20px; height: 20px; border-radius: 50%;
-          background: var(--green-600); border: 2px solid #0d2010;
+          background: var(--green-600); border: 2px solid var(--bg-card);
           display: flex; align-items: center; justify-content: center;
         }
 

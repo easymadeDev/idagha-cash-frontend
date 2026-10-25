@@ -315,17 +315,17 @@ function MemberRow({ m, memberTarget, onNotify, notifying, onNotifyWa, waNotifyi
 
   return (
     <div style={{
-      background: 'linear-gradient(160deg, rgba(10,26,13,0.7), rgba(6,13,8,0.5))',
-      border: `1px solid ${m.completed ? 'rgba(34,197,94,0.2)' : 'var(--border)'}`,
+      background: 'linear-gradient(160deg, rgba(10,26,13,0.7), var(--bg-card))',
+      border: `1px solid ${m.completed ? 'rgba(22,101,52,0.2)' : 'var(--border)'}`,
       borderRadius: 'var(--radius-sm)', marginBottom: 6, overflow: 'hidden',
     }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', flexWrap: 'wrap' }}>
         {/* Avatar */}
         <div style={{
           width: 40, height: 40, borderRadius: '50%', flexShrink: 0,
-          background: m.completed ? 'rgba(34,197,94,0.12)' : 'rgba(248,113,113,0.08)',
+          background: m.completed ? 'rgba(22,101,52,0.12)' : 'rgba(248,113,113,0.08)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          border: `1px solid ${m.completed ? 'rgba(34,197,94,0.3)' : 'rgba(248,113,113,0.2)'}`,
+          border: `1px solid ${m.completed ? 'rgba(22,101,52,0.3)' : 'rgba(248,113,113,0.2)'}`,
           fontSize: '0.8rem', fontWeight: 800,
           color: m.completed ? 'var(--green-400)' : 'var(--red)',
         }}>
@@ -337,7 +337,7 @@ function MemberRow({ m, memberTarget, onNotify, notifying, onNotifyWa, waNotifyi
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>{m.name}</span>
             {m.completed ? (
-              <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: 'rgba(34,197,94,0.12)', color: 'var(--green-400)', border: '1px solid rgba(34,197,94,0.25)' }}>
+              <span style={{ fontSize: '0.65rem', fontWeight: 700, padding: '2px 8px', borderRadius: 99, background: 'rgba(22,101,52,0.12)', color: 'var(--green-400)', border: '1px solid rgba(22,101,52,0.25)' }}>
                 PAID IN FULL
               </span>
             ) : (
@@ -350,7 +350,7 @@ function MemberRow({ m, memberTarget, onNotify, notifying, onNotifyWa, waNotifyi
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 99 }}>
+            <div style={{ flex: 1, height: 6, background: 'rgba(15,61,34,0.06)', borderRadius: 99 }}>
               <div style={{ height: '100%', width: `${m.percentage}%`, borderRadius: 99, background: m.completed ? 'var(--green-500)' : 'linear-gradient(90deg, var(--red), #fb923c)', transition: 'width 0.6s' }} />
             </div>
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: m.completed ? 'var(--green-400)' : 'var(--red)', minWidth: 32 }}>{m.percentage}%</span>
@@ -412,7 +412,7 @@ function MemberRow({ m, memberTarget, onNotify, notifying, onNotifyWa, waNotifyi
 
       {/* Payment history */}
       {expanded && m.payments?.length > 0 && (
-        <div style={{ borderTop: '1px solid var(--border)', padding: '12px 18px', background: 'rgba(6,13,8,0.4)' }}>
+        <div style={{ borderTop: '1px solid var(--border)', padding: '12px 18px', background: 'var(--bg-card)' }}>
           <div style={{ fontSize: '0.7rem', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>
             Payment History
           </div>

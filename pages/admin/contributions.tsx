@@ -26,7 +26,7 @@ const CAT_META: Record<string, { label: string; color: string; bg: string }> = {
   'general':      { label: 'General',       color: 'var(--text-3)',   bg: 'rgba(107,114,128,0.1)' },
   'monthly-dues': { label: 'Monthly Dues',  color: 'var(--blue)',     bg: 'rgba(96,165,250,0.1)' },
   'reunion-fund': { label: 'Reunion Fund',  color: 'var(--yellow)',   bg: 'rgba(251,191,36,0.1)' },
-  'welfare':      { label: 'Welfare',       color: 'var(--green-400)',bg: 'rgba(34,197,94,0.1)' },
+  'welfare':      { label: 'Welfare',       color: 'var(--green-400)',bg: 'rgba(22,101,52,0.1)' },
   'special':      { label: 'Special',       color: '#c4b5fd',         bg: 'rgba(196,181,253,0.1)' },
 };
 
@@ -276,8 +276,8 @@ export default function AdminContributions() {
             return (
               <button key={cat} onClick={() => setFilterCat(cat)} style={{
                 padding: '6px 14px', borderRadius: 99, fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer',
-                border: active ? `1px solid ${meta?.color || 'rgba(34,197,94,0.5)'}` : '1px solid var(--border)',
-                background: active ? (meta?.bg || 'rgba(34,197,94,0.1)') : 'rgba(255,255,255,0.02)',
+                border: active ? `1px solid ${meta?.color || 'rgba(22,101,52,0.5)'}` : '1px solid var(--border)',
+                background: active ? (meta?.bg || 'rgba(22,101,52,0.1)') : 'rgba(15,61,34,0.02)',
                 color: active ? (meta?.color || 'var(--green-400)') : 'var(--text-3)',
                 transition: 'all 0.15s',
               }}>
@@ -426,7 +426,7 @@ export default function AdminContributions() {
             <p className="modal-title">Approve Contribution</p>
 
             {/* Summary card */}
-            <div style={{ background: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
+            <div style={{ background: 'rgba(22,101,52,0.06)', border: '1px solid rgba(22,101,52,0.2)', borderRadius: 10, padding: '14px 18px', marginBottom: 20 }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 6 }}>
                 <span style={{ color: 'var(--text-3)', fontSize: '0.82rem' }}>Contributor</span>
                 <strong style={{ fontSize: '0.88rem' }}>{approveModal.contributorName}</strong>
@@ -492,7 +492,7 @@ export default function AdminContributions() {
             </div>
 
             {(approveModal.email || approveMemberId) && (
-              <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', background: 'rgba(34,197,94,0.04)', border: '1px solid rgba(34,197,94,0.15)', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
+              <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', background: 'rgba(22,101,52,0.04)', border: '1px solid rgba(22,101,52,0.15)', borderRadius: 8, padding: '10px 14px', marginBottom: 16 }}>
                 📧 An approval email will be sent to <strong>{approveModal.email || memberList.find((m: any) => m._id === approveMemberId)?.email || 'contributor'}</strong>
               </div>
             )}
@@ -609,7 +609,7 @@ export default function AdminContributions() {
                         {reunionRemaining > 0 ? formatNaira(reunionRemaining) : 'Fully paid ✓'}
                       </span>
                     </div>
-                    <div style={{ height: 5, borderRadius: 99, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
+                    <div style={{ height: 5, borderRadius: 99, background: 'rgba(15,61,34,0.07)', overflow: 'hidden' }}>
                       <div style={{
                         height: '100%', borderRadius: 99,
                         background: reunionAlreadyPaid >= REUNION_TARGET ? 'var(--green-400)' : 'var(--yellow)',

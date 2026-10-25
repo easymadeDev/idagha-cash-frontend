@@ -18,3 +18,7 @@ out/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+
+# design-tool scratch files and unedited photo originals (edited copies live in public/img/class)
+.taste-skill/
+photo-originals/

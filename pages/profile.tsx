@@ -121,7 +121,7 @@ export default function ProfilePage() {
   if (!ready || !member || !loaded) return (
     <Layout>
       <div style={{ minHeight: '60vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: 36, height: 36, border: '3px solid rgba(34,197,94,0.2)', borderTopColor: 'var(--green-400)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
+        <div style={{ width: 36, height: 36, border: '3px solid rgba(22,101,52,0.2)', borderTopColor: 'var(--green-400)', borderRadius: '50%', animation: 'spin 0.7s linear infinite' }} />
         <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
       </div>
     </Layout>
@@ -179,7 +179,7 @@ export default function ProfilePage() {
             {form.nickname && <div style={{ fontSize: '0.82rem', color: 'var(--green-400)', marginBottom: 6 }}>"{form.nickname}"</div>}
             <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
               {member.position && (
-                <span style={{ padding: '3px 10px', borderRadius: 99, background: 'rgba(34,197,94,0.1)', border: '1px solid rgba(34,197,94,0.25)', fontSize: '0.72rem', fontWeight: 700, color: 'var(--green-400)' }}>
+                <span style={{ padding: '3px 10px', borderRadius: 99, background: 'rgba(22,101,52,0.1)', border: '1px solid rgba(22,101,52,0.25)', fontSize: '0.72rem', fontWeight: 700, color: 'var(--green-400)' }}>
                   {member.position}
                 </span>
               )}
@@ -191,7 +191,7 @@ export default function ProfilePage() {
 
             {/* New photo selected indicator */}
             {photo && !editing && (
-              <div style={{ marginTop: 10, padding: '8px 12px', background: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.2)', borderRadius: 8, fontSize: '0.78rem', color: 'var(--green-400)' }}>
+              <div style={{ marginTop: 10, padding: '8px 12px', background: 'rgba(22,101,52,0.08)', border: '1px solid rgba(22,101,52,0.2)', borderRadius: 8, fontSize: '0.78rem', color: 'var(--green-400)' }}>
                 New photo selected — save your profile to apply it.
               </div>
             )}
@@ -243,7 +243,7 @@ export default function ProfilePage() {
               <div className="profile-section-title">Profile Photo</div>
               {photo ? (
                 <div className="profile-photo-preview-row">
-                  <img src={photoPreview} alt="preview" style={{ width: 64, height: 64, borderRadius: 12, objectFit: 'cover', border: '2px solid rgba(34,197,94,0.4)', flexShrink: 0 }} />
+                  <img src={photoPreview} alt="preview" style={{ width: 64, height: 64, borderRadius: 12, objectFit: 'cover', border: '2px solid rgba(22,101,52,0.4)', flexShrink: 0 }} />
                   <div style={{ flex: 1 }}>
                     <div style={{ fontWeight: 700, fontSize: '0.88rem', color: 'var(--green-400)', marginBottom: 4 }}>
                       ✓ New photo ready
@@ -259,8 +259,8 @@ export default function ProfilePage() {
                 <button type="button" className="profile-photo-upload-row" onClick={() => fileRef.current?.click()}>
                   <div style={{
                     width: 56, height: 56, borderRadius: '50%', flexShrink: 0,
-                    background: photoPreview ? 'transparent' : 'rgba(34,197,94,0.08)',
-                    border: '2px dashed rgba(34,197,94,0.35)',
+                    background: photoPreview ? 'transparent' : 'rgba(22,101,52,0.08)',
+                    border: '2px dashed rgba(22,101,52,0.35)',
                     overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   }}>
                     {photoPreview
@@ -322,7 +322,7 @@ export default function ProfilePage() {
 
         .profile-hero-card {
           background: linear-gradient(135deg, var(--bg-card2), var(--bg-surface));
-          border: 1px solid rgba(34,197,94,0.2);
+          border: 1px solid rgba(22,101,52,0.2);
           border-radius: var(--radius); overflow: hidden;
           margin-bottom: 14px;
           box-shadow: 0 8px 32px rgba(0,0,0,0.4);
@@ -334,12 +334,12 @@ export default function ProfilePage() {
         }
         .profile-banner::after {
           content: ''; position: absolute; inset: 0;
-          background: radial-gradient(circle at 70% 50%, rgba(255,255,255,0.06), transparent 60%);
+          background: radial-gradient(circle at 70% 50%, rgba(15,61,34,0.06), transparent 60%);
         }
         .profile-avatar {
           width: 86px; height: 86px; border-radius: 50%; overflow: hidden;
           border: 3px solid var(--bg-card2);
-          background: rgba(34,197,94,0.1);
+          background: rgba(22,101,52,0.1);
           display: flex; align-items: center; justify-content: center;
         }
         .profile-camera-btn {
@@ -353,11 +353,11 @@ export default function ProfilePage() {
         .profile-edit-btn {
           display: flex; align-items: center; gap: 6px;
           padding: 8px 14px; border-radius: 10px;
-          background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.25);
+          background: rgba(22,101,52,0.1); border: 1px solid rgba(22,101,52,0.25);
           color: var(--green-400); font-weight: 600; font-size: 0.82rem;
           cursor: pointer; font-family: var(--font); transition: all 0.15s;
         }
-        .profile-edit-btn:hover { background: rgba(34,197,94,0.18); }
+        .profile-edit-btn:hover { background: rgba(22,101,52,0.18); }
 
         .profile-info-card {
           background: var(--grad-card);
@@ -373,7 +373,7 @@ export default function ProfilePage() {
         .profile-info-row:last-of-type { border-bottom: none; }
         .profile-info-icon {
           width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
-          background: rgba(34,197,94,0.08); border: 1px solid rgba(34,197,94,0.15);
+          background: rgba(22,101,52,0.08); border: 1px solid rgba(22,101,52,0.15);
           display: flex; align-items: center; justify-content: center;
           color: var(--green-400);
         }
@@ -392,19 +392,19 @@ export default function ProfilePage() {
         }
         .profile-photo-preview-row {
           display: flex; gap: 14px; align-items: flex-start;
-          padding: 14px; background: rgba(34,197,94,0.04);
-          border: 1px solid rgba(34,197,94,0.2); border-radius: var(--radius-sm);
+          padding: 14px; background: rgba(22,101,52,0.04);
+          border: 1px solid rgba(22,101,52,0.2); border-radius: var(--radius-sm);
           margin-bottom: 14px;
         }
         .profile-photo-upload-row {
           display: flex; align-items: center; gap: 14px; width: 100%;
-          padding: 14px; background: rgba(34,197,94,0.03);
-          border: 2px dashed rgba(34,197,94,0.25); border-radius: var(--radius-sm);
+          padding: 14px; background: rgba(22,101,52,0.03);
+          border: 2px dashed rgba(22,101,52,0.25); border-radius: var(--radius-sm);
           cursor: pointer; text-align: left; margin-bottom: 14px;
           transition: border-color 0.2s, background 0.2s; font-family: var(--font);
         }
         .profile-photo-upload-row:hover {
-          border-color: rgba(34,197,94,0.5); background: rgba(34,197,94,0.06);
+          border-color: rgba(22,101,52,0.5); background: rgba(22,101,52,0.06);
         }
 
         @media (max-width: 480px) {

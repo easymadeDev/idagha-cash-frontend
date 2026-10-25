@@ -78,7 +78,7 @@ export default function AdminWallets() {
               const isPledge = w.type === 'pledge';
 
               const rows = isPledge ? [
-                { label: 'Pledged', value: formatNaira(s.pledgeStats?.totalPledged ?? 0), color: '#a855f7' },
+                { label: 'Pledged', value: formatNaira(s.pledgeStats?.totalPledged ?? 0), color: '#c99412' },
                 { label: 'Fulfilled', value: formatNaira(s.pledgeStats?.totalFulfilled ?? 0), color: 'var(--green-400)' },
                 { label: 'Pending', value: formatNaira(s.pledgeStats?.totalPending ?? 0), color: 'var(--yellow)' },
               ] : [
@@ -102,13 +102,13 @@ export default function AdminWallets() {
                         </div>
                         <span style={{
                           fontSize: '0.65rem', fontWeight: 700, padding: '2px 7px', borderRadius: 99,
-                          background: 'rgba(255,255,255,0.05)', color: 'var(--text-3)',
+                          background: 'rgba(15,61,34,0.05)', color: 'var(--text-3)',
                           border: '1px solid var(--border)', textTransform: 'capitalize',
                         }}>{w.type}</span>
                       </div>
                       <div style={{ display: 'flex', gap: 5, flexShrink: 0 }}>
                         {isPledge && (
-                          <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.7rem', padding: '3px 8px', color: '#a855f7' }}
+                          <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.7rem', padding: '3px 8px', color: '#c99412' }}
                             onClick={() => window.location.href = '/admin/pledges'}>View</button>
                         )}
                         <button className="btn btn-ghost btn-sm" style={{ fontSize: '0.7rem', padding: '3px 8px' }} onClick={() => openEdit(w)}>Edit</button>

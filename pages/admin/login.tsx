@@ -38,7 +38,7 @@ export default function AdminLogin() {
       padding: 24, position: 'relative', overflow: 'hidden',
     }}>
       {/* Background glow */}
-      <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(34,197,94,0.08), transparent 70%)', pointerEvents: 'none' }} />
+      <div style={{ position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(22,101,52,0.08), transparent 70%)', pointerEvents: 'none' }} />
 
       <div style={{ width: '100%', maxWidth: 420, position: 'relative' }}>
         {/* Logo */}
@@ -46,7 +46,7 @@ export default function AdminLogin() {
           <div style={{ margin: '0 auto 20px', display: 'inline-block', position: 'relative' }}>
             <div style={{
               position: 'absolute', inset: -8, borderRadius: '50%',
-              background: 'radial-gradient(circle, rgba(34,197,94,0.25), transparent 70%)',
+              background: 'radial-gradient(circle, rgba(22,101,52,0.25), transparent 70%)',
               animation: 'heroBreathe 4s ease-in-out infinite',
             }} />
             <Image
@@ -54,7 +54,7 @@ export default function AdminLogin() {
               alt="IDAGHA Alumni Logo"
               width={90}
               height={90}
-              style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 24px rgba(34,197,94,0.5))', position: 'relative' }}
+              style={{ objectFit: 'contain', filter: 'drop-shadow(0 0 24px rgba(22,101,52,0.5))', position: 'relative' }}
               priority
             />
           </div>
