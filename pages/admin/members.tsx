@@ -2,6 +2,7 @@ import { useState, useRef } from 'react';
 import AdminLayout from '../../components/AdminLayout';
 import useSWR, { mutate } from 'swr';
 import api from '../../lib/api';
+import { OFFICIAL_POSITIONS } from '../../lib/positions';
 import { useToast } from '../../components/Toast';
 
 const fetcher = (url: string) =>
@@ -14,7 +15,7 @@ const EMPTY = {
   gender: '', email: '', location: '', occupation: '', position: '', birthday: '',
 };
 
-const POSITIONS = ['Member', 'Secretary', 'President', 'Vice President', 'Treasurer', 'PRO', 'Welfare Officer', 'Financial Secretary'];
+const POSITIONS = ['Member', ...OFFICIAL_POSITIONS];
 
 const AVATAR_COLORS = [
   ['rgba(22,101,52,0.15)', 'var(--green-400)'],
@@ -539,7 +540,9 @@ export default function AdminMembers() {
                   <label className="form-label">Position</label>
                   <select className="form-select" value={form.position} onChange={f('position')}>
                     <option value="">Select position</option>
-                    {POSITIONS.map((p) => <option key={p} value={p}>{p}</option>)}
+                    {/* keep a title saved before the official list existed, so editing doesn't blank it */}
+                    {(form.position && !POSITIONS.includes(form.position) ? [...POSITIONS, form.position] : POSITIONS)
+                      .map((p) => <option key={p} value={p}>{p}</option>)}
                   </select>
                 </div>
                 <div className="form-group">

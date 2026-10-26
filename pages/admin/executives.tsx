@@ -6,10 +6,11 @@ import api from '../../lib/api';
 import { useToast } from '../../components/Toast';
 import { adminFetcher, errorMessage, initials } from '../../lib/member';
 import { fileToDataUrl } from '../../lib/image';
+import { OFFICIAL_POSITIONS, positionRank } from '../../lib/positions';
 
 const KEY = '/api/executives/admin/all';
 const EMPTY = { name: '', position: '', memberId: '', photo: '', bio: '', phone: '', email: '', tenure: '', isCurrent: true, order: 0 };
-const SUGGESTED = ['President', 'Vice President', 'Secretary', 'Assistant Secretary', 'Financial Secretary', 'Treasurer', 'PRO', 'Welfare Officer', 'Social Director'];
+const SUGGESTED = OFFICIAL_POSITIONS;
 
 export default function AdminExecutives() {
   const { toast } = useToast();
@@ -120,7 +121,12 @@ export default function AdminExecutives() {
                   </div>
                   <div className="form-group">
                     <label className="form-label">Position *</label>
-                    <input className="form-input" list="pos-list" value={form.position} onChange={(e) => setForm({ ...form, position: e.target.value })} required />
+                    {/* picking an official position also sets its display order (Chairman first) */}
+                    <input className="form-input" list="pos-list" value={form.position} required
+                      onChange={(e) => {
+                        const rank = positionRank(e.target.value);
+                        setForm({ ...form, position: e.target.value, order: rank < OFFICIAL_POSITIONS.length ? rank : form.order });
+                      }} />
                     <datalist id="pos-list">{SUGGESTED.map((p) => <option key={p} value={p} />)}</datalist>
                   </div>
                 </div>

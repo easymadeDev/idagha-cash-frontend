@@ -6,12 +6,14 @@ import api, { formatNaira, formatDate } from '../../lib/api';
 import { useToast } from '../../components/Toast';
 import { adminFetcher, errorMessage, initials } from '../../lib/member';
 import { STATUS_INFO } from '../../lib/elections';
+import { OFFICIAL_POSITIONS } from '../../lib/positions';
 
 const LIST_KEY = '/api/elections/admin/all';
 const EMPTY = {
   title: '', description: '', status: 'draft', bankName: '', accountName: '', accountNumber: '',
   formSaleEnds: '', votingStarts: '', votingEnds: '',
-  positions: [{ title: 'President', description: '', requirements: '', formPrice: 10000 }],
+  // every official position, with the form price left for the Secretary to set
+  positions: OFFICIAL_POSITIONS.map((title) => ({ title, description: '', requirements: '', formPrice: '' as any })),
 };
 const toDay = (d?: string) => (d ? new Date(d).toISOString().slice(0, 10) : '');
 const NEXT_STATUS: Record<string, string> = { draft: 'forms', forms: 'screening', screening: 'voting', voting: 'closed' };
@@ -55,7 +57,7 @@ function ElectionForm({ initial, onClose, onSaved }: { initial: any; onClose: ()
             {f.positions.map((p: any, i: number) => (
               <div key={p._id || i} style={{ padding: 12, borderRadius: 10, border: '1px solid var(--border)', display: 'grid', gap: 8 }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 140px auto', gap: 8 }}>
-                  <input className="form-input" value={p.title} placeholder="Position" onChange={(e) => setPos(i, { title: e.target.value })} required />
+                  <input className="form-input" list="official-positions" value={p.title} placeholder="Position" onChange={(e) => setPos(i, { title: e.target.value })} required />
                   <input className="form-input" type="number" min={0} value={p.formPrice} placeholder="Form ₦" onChange={(e) => setPos(i, { formPrice: e.target.value })} required />
                   <button type="button" className="btn btn-danger btn-sm" onClick={() => setF({ ...f, positions: f.positions.filter((_: any, j: number) => j !== i) })}>✕</button>
                 </div>
@@ -65,7 +67,8 @@ function ElectionForm({ initial, onClose, onSaved }: { initial: any; onClose: ()
             ))}
           </div>
           <button type="button" className="btn btn-ghost btn-sm" style={{ marginBottom: 18 }}
-            onClick={() => setF({ ...f, positions: [...f.positions, { title: '', description: '', requirements: '', formPrice: 5000 }] })}>+ Add position</button>
+            onClick={() => setF({ ...f, positions: [...f.positions, { title: '', description: '', requirements: '', formPrice: '' }] })}>+ Add position</button>
+          <datalist id="official-positions">{OFFICIAL_POSITIONS.map((p) => <option key={p} value={p} />)}</datalist>
 
           <div className="section-title" style={{ margin: '8px 0 10px', fontSize: '0.95rem' }}>Bank account for form payments</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: 10 }}>
