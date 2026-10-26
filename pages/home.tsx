@@ -181,7 +181,7 @@ export default function Home({ classPhotos = [] }: { classPhotos?: { src: string
               <button className="hm-link" onClick={() => router.push(election ? `/elections/${election._id}` : '/elections')}>Open</button>
             </div>
             {aspirants.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+              <div className="swipe-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
                 {aspirants.slice(0, 3).map((c: any) => (
                   <motion.div key={c._id} whileHover={{ y: -6, rotate: -1 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                     onClick={() => router.push(`/elections/${election._id}`)} style={{ cursor: 'pointer' }}>
@@ -206,11 +206,11 @@ export default function Home({ classPhotos = [] }: { classPhotos?: { src: string
             {photos.length === 0 ? (
               <p style={{ color: 'var(--text-3)' }}>No photographs yet. Share the first one from school days.</p>
             ) : (
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
-                {photos.map((p: any, i: number) => (
+              <div className="swipe-row" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: 8 }}>
+                {/* the panel reveals as a whole; per-photo in-view triggers fail inside the phone swipe row */}
+                {photos.map((p: any) => (
                   <motion.div key={p._id} onClick={() => router.push('/gallery')}
-                    initial={{ opacity: 0, scale: 0.94 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true }}
-                    transition={{ delay: i * 0.06, duration: 0.6, ease: EASE }} whileHover={{ scale: 1.03 }}
+                    transition={{ duration: 0.4, ease: EASE }} whileHover={{ scale: 1.03 }}
                     style={{ aspectRatio: '1', borderRadius: 14, overflow: 'hidden', cursor: 'pointer', background: 'var(--bg-elevated)' }}>
                     <img src={p.image} alt={p.caption || p.album} loading="lazy" style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: (p as any).focus || '50% 30%' }} />
                   </motion.div>

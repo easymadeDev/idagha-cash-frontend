@@ -9,6 +9,8 @@ import 'lenis/dist/lenis.css';
 import '../styles/glass.css';
 import '../styles/skin-glass.css';
 import { SkinSwitch } from '../lib/skin';
+import Interactions from '../components/Interactions';
+import '../styles/enhance.css';
 import SmoothScroll from '../components/SmoothScroll';
 import WelcomePopup from '../components/WelcomePopup';
 import WhatsAppPrompt from '../components/WhatsAppPrompt';
@@ -141,6 +143,7 @@ export default function App({ Component, pageProps }: AppProps) {
         </svg>
         <SmoothScroll />
         <SkinSwitch />
+        <Interactions />
         <WelcomePopup />
         <WhatsAppPrompt />
         <Component {...pageProps} />

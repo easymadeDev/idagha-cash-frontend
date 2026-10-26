@@ -161,14 +161,15 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
           <motion.h2 id="mem-h" className="gl-h2" {...rise(0)}>Our memories</motion.h2>
           <motion.button className="gl-btn" onClick={() => go('/gallery')} {...rise(1)}><Images size={16} /> Open the gallery</motion.button>
         </div>
-        <div className="gl-mosaic">
+        {/* the mosaic rises as one block: per-photo in-view triggers fail inside the phone swipe row */}
+        <motion.div className="gl-mosaic swipe-row" {...rise(0)}>
           {photos.slice(0, 7).map((p, i) => (
-            <motion.figure key={p.src} className={`gl-tile gl-tile--${i}`} {...rise(i % 3)} whileHover={{ scale: 1.02 }}>
+            <motion.figure key={p.src} className={`gl-tile gl-tile--${i}`} whileHover={{ scale: 1.02 }}>
               <img src={p.src} alt={p.caption} style={{ objectPosition: p.focus }} loading="lazy" />
               {p.caption && <figcaption className="gl-glass">{p.caption}</figcaption>}
             </motion.figure>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* Executive */}

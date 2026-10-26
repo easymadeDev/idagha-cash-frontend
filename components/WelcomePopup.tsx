@@ -238,7 +238,7 @@ export default function WelcomePopup() {
           <>
             <h2 className="wp-title">Welcome, Classmate!</h2>
             <p className="wp-sub">
-              This is the official financial transparency portal for the{' '}
+              This is the members’ home of the{' '}
               <strong>IDAGHA Secondary School Class of 2018 Alumni</strong>. Are you a registered member?
             </p>
             <div className="wp-actions">

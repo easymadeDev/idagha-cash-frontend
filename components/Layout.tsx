@@ -2,7 +2,19 @@ import { useRef } from 'react';
 import { useRouter } from 'next/router';
 import { motion, useReducedMotion } from 'framer-motion';
 import Navbar from './Navbar';
+import MobileTabBar from './MobileTabBar';
 import { useAutoReveal, EASE } from './motion';
+
+// Each section gets its own class photograph behind its page title
+const HERO_PHOTO: Record<string, string> = {
+  '/members': 'idagha-00', '/executives': 'idagha-03', '/about': 'idagha-02', '/events': 'idagha-09',
+  '/elections': 'idagha-08', '/awards': 'idagha-01', '/gallery': 'idagha-05', '/profile': 'idagha-04',
+  '/register': 'idagha-02',
+};
+const heroFor = (path: string) => {
+  const key = Object.keys(HERO_PHOTO).find((p) => path === p || path.startsWith(p + '/'));
+  return `url(/img/class/${key ? HERO_PHOTO[key] : 'idagha-06'}.jpg)`;
+};
 
 const FOOTER_GROUPS = [
   { title: 'The set', links: [['Home', '/home'], ['Members', '/members'], ['Executives', '/executives'], ['About', '/about']] },
@@ -23,12 +35,15 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ref={mainRef}
         className="page-wrap"
         key={router.pathname}
+        style={{ ['--hero-img' as any]: heroFor(router.pathname) }}
+        // no filter here: a leftover filter would trap position:fixed modals inside the page
         initial={reduce ? false : { opacity: 0, y: 40, scale: 0.985 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.7, ease: EASE }}
+        transition={{ duration: 0.75, ease: EASE }}
       >
         {children}
       </motion.div>
+      <MobileTabBar />
       <footer className="footer">
         <div className="footer-stripe" aria-hidden="true">{Array.from({ length: 60 }).map((_, i) => <i key={i} />)}</div>
         <div className="footer-inner" style={{ alignItems: 'flex-start' }}>
