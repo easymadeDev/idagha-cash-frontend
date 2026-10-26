@@ -10,6 +10,7 @@ import { formatNaira } from '../lib/api';
 import { CountUp } from '../components/motion';
 import GlassLanding from '../components/GlassLanding';
 import { useSkin } from '../lib/skin';
+import { isPublicPath } from '../lib/requireLogin';
 
 type Photo = { src: string; caption: string; focus: string };
 
@@ -131,7 +132,7 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
   const yearsOut = new Date().getFullYear() - GRAD_YEAR;
 
   const enterPortal = () => (cleared ? router.push('/home') : setGateOpen(true));
-  const go = (href: string) => (cleared ? router.push(href) : (sessionStorage.setItem('idagha_redirect_after_login', href), setGateOpen(true)));
+  const go = (href: string) => (cleared || isPublicPath(href) ? router.push(href) : (sessionStorage.setItem('idagha_redirect_after_login', href), setGateOpen(true)));
 
   // ── The crest tilts in 3D toward the pointer ──
   useEffect(() => {

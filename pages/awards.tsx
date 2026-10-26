@@ -5,6 +5,7 @@ import { useToast } from '../components/Toast';
 import { useGate } from '../lib/gate';
 import { fetcher, memberFetcher, memberApi, errorMessage, initials } from '../lib/member';
 import Poster from '../components/Poster';
+import { useRequireLogin } from '../lib/requireLogin';
 
 function NominateModal({ category, onClose, onDone }: { category: any; onClose: () => void; onDone: () => void }) {
   const { toast } = useToast();
@@ -79,9 +80,11 @@ function NominateModal({ category, onClose, onDone }: { category: any; onClose: 
 
 export default function AwardsPage() {
   const { toast } = useToast();
-  const { member } = useGate();
+  const { member, cleared } = useGate();
+  const requireLogin = useRequireLogin();
   const { data: board, isLoading } = useSWR('/api/awards', fetcher, { refreshInterval: 15000 });
-  const { data: mine } = useSWR('/api/awards/me', memberFetcher);
+  // the board is public; your own supports load once signed in
+  const { data: mine } = useSWR(cleared ? '/api/awards/me' : null, memberFetcher);
   const [nominating, setNominating] = useState<any>(null);
   const [busy, setBusy] = useState('');
   const [posterFor, setPosterFor] = useState<{ cat: any; n: any } | null>(null);
@@ -182,7 +185,7 @@ export default function AwardsPage() {
                           <div style={{ textAlign: 'right' }}>
                             <div style={{ fontWeight: 800, color: 'var(--green-400)' }}>{n.supports}</div>
                             {open && !isMine && (
-                              <button className="btn btn-ghost btn-sm" style={{ marginTop: 4 }} disabled={busy === n._id} onClick={() => support(cat, n)}>
+                              <button className="btn btn-ghost btn-sm" style={{ marginTop: 4 }} disabled={busy === n._id} onClick={() => requireLogin(() => support(cat, n))}>
                                 {isSelf ? 'Back yourself' : 'Support'}
                               </button>
                             )}
@@ -196,7 +199,9 @@ export default function AwardsPage() {
                   </div>
 
                   {open && (
-                    <button className="btn btn-primary" style={{ marginTop: 'auto' }} onClick={() => setNominating(cat)}>+ Nominate a classmate</button>
+                    <button className="btn btn-primary" style={{ marginTop: 'auto' }} onClick={() => requireLogin(() => setNominating(cat))}>
+                      {cleared ? '+ Nominate a classmate' : 'Sign in to nominate'}
+                    </button>
                   )}
                 </div>
               );

@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGate } from '../lib/gate';
+import { useRequireLogin } from '../lib/requireLogin';
 import { EASE } from './motion';
 
 type NavLink = { label: string; href: string };
@@ -43,6 +44,7 @@ export default function Navbar() {
   const [dropOpen, setDropOpen] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
   const { cleared, member, ready } = useGate();
+  const requireLogin = useRequireLogin();
   const navRef = useRef<HTMLUListElement>(null);
 
   const navigate = (href: string) => {
@@ -142,6 +144,15 @@ export default function Navbar() {
             );
           })}
 
+          {/* signed-out visitors can still browse the public pages */}
+          {ready && !cleared && [['Elections', '/elections'], ['Class awards', '/awards']].map(([label, href]) => (
+            <li key={href}>
+              <a className={router.pathname.startsWith(href) ? 'active' : ''} onClick={() => navigate(href)} style={{ cursor: 'pointer' }}>
+                {router.pathname.startsWith(href) && <motion.span layoutId="nav-pill" className="nav-pill" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}
+                {label}
+              </a>
+            </li>
+          ))}
           {!member && (
             <li>
               <a className={router.pathname === '/register' ? 'active' : ''} onClick={() => navigate('/register')} style={{ cursor: 'pointer' }}>
@@ -159,6 +170,9 @@ export default function Navbar() {
         </ul>
 
         <div className="nav-cta" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          {ready && !cleared && (
+            <button className="btn btn-primary btn-sm" onClick={() => requireLogin(() => {})}>Sign in</button>
+          )}
           {member && (
             <motion.div onClick={() => navigate('/profile')} title={`Signed in as ${member.name}`} className="nav-me"
               whileHover={{ y: -2 }} whileTap={{ scale: 0.96 }}>

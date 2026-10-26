@@ -8,6 +8,7 @@ import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
 import { formatNaira } from '../lib/api';
 import { CountUp } from './motion';
+import { isPublicPath } from '../lib/requireLogin';
 
 // The landing page in the glass skin: frosted white-and-blue panels
 // floating over a softly blurred photograph of the whole class.
@@ -65,7 +66,7 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
   }, []);
 
   const enterPortal = () => (cleared ? router.push('/home') : setGateOpen(true));
-  const go = (href: string) => (cleared ? router.push(href) : (sessionStorage.setItem('idagha_redirect_after_login', href), setGateOpen(true)));
+  const go = (href: string) => (cleared || isPublicPath(href) ? router.push(href) : (sessionStorage.setItem('idagha_redirect_after_login', href), setGateOpen(true)));
   const leader = (a: any) => a.winner || a.nominees?.[0];
 
   const together = [

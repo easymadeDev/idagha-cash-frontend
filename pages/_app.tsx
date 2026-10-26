@@ -9,6 +9,7 @@ import 'lenis/dist/lenis.css';
 import '../styles/glass.css';
 import '../styles/skin-glass.css';
 import { SkinSwitch } from '../lib/skin';
+import { isPublicPath } from '../lib/requireLogin';
 import Interactions from '../components/Interactions';
 import '../styles/enhance.css';
 import SmoothScroll from '../components/SmoothScroll';
@@ -36,11 +37,13 @@ function clearMemberToken() {
   localStorage.removeItem(MEMBER_TOKEN_KEY);
 }
 
-// Fully open — no token needed
+// Fully open — no token needed. Elections and class awards can be browsed by anyone;
+// buying a form, applying, voting, nominating and supporting ask for sign-in on the page itself.
 const FULLY_EXEMPT = (pathname: string) =>
   pathname === '/' ||
   pathname === '/test' ||
-  pathname.startsWith('/admin');
+  pathname.startsWith('/admin') ||
+  isPublicPath(pathname);
 
 // Requires only gate token (PIN passed) — not full member verification
 const GATE_ONLY = (pathname: string) =>

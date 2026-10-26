@@ -9,6 +9,7 @@ import { fileToDataUrl } from '../../lib/image';
 import { formatNaira, formatDate } from '../../lib/api';
 import { STATUS_INFO, ELECTION_STAGES } from '../../lib/elections';
 import Poster from '../../components/Poster';
+import { useRequireLogin } from '../../lib/requireLogin';
 
 const PAY_BADGE: Record<string, [string, string]> = {
   pending: ['badge-yellow', 'Payment pending'],
@@ -179,7 +180,10 @@ export default function ElectionDetail() {
   const { toast } = useToast();
   const id = router.query.id as string | undefined;
   const key = id ? `/api/elections/${id}` : null;
-  const meKey = id ? `/api/elections/${id}/me` : null;
+  const { cleared } = useGate();
+  const requireLogin = useRequireLogin();
+  // the member's own forms and votes load only once signed in (the page itself is public)
+  const meKey = id && cleared ? `/api/elections/${id}/me` : null;
   const { data: el, error } = useSWR(key, fetcher, { refreshInterval: 20000 });
   const { data: me } = useSWR(meKey, memberFetcher);
   const [buying, setBuying] = useState<any>(null);
@@ -281,7 +285,9 @@ export default function ElectionDetail() {
                   {el.status === 'forms' && (
                     mine
                       ? <span className="badge badge-green">You have this form</span>
-                      : <button className="btn btn-primary btn-sm" onClick={() => setBuying(p)}>Buy form · {formatNaira(p.formPrice)}</button>
+                      : <button className="btn btn-primary btn-sm" onClick={() => requireLogin(() => setBuying(p))}>
+                          {cleared ? 'Buy form' : 'Sign in to buy form'} · {formatNaira(p.formPrice)}
+                        </button>
                   )}
                   {el.status === 'voting' && voted && <span className="badge badge-green">✓ You voted</span>}
                 </div>
@@ -308,7 +314,7 @@ export default function ElectionDetail() {
                           <div key={c._id} className={`candidate${selected ? ' selected' : ''}`}
                             style={{ flexDirection: 'column', alignItems: 'stretch', padding: 10, borderColor: winner ? 'var(--yellow)' : undefined }}>
                             <Poster
-                              onClick={canPick ? () => setChoice({ ...choice, [p._id]: c._id }) : undefined}
+                              onClick={canPick ? () => requireLogin(() => setChoice({ ...choice, [p._id]: c._id })) : undefined}
                               data={{
                                 photo: c.photo, name: c.memberName, band: winner ? 'WINNER' : 'VOTE',
                                 role: `for ${p.title}`, slogan: c.slogan, footer: el.title,
@@ -322,8 +328,8 @@ export default function ElectionDetail() {
                               </details>
                             )}
                             {canPick && (
-                              <button className={`btn btn-sm ${selected ? 'btn-primary' : 'btn-ghost'}`} onClick={() => setChoice({ ...choice, [p._id]: c._id })}>
-                                {selected ? '✓ Selected' : `Select ${c.memberName.split(' ')[0]}`}
+                              <button className={`btn btn-sm ${selected ? 'btn-primary' : 'btn-ghost'}`} onClick={() => requireLogin(() => setChoice({ ...choice, [p._id]: c._id }))}>
+                                {!cleared ? 'Sign in to vote' : selected ? '✓ Selected' : `Select ${c.memberName.split(' ')[0]}`}
                               </button>
                             )}
                             {voted === c._id && <span className="badge badge-green">Your vote</span>}
@@ -342,9 +348,9 @@ export default function ElectionDetail() {
 
                 {el.status === 'voting' && !voted && p.candidates.length > 0 && (
                   <div style={{ marginTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
-                    <button className="btn btn-primary" disabled={!choice[p._id]}
-                      onClick={() => setConfirm({ position: p, candidate: p.candidates.find((c: any) => c._id === choice[p._id]) })}>
-                      Cast vote for {p.title}
+                    <button className="btn btn-primary" disabled={cleared && !choice[p._id]}
+                      onClick={() => requireLogin(() => setConfirm({ position: p, candidate: p.candidates.find((c: any) => c._id === choice[p._id]) }))}>
+                      {cleared ? `Cast vote for ${p.title}` : `Sign in to vote for ${p.title}`}
                     </button>
                   </div>
                 )}
