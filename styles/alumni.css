@@ -346,10 +346,12 @@
 .lp-stats { display: grid; grid-template-columns: repeat(12, 1fr); gap: 8px; align-items: start; }
 .lp-stat { padding: 28px; display: flex; flex-direction: column; justify-content: space-between; }
 .lp-stat b { font: 700 clamp(3.5rem, 5.4vw, 5.75rem)/0.85 var(--lp-display); letter-spacing: -0.045em; font-variant-numeric: tabular-nums; }
-.lp-stat span { font-size: 1.05rem; max-width: 26ch; }
-.lp-stat--a { grid-column: 1 / 7; height: 70vh; min-height: 420px; background: var(--lp-gold); }
-.lp-stat--b { grid-column: 7 / 10; height: 44vh; min-height: 280px; margin-top: 14vh; background: var(--lp-green); color: var(--lp-on-green); }
-.lp-stat--c { grid-column: 10 / 13; height: 34vh; min-height: 230px; margin-top: 26vh; background: var(--lp-paper-2); }
+/* Caption only — the figure's own counter is a <span> inside <b> */
+.lp-stat > span { font-size: 1.05rem; max-width: 26ch; }
+/* All three tiles share row 1; the heading sits in the notch above the smaller two */
+.lp-stat--a { grid-column: 1 / 7; grid-row: 1; height: 70vh; min-height: 420px; background: var(--lp-gold); }
+.lp-stat--b { grid-column: 7 / 10; grid-row: 1; height: 44vh; min-height: 280px; margin-top: 14vh; background: var(--lp-green); color: var(--lp-on-green); }
+.lp-stat--c { grid-column: 10 / 13; grid-row: 1; height: 34vh; min-height: 230px; margin-top: 26vh; background: var(--lp-paper-2); }
 .lp-stats-head { grid-column: 7 / 13; grid-row: 1; align-self: start; font-size: clamp(1.75rem, 2.4vw, 2.25rem); max-width: 16ch; }
 .lp-stats-head + p { display: none; }
 @media (max-width: 900px) {
@@ -357,11 +359,11 @@
   .lp-stats-head { grid-column: 1 / -1; grid-row: auto; margin-bottom: 12px; }
   /* Phone: one tile per row, figure and its caption side by side */
   .lp-stats { grid-template-columns: 1fr; gap: 6px; }
-  .lp-stat--a, .lp-stat--b, .lp-stat--c { grid-column: 1 / -1; height: auto; min-height: 0; margin: 0; }
+  .lp-stat--a, .lp-stat--b, .lp-stat--c { grid-column: 1 / -1; grid-row: auto; height: auto; min-height: 0; margin: 0; }
   .lp-stat { padding: 22px 18px; flex-direction: row; align-items: center; justify-content: flex-start; gap: 18px; }
   .lp-stat--a { padding-top: 40px; padding-bottom: 40px; }
   .lp-stat b { font-size: 16vw; flex-shrink: 0; }
-  .lp-stat span { margin-left: auto; text-align: right; max-width: 22ch; }
+  .lp-stat > span { margin-left: auto; text-align: right; max-width: 22ch; }
   .lp-stat--b b, .lp-stat--c b { font-size: 12vw; }
 }
 
@@ -376,11 +378,11 @@
   grid-column: 1 / 9; position: relative; overflow: hidden;
 }
 .lp-cta-shield .shield {
-  position: absolute; left: -8%; bottom: -34%;
-  width: 104%; aspect-ratio: 1 / 1.12; background: var(--lp-gold);
+  position: absolute; left: 4%; bottom: -16%;
+  width: 82%; aspect-ratio: 1 / 1.12; background: var(--lp-gold);
   display: grid; place-items: center;
 }
-.lp-cta-shield img { width: 52%; margin-top: -18%; }
+.lp-cta-shield img { width: 46%; margin-top: -10%; }
 .lp-cta-text { grid-column: 9 / 13; align-self: center; position: relative; z-index: 1; padding: 48px var(--lp-margin) 48px 0; display: flex; flex-direction: column; gap: 22px; }
 .lp-cta-text h2 { font-size: clamp(2rem, 3vw, 2.6rem); max-width: 12ch; }
 .lp-cta-fact { font-size: 1.375rem; font-weight: 600; color: var(--lp-gold); }
@@ -389,7 +391,7 @@
   .lp-cta-text { grid-column: 1; padding: 48px 16px 24px; order: -1; }
   .lp-cta-text .lp-btn { width: 100%; }
   .lp-cta-shield { grid-column: 1; height: 55svh; }
-  .lp-cta-shield .shield { width: 130vw; left: -8%; bottom: -40%; }
+  .lp-cta-shield .shield { width: 96vw; left: 2vw; bottom: -22%; }
 }
 
 /* ── Footer: the mark, built large ───────────────────────────────── */

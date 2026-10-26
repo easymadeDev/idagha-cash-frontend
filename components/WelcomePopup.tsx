@@ -509,13 +509,13 @@ export default function WelcomePopup() {
         .wp-close {
           position: absolute; top: 12px; right: 12px; z-index: 2;
           width: 36px; height: 36px; border-radius: 50%;
-          border: 1px solid var(--border); background: rgba(15,61,34,0.04);
+          border: 1px solid var(--border); background: rgba(255,255,255,0.04);
           color: var(--text-3); font-size: 1.3rem; line-height: 1; cursor: pointer;
         }
         .wp-close:hover { color: var(--text-1); border-color: var(--border-mid); }
         .wp-drag-handle {
           width: 36px; height: 4px; border-radius: 99px;
-          background: rgba(15,61,34,0.18);
+          background: rgba(255,255,255,0.18);
           margin: 10px auto 18px;
         }
 
@@ -599,7 +599,7 @@ export default function WelcomePopup() {
         }
         .wp-input {
           width: 100%; padding: 13px 14px 13px 40px;
-          background: rgba(15,61,34,0.04); border: 1px solid var(--border-mid);
+          background: rgba(255,255,255,0.04); border: 1px solid var(--border-mid);
           border-radius: var(--radius-sm); color: var(--text-1);
           font-family: var(--font); font-size: 16px;
           outline: none; transition: all 0.2s var(--ease);

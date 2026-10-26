@@ -65,7 +65,7 @@ export default function ActivityTicker() {
             <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '0 28px' }}>
               <span style={{ width: 5, height: 5, borderRadius: '50%', background: item.dot, flexShrink: 0, display: 'inline-block' }} />
               <span style={{ fontSize: '0.75rem', color: item.color, fontWeight: 600 }}>{item.text}</span>
-              <span style={{ color: 'rgba(15,61,34,0.1)', marginLeft: 12 }}>|</span>
+              <span style={{ color: 'rgba(255,255,255,0.1)', marginLeft: 12 }}>|</span>
             </span>
           ))}
         </div>

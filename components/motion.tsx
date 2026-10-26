@@ -3,20 +3,39 @@ import { motion, useInView, useReducedMotion, animate } from 'framer-motion';
 
 export const EASE = [0.22, 1, 0.36, 1] as const;
 
-// Fade-and-rise as the block scrolls into view. Content renders visible
-// on the server; motion only adds the travel once hydrated.
+// True once the element has entered the viewport. Besides the observer, a check after
+// scrolling settles catches blocks that a fast phone flick carried past the observer.
+function useRevealed(ref: React.RefObject<HTMLElement>) {
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || shown) return;
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) setShown(true); }, { rootMargin: '0px 0px 12% 0px' });
+    io.observe(el);
+    let t: ReturnType<typeof setTimeout> | undefined;
+    const check = () => { clearTimeout(t); t = setTimeout(() => { if (el.getBoundingClientRect().top < window.innerHeight) setShown(true); }, 120); };
+    window.addEventListener('scroll', check, { passive: true });
+    check();
+    return () => { io.disconnect(); clearTimeout(t); window.removeEventListener('scroll', check); };
+  }, [ref, shown]);
+  return shown;
+}
+
+// Fade-and-rise as the block scrolls into view.
 export function Reveal({ children, delay = 0, y = 28, className, style, as = 'div' }: {
   children: React.ReactNode; delay?: number; y?: number; className?: string; style?: React.CSSProperties; as?: 'div' | 'section' | 'li';
 }) {
   const reduce = useReducedMotion();
+  const ref = useRef<HTMLElement>(null);
+  const shown = useRevealed(ref);
   const Tag: any = motion[as];
   return (
     <Tag
+      ref={ref}
       className={className}
       style={style}
       initial={reduce ? false : { opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '0px 0px -10% 0px' }}
+      animate={shown || reduce ? { opacity: 1, y: 0 } : undefined}
       transition={{ duration: 0.8, ease: EASE, delay }}
     >
       {children}
@@ -29,13 +48,15 @@ export function Stagger({ children, className, style, gap = 0.07 }: {
   children: React.ReactNode; className?: string; style?: React.CSSProperties; gap?: number;
 }) {
   const reduce = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const shown = useRevealed(ref);
   return (
     <motion.div
+      ref={ref}
       className={className}
       style={style}
       initial={reduce ? false : 'hide'}
-      whileInView="show"
-      viewport={{ once: true, margin: '0px 0px -8% 0px' }}
+      animate={shown || reduce ? 'show' : 'hide'}
       variants={{ hide: {}, show: { transition: { staggerChildren: gap } } }}
     >
       {children}
@@ -112,7 +133,9 @@ export function useAutoReveal(rootRef: React.RefObject<HTMLElement>, key: string
 
     const scan = () => {
       const fresh = Array.from(root.querySelectorAll<HTMLElement>(REVEAL_SELECTOR))
-        .filter((el) => !el.dataset.rv && !el.closest('.modal, .modal-overlay, .lightbox, [data-no-reveal]'));
+        .filter((el) => !el.dataset.rv && !el.closest('.modal, .modal-overlay, .lightbox, [data-no-reveal]'))
+        // Framer-animated blocks already carry an inline opacity: leave their motion to Framer
+        .filter((el) => !/opacity/.test(el.getAttribute('style') || ''));
       fresh.forEach((el, i) => {
         el.dataset.rv = '1';
         el.style.setProperty('--rv-i', String(i % 8));

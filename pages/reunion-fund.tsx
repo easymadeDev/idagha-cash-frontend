@@ -58,7 +58,7 @@ function MemberPaymentCard({ member, memberTarget, index }: { member: any; membe
 
       {/* Progress bar */}
       <div style={{ marginBottom: 8 }}>
-        <div style={{ height: 7, background: 'rgba(15,61,34,0.06)', borderRadius: 99, overflow: 'hidden' }}>
+        <div style={{ height: 7, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden' }}>
           <div style={{
             height: '100%', borderRadius: 99,
             width: `${pct}%`,
@@ -157,7 +157,7 @@ export default function ReunionFundPage() {
               { label: 'Completed', val: `${completedCount} members`, color: 'var(--green-400)' },
               { label: 'Contributing', val: `${paidCount} members`, color: 'var(--blue)' },
             ].map((item) => (
-              <div key={item.label} style={{ background: 'rgba(15,61,34,0.03)', borderRadius: 'var(--radius-sm)', padding: '14px 16px', border: '1px solid var(--border)' }}>
+              <div key={item.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 'var(--radius-sm)', padding: '14px 16px', border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: '0.7rem', fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'var(--text-3)', marginBottom: 6 }}>{item.label}</div>
                 <div style={{ fontFamily: 'var(--font-d)', fontSize: '1.15rem', fontWeight: 800, letterSpacing: '-0.02em', color: item.color }}>{item.val}</div>
               </div>
@@ -208,7 +208,7 @@ export default function ReunionFundPage() {
                   <span>Group completion</span>
                   <span>{Math.round((completedCount / totalExpected) * 100)}% of members fully paid</span>
                 </div>
-                <div style={{ height: 8, background: 'rgba(15,61,34,0.06)', borderRadius: 99, overflow: 'hidden' }}>
+                <div style={{ height: 8, background: 'rgba(255,255,255,0.06)', borderRadius: 99, overflow: 'hidden' }}>
                   <div style={{
                     height: '100%', borderRadius: 99,
                     width: `${Math.min(100, Math.round((completedCount / totalExpected) * 100))}%`,

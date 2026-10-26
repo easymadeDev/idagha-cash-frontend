@@ -246,7 +246,7 @@ export default function Home({ classPhotos = [] }: { classPhotos?: { src: string
                       </div>
                     )}
                   </div>
-                  <span style={{ fontWeight: 700, color: 'var(--brand)', fontVariantNumeric: 'tabular-nums' }}>{top}</span>
+                  <span style={{ fontWeight: 700, color: 'var(--green-400)', fontVariantNumeric: 'tabular-nums' }}>{top}</span>
                 </div>
               );
             })}

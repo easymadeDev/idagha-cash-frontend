@@ -203,15 +203,15 @@ export default function PledgesPage() {
               onClick={() => setAgreed(!agreed)}
               style={{
                 display: 'flex', alignItems: 'center', gap: 14, width: '100%',
-                background: agreed ? 'rgba(124,58,237,0.12)' : 'rgba(15,61,34,0.04)',
-                border: `2px solid ${agreed ? '#8a6408' : 'rgba(15,61,34,0.1)'}`,
+                background: agreed ? 'rgba(124,58,237,0.12)' : 'rgba(255,255,255,0.04)',
+                border: `2px solid ${agreed ? '#8a6408' : 'rgba(255,255,255,0.1)'}`,
                 borderRadius: 10, padding: '12px 14px', cursor: 'pointer',
                 textAlign: 'left', margin: '4px 0 20px', transition: 'all 0.15s',
               }}
             >
               <div style={{
                 width: 22, height: 22, borderRadius: 6, flexShrink: 0,
-                border: `2px solid ${agreed ? '#8a6408' : 'rgba(15,61,34,0.2)'}`,
+                border: `2px solid ${agreed ? '#8a6408' : 'rgba(255,255,255,0.2)'}`,
                 background: agreed ? '#8a6408' : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.15s',
@@ -346,7 +346,7 @@ const lbl: React.CSSProperties = {
 };
 
 const inp: React.CSSProperties = {
-  width: '100%', padding: '9px 12px', border: '1px solid rgba(15,61,34,0.12)',
+  width: '100%', padding: '9px 12px', border: '1px solid rgba(255,255,255,0.12)',
   borderRadius: 8, background: '#1f2937', color: '#f9fafb',
   fontSize: '.9rem', boxSizing: 'border-box',
 };

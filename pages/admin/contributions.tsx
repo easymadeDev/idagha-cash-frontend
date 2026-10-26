@@ -277,7 +277,7 @@ export default function AdminContributions() {
               <button key={cat} onClick={() => setFilterCat(cat)} style={{
                 padding: '6px 14px', borderRadius: 99, fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer',
                 border: active ? `1px solid ${meta?.color || 'rgba(22,101,52,0.5)'}` : '1px solid var(--border)',
-                background: active ? (meta?.bg || 'rgba(22,101,52,0.1)') : 'rgba(15,61,34,0.02)',
+                background: active ? (meta?.bg || 'rgba(22,101,52,0.1)') : 'rgba(255,255,255,0.02)',
                 color: active ? (meta?.color || 'var(--green-400)') : 'var(--text-3)',
                 transition: 'all 0.15s',
               }}>
@@ -609,7 +609,7 @@ export default function AdminContributions() {
                         {reunionRemaining > 0 ? formatNaira(reunionRemaining) : 'Fully paid ✓'}
                       </span>
                     </div>
-                    <div style={{ height: 5, borderRadius: 99, background: 'rgba(15,61,34,0.07)', overflow: 'hidden' }}>
+                    <div style={{ height: 5, borderRadius: 99, background: 'rgba(255,255,255,0.07)', overflow: 'hidden' }}>
                       <div style={{
                         height: '100%', borderRadius: 99,
                         background: reunionAlreadyPaid >= REUNION_TARGET ? 'var(--green-400)' : 'var(--yellow)',

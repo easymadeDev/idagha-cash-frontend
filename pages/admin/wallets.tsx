@@ -102,7 +102,7 @@ export default function AdminWallets() {
                         </div>
                         <span style={{
                           fontSize: '0.65rem', fontWeight: 700, padding: '2px 7px', borderRadius: 99,
-                          background: 'rgba(15,61,34,0.05)', color: 'var(--text-3)',
+                          background: 'rgba(255,255,255,0.05)', color: 'var(--text-3)',
                           border: '1px solid var(--border)', textTransform: 'capitalize',
                         }}>{w.type}</span>
                       </div>

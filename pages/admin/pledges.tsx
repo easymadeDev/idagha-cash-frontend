@@ -414,8 +414,8 @@ export default function AdminPledges() {
         .pa-btn:last-child { margin-left: auto; }
         .pa-green  { background: rgba(22,101,52,0.1); color: var(--green-400); border-color: rgba(22,101,52,0.25); }
         .pa-green:hover { background: rgba(22,101,52,0.18); }
-        .pa-ghost  { background: rgba(15,61,34,0.04); color: var(--text-2); border-color: var(--border); }
-        .pa-ghost:hover { background: rgba(15,61,34,0.08); color: var(--text-1); }
+        .pa-ghost  { background: rgba(255,255,255,0.04); color: var(--text-2); border-color: var(--border); }
+        .pa-ghost:hover { background: rgba(255,255,255,0.08); color: var(--text-1); }
         .pa-red    { width: 28px; padding: 5px; background: rgba(248,113,113,0.08); color: var(--red); border-color: rgba(248,113,113,0.2); border-radius: 6px; justify-content: center; flex-shrink: 0; }
         .pa-red:hover { background: rgba(248,113,113,0.18); }
 

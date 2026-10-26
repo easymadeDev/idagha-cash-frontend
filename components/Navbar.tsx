@@ -189,7 +189,7 @@ export default function Navbar() {
           transition: background 0.15s, color 0.15s, padding-left 0.25s;
         }
         .nav-dropdown a:hover { background: rgba(217,165,32,0.14); color: var(--brand); padding-left: 18px; }
-        .nav-dropdown a.on { font-weight: 700; color: var(--brand); background: rgba(15,61,34,0.07); }
+        .nav-dropdown a.on { font-weight: 700; color: var(--brand); background: rgba(255,255,255,0.07); }
         .nav-me {
           display: flex; align-items: center; gap: 8px; cursor: pointer;
           padding: 4px 12px 4px 4px; border-radius: 99px;
@@ -218,7 +218,7 @@ export default function Navbar() {
           .nav-mobile-group span { font-size: 0.85rem; font-weight: 600; color: var(--gold-deep); padding: 16px 14px 4px; }
           .nav-mobile-group a.active { background: var(--brand); }
           .nav-mobile-only { display: list-item !important; }
-          .nav-mobile-btn { display: flex !important; color: var(--brand); }
+          .nav-mobile-btn { display: flex !important; color: #fff; }
           .nav-me-name { display: none; }
         }
         @keyframes navSheet { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: none; } }

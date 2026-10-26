@@ -350,7 +350,7 @@ function MemberRow({ m, memberTarget, onNotify, notifying, onNotifyWa, waNotifyi
             )}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ flex: 1, height: 6, background: 'rgba(15,61,34,0.06)', borderRadius: 99 }}>
+            <div style={{ flex: 1, height: 6, background: 'rgba(255,255,255,0.06)', borderRadius: 99 }}>
               <div style={{ height: '100%', width: `${m.percentage}%`, borderRadius: 99, background: m.completed ? 'var(--green-500)' : 'linear-gradient(90deg, var(--red), #fb923c)', transition: 'width 0.6s' }} />
             </div>
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: m.completed ? 'var(--green-400)' : 'var(--red)', minWidth: 32 }}>{m.percentage}%</span>

@@ -685,7 +685,7 @@ export default function AdminMembers() {
                       style={{
                         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                         padding: '9px 12px', borderRadius: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
-                        border: notifyChannels.includes('email') ? '2px solid #3b82f6' : '2px solid rgba(15,61,34,0.1)',
+                        border: notifyChannels.includes('email') ? '2px solid #3b82f6' : '2px solid rgba(255,255,255,0.1)',
                         background: notifyChannels.includes('email') ? 'rgba(59,130,246,0.12)' : 'transparent',
                         color: notifyChannels.includes('email') ? '#93c5fd' : 'var(--text-3)',
                         transition: 'all 0.15s',
@@ -702,7 +702,7 @@ export default function AdminMembers() {
                       style={{
                         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
                         padding: '9px 12px', borderRadius: 8, cursor: 'pointer', fontSize: '0.85rem', fontWeight: 600,
-                        border: notifyChannels.includes('whatsapp') ? '2px solid #1b6a3d' : '2px solid rgba(15,61,34,0.1)',
+                        border: notifyChannels.includes('whatsapp') ? '2px solid #1b6a3d' : '2px solid rgba(255,255,255,0.1)',
                         background: notifyChannels.includes('whatsapp') ? 'rgba(22,101,52,0.1)' : 'transparent',
                         color: notifyChannels.includes('whatsapp') ? '#2f7d4f' : 'var(--text-3)',
                         transition: 'all 0.15s',
@@ -891,8 +891,8 @@ export default function AdminMembers() {
           cursor: pointer; border: 1px solid transparent; transition: all 0.15s; white-space: nowrap;
           font-family: var(--font); line-height: 1;
         }
-        .amca-edit    { flex: 1; background: rgba(15,61,34,0.04); color: var(--text-2); border-color: var(--border); }
-        .amca-edit:hover { background: rgba(15,61,34,0.08); color: var(--text-1); }
+        .amca-edit    { flex: 1; background: rgba(255,255,255,0.04); color: var(--text-2); border-color: var(--border); }
+        .amca-edit:hover { background: rgba(255,255,255,0.08); color: var(--text-1); }
         .amca-notify  { flex: 1; background: rgba(59,130,246,0.1); color: #93c5fd; border-color: rgba(59,130,246,0.25); }
         .amca-notify:hover { background: rgba(59,130,246,0.18); }
         .amca-merge   { flex: 1; background: rgba(196,181,253,0.1); color: #c4b5fd; border-color: rgba(196,181,253,0.25); }

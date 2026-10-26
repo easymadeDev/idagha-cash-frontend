@@ -334,7 +334,7 @@ export default function ProfilePage() {
         }
         .profile-banner::after {
           content: ''; position: absolute; inset: 0;
-          background: radial-gradient(circle at 70% 50%, rgba(15,61,34,0.06), transparent 60%);
+          background: radial-gradient(circle at 70% 50%, rgba(255,255,255,0.06), transparent 60%);
         }
         .profile-avatar {
           width: 86px; height: 86px; border-radius: 50%; overflow: hidden;

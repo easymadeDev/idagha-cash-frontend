@@ -2,20 +2,24 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 import useSWR from 'swr';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
-import { renderPoster } from '../lib/poster';
+import { formatNaira } from '../lib/api';
 import { CountUp } from '../components/motion';
 
-// Found pictures stand in until the class uploads its own to the gallery.
-// They show secondary-school life in Nigeria — never presented as Idagha's own.
-const FALLBACK_PHOTOS = [
-  { src: '/img/classroom-kwara.jpg', caption: 'A secondary school classroom in Kwara State, 2022' },
-  { src: '/img/student-kwara.jpg', caption: 'A student at a reading workshop in Kwara State, 2022' },
-];
+type Photo = { src: string; caption: string; focus: string };
 
 const GRAD_YEAR = 2018;
-const STRIPES = Array.from({ length: 40 });
+const STATEMENT =
+  'We wrote our last exam at Idagha Secondary School in 2018 and scattered across cities, campuses and jobs. ' +
+  'This is where the set comes back together: our reunions, our elections, our memories, and every naira accounted for.';
+
+export async function getStaticProps() {
+  const { getClassPhotos } = await import('../lib/classPhotos');
+  return { props: { classPhotos: getClassPhotos() } };
+}
 
 function useCountdown(target?: string) {
   const [now, setNow] = useState(() => Date.now());
@@ -25,544 +29,356 @@ function useCountdown(target?: string) {
     return () => clearInterval(t);
   }, [target]);
   if (!target) return null;
-  const diff = Math.max(0, new Date(target).getTime() - now);
-  return {
-    days: Math.floor(diff / 86400000),
-    hours: Math.floor((diff / 3600000) % 24),
-    minutes: Math.floor((diff / 60000) % 60),
-    seconds: Math.floor((diff / 1000) % 60),
-  };
+  const d = Math.max(0, new Date(target).getTime() - now);
+  return { days: Math.floor(d / 864e5), hours: Math.floor((d / 36e5) % 24), mins: Math.floor((d / 6e4) % 60), secs: Math.floor((d / 1e3) % 60) };
 }
 
-// Slow crossfade: one image at a time, holds ~5.5s, pauses when the tab is hidden
-function useCrossfade(count: number, hold = 5500) {
-  const [index, setIndex] = useState(0);
-  useEffect(() => {
-    if (count < 2) return;
-    if (typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const t = setInterval(() => { if (!document.hidden) setIndex((i) => (i + 1) % count); }, hold);
-    return () => clearInterval(t);
-  }, [count, hold]);
-  return [index, setIndex] as const;
-}
+const fmtDay = (d: string) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long' });
 
-// Splits a heading into words that rise one after another (each word clipped by its own box)
-function Words({ text, base = 0 }: { text: string; base?: number }) {
-  const words = text.split(' ');
-  return (
-    <>
-      {words.map((w, i) => (
-        <span key={i}>
-          <span className="w"><span className="wi" style={{ ['--w' as any]: i + base }}>{w}</span></span>
-          {i < words.length - 1 && ' '}
-        </span>
-      ))}
-    </>
-  );
-}
-
-const fmtDay = (d: string) =>
-  new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-const fmtShort = (d: string) => new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
-
-export async function getStaticProps() {
-  const { getClassPhotos } = await import('../lib/classPhotos');
-  return { props: { classPhotos: getClassPhotos() } };
-}
-
-export default function Landing({ classPhotos = [] }: { classPhotos?: { src: string; caption: string; focus: string }[] }) {
+export default function Landing({ classPhotos = [] }: { classPhotos?: Photo[] }) {
   const router = useRouter();
   const { cleared, ready, setGateOpen } = useGate();
-  const rootRef = useRef<HTMLDivElement>(null);
+  const root = useRef<HTMLDivElement>(null);
+  const crest = useRef<HTMLImageElement>(null);
 
   const { data: events } = useSWR('/api/events', fetcher);
   const { data: execs } = useSWR('/api/executives', fetcher);
   const { data: awards } = useSWR('/api/awards', fetcher);
   const { data: elections } = useSWR('/api/elections', fetcher);
-  const { data: gallery } = useSWR('/api/gallery?page=1', fetcher);
   const { data: memberCount } = useSWR('/api/members/count', fetcher);
+  const { data: stats } = useSWR('/api/stats/summary', fetcher);
 
-  // Our own photographs first (curated in public/img/class), then members' gallery
-  // uploads; the found stand-ins only when the class has nothing of its own yet
-  const photos = useMemo(() => {
-    const uploads = Array.isArray(gallery?.items)
-      ? gallery.items.slice(0, 6).map((p: any) => ({ src: p.image, caption: p.caption || p.album, focus: '50% 30%' }))
-      : [];
-    const own = [...classPhotos, ...uploads];
-    return own.length >= 2 ? own : [...own, ...FALLBACK_PHOTOS.map((p) => ({ ...p, focus: '50% 40%' }))];
-  }, [gallery, classPhotos]);
-  const usingFallback = classPhotos.length + (Array.isArray(gallery?.items) ? gallery.items.length : 0) < 2;
-
-  // The whole-class photo (first) anchors "Our story"; the tall hero shield starts with the close-ups
-  const heroPhotos = photos.length > 1 ? [...photos.slice(1), photos[0]] : photos;
-  const [heroIdx] = useCrossfade(heroPhotos.length);
-  const [frameIdx, setFrameIdx] = useCrossfade(photos.length, 3000);
-
-  const upcoming = useMemo(
-    () => (Array.isArray(events) ? events.filter((e: any) => new Date(e.endDate || e.date).getTime() > Date.now()) : []),
-    [events],
-  );
+  const photos: Photo[] = classPhotos.length ? classPhotos : [{ src: '/img/classroom-kwara.jpg', caption: '', focus: '50% 40%' }];
+  const group = photos[0];
+  const upcoming = useMemo(() => (Array.isArray(events) ? events.filter((e: any) => new Date(e.endDate || e.date).getTime() > Date.now()) : []), [events]);
   const next = upcoming[0];
   const clock = useCountdown(next?.date);
-
   const election = Array.isArray(elections) ? elections[0] : null;
-  const { data: electionDetail } = useSWR(election ? `/api/elections/${election._id}` : null, fetcher);
-
-  // Every aspirant's auto-generated poster, rotating on the elections plate
-  const [posters, setPosters] = useState<string[]>([]);
-  useEffect(() => {
-    const people: any[] = (electionDetail?.positions || []).flatMap((p: any) =>
-      (['voting', 'closed'].includes(electionDetail.status) ? p.candidates : p.aspirants || [])
-        .map((c: any) => ({ ...c, positionTitle: p.title })));
-    if (!people.length) { setPosters([]); return; }
-    let live = true;
-    Promise.all(people.slice(0, 12).map((c) => renderPoster({
-      photo: c.photo, name: c.memberName, band: 'VOTE', role: `for ${c.positionTitle}`,
-      slogan: c.slogan, footer: electionDetail.title,
-      badge: c.applicationStatus === 'cleared' ? 'CANDIDATE' : 'ASPIRANT',
-    }))).then((urls) => { if (live) setPosters(urls); }).catch(() => {});
-    return () => { live = false; };
-  }, [electionDetail]);
-  const [posterIdx] = useCrossfade(posters.length, 3200);
-  const [electTab, setElectTab] = useState<'positions' | 'how' | 'results'>('positions');
   const execList = Array.isArray(execs) ? execs : [];
   const awardList = Array.isArray(awards) ? awards : [];
+  const yearsOut = new Date().getFullYear() - GRAD_YEAR;
 
   const enterPortal = () => (cleared ? router.push('/home') : setGateOpen(true));
   const go = (href: string) => (cleared ? router.push(href) : (sessionStorage.setItem('idagha_redirect_after_login', href), setGateOpen(true)));
 
-  // Section entrances — content is visible without script; script adds the rise
+  // ── The crest tilts in 3D toward the pointer ──
   useEffect(() => {
-    const root = rootRef.current;
-    if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    root.classList.add('js-reveal');
-    const io = new IntersectionObserver((entries) => {
-      entries.forEach((en) => { if (en.isIntersecting) { en.target.classList.add('is-in'); io.unobserve(en.target); } });
-    }, { rootMargin: '0px 0px -8% 0px' });
-    root.querySelectorAll('.lp-rise, .lp-blocks, .lp-split').forEach((el) => io.observe(el));
-    return () => io.disconnect();
-  }, [events, execs, awards, elections]);
-
-  // Parallax: elements marked data-par drift against the scroll by their factor.
-  // Uses the CSS `translate` property so it never fights a reveal's `transform`.
-  useEffect(() => {
-    const root = rootRef.current;
-    if (!root || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    const els = Array.from(root.querySelectorAll<HTMLElement>('[data-par]'));
-    let raf = 0;
-    const tick = () => {
-      raf = 0;
-      const vh = window.innerHeight;
-      for (const el of els) {
-        const r = el.getBoundingClientRect();
-        if (r.bottom < -200 || r.top > vh + 200) continue;
-        const offset = (r.top + r.height / 2 - vh / 2) * Number(el.dataset.par);
-        el.style.translate = `0 ${offset.toFixed(1)}px`;
-      }
+    const el = crest.current;
+    if (!el || window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const rx = gsap.quickTo(el, 'rotationX', { duration: 0.8, ease: 'power3.out' });
+    const ry = gsap.quickTo(el, 'rotationY', { duration: 0.8, ease: 'power3.out' });
+    const onMove = (e: PointerEvent) => {
+      ry(((e.clientX / window.innerWidth) - 0.5) * 50);
+      rx(-((e.clientY / window.innerHeight) - 0.5) * 40);
     };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(tick); };
-    tick();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
-    return () => { window.removeEventListener('scroll', onScroll); window.removeEventListener('resize', onScroll); cancelAnimationFrame(raf); };
+    window.addEventListener('pointermove', onMove);
+    // Idle drift for touch screens, where there is no pointer to follow
+    const idle = gsap.to(el, { rotationY: 18, duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+    const stopIdle = () => idle.kill();
+    window.addEventListener('pointermove', stopIdle, { once: true });
+    return () => { window.removeEventListener('pointermove', onMove); idle.kill(); };
   }, []);
 
-  const yearsOut = new Date().getFullYear() - GRAD_YEAR;
+  // ── Hero entrance: plays once on load, never again when data arrives ──
+  useEffect(() => {
+    if (!root.current) return;
+    const ctx = gsap.context(() => {
+      gsap.from('.cx-hero-title .cx-line > span', { yPercent: 115, rotate: 4, duration: 1.3, ease: 'expo.out', stagger: 0.12, delay: 0.2 });
+      gsap.from('.cx-hero-sub, .cx-hero-ctas', { y: 40, opacity: 0, duration: 1.1, ease: 'expo.out', stagger: 0.12, delay: 0.7 });
+      gsap.from('.cx-crest-wrap', { scale: 0.3, opacity: 0, rotate: -120, duration: 1.6, ease: 'expo.out' });
+      gsap.from('.cx-hero-bg img', { scale: 1.35, duration: 2.4, ease: 'expo.out' });
+      gsap.from('.cx-nav', { y: -80, opacity: 0, duration: 1, ease: 'expo.out', delay: 0.3 });
+    }, root);
+    return () => ctx.revert();
+  }, []);
+
+  // ── Scroll choreography (rebuilt when data changes the page) ──
+  useEffect(() => {
+    if (!root.current) return;
+    gsap.registerPlugin(ScrollTrigger);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const ctx = gsap.context(() => {
+      if (reduce) return;
+
+      // Hero: pin and zoom through — the photo pushes in, the crest flies at the viewer
+      const heroTl = gsap.timeline({
+        scrollTrigger: { trigger: '.cx-hero', start: 'top top', end: '+=120%', scrub: 1, pin: true },
+      });
+      // Explicit start values: the entrance tweens may still be mid-flight when this is built,
+      // and a plain .to() would record their half-finished state as the start
+      const still = { immediateRender: false };
+      heroTl
+        .fromTo('.cx-hero-bg img', { scale: 1 }, { scale: 1.6, ease: 'none', ...still }, 0)
+        .fromTo('.cx-hero-bg', { opacity: 1 }, { opacity: 0.15, ease: 'none', ...still }, 0)
+        .fromTo('.cx-crest-wrap', { scale: 1, opacity: 1, rotate: 0 }, { scale: 4.5, opacity: 0, ease: 'power2.in', ...still }, 0)
+        .fromTo('.cx-hero-copy', { yPercent: 0, opacity: 1 }, { yPercent: -60, opacity: 0, ease: 'power1.in', ...still }, 0);
+
+      // Statement: words scrub from faint to full
+      gsap.fromTo('.cx-statement .cx-word', { opacity: 0.12 }, {
+        opacity: 1, stagger: 0.1, ease: 'none',
+        scrollTrigger: { trigger: '.cx-statement', start: 'top 75%', end: 'bottom 45%', scrub: true },
+      });
+
+      // Light sweep across big headings when they arrive
+      gsap.utils.toArray<HTMLElement>('.cx-sweep').forEach((h) => {
+        gsap.fromTo(h, { backgroundPosition: '200% 0' }, {
+          backgroundPosition: '-100% 0', duration: 2.2, ease: 'power2.inOut',
+          scrollTrigger: { trigger: h, start: 'top 85%' },
+        });
+        gsap.from(h, { y: 60, opacity: 0, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: h, start: 'top 88%' } });
+      });
+
+      // Accordion slices rise in sequence
+      gsap.from('.cx-slice', { y: 120, opacity: 0, duration: 1.2, ease: 'expo.out', stagger: 0.12, scrollTrigger: { trigger: '.cx-accordion', start: 'top 80%' } });
+
+      // 3D tunnel: class photos fly toward the viewer as you scroll
+      const items = gsap.utils.toArray<HTMLElement>('.cx-tunnel-item');
+      const DEPTH = 900;
+      const total = items.length * DEPTH + 1200;
+      const place = (p: number) => {
+        items.forEach((el, i) => {
+          const z = -i * DEPTH - 900 + p * total;
+          const fadeIn = gsap.utils.clamp(0, 1, (z + 4000) / 2200);
+          const fadeOut = gsap.utils.clamp(0, 1, (700 - z) / 500);
+          gsap.set(el, { z, opacity: Math.min(fadeIn, fadeOut), visibility: z > 700 ? 'hidden' : 'visible' });
+        });
+      };
+      gsap.set(items, { xPercent: -50, yPercent: -50 });
+      place(0);
+      ScrollTrigger.create({
+        trigger: '.cx-tunnel', start: 'top top', end: 'bottom bottom', scrub: true,
+        onUpdate: (self) => place(self.progress),
+      });
+      gsap.fromTo('.cx-tunnel-title', { scale: 0.6, opacity: 0 }, {
+        scale: 1, opacity: 1, ease: 'none',
+        scrollTrigger: { trigger: '.cx-tunnel', start: 'top 60%', end: 'top top', scrub: true },
+      });
+
+      // Executive split: title pinned, cards grow in and darken as they leave (desktop)
+      const mm = gsap.matchMedia();
+      mm.add('(min-width: 900px)', () => {
+        ScrollTrigger.create({ trigger: '.cx-split', start: 'top 15%', end: 'bottom 70%', pin: '.cx-split-title' });
+      });
+      gsap.utils.toArray<HTMLElement>('.cx-exec').forEach((card) => {
+        gsap.fromTo(card, { scale: 0.8, opacity: 0.2 }, { scale: 1, opacity: 1, ease: 'none', scrollTrigger: { trigger: card, start: 'top 95%', end: 'top 55%', scrub: true } });
+        gsap.to(card, { opacity: 0.25, scale: 0.94, ease: 'none', scrollTrigger: { trigger: card, start: 'bottom 30%', end: 'bottom 0%', scrub: true } });
+      });
+
+      // Stacking figure cards: each one settles and shrinks as the next arrives
+      const stack = gsap.utils.toArray<HTMLElement>('.cx-stack-card');
+      stack.forEach((card, i) => {
+        if (i === stack.length - 1) return;
+        // Covered cards shrink and dim but stay opaque, so numbers never show through
+        gsap.to(card, {
+          scale: 0.9 - (stack.length - i) * 0.02, filter: 'brightness(0.45)', ease: 'none',
+          scrollTrigger: { trigger: stack[i + 1], start: 'top bottom', end: 'top 20%', scrub: true },
+        });
+      });
+
+      // Closing call rises with the crest
+      gsap.from('.cx-cta-crest', { scale: 0.4, rotate: -90, opacity: 0, duration: 1.6, ease: 'expo.out', scrollTrigger: { trigger: '.cx-cta', start: 'top 70%' } });
+      gsap.from('.cx-foot-word span', { yPercent: 100, duration: 1.1, ease: 'expo.out', stagger: 0.06, scrollTrigger: { trigger: '.cx-foot-word', start: 'top 92%' } });
+    }, root);
+    return () => ctx.revert();
+  }, [execList.length, photos.length]);
+
+  // Refresh trigger positions once data has rendered and changed the page height
+  useEffect(() => { const t = setTimeout(() => ScrollTrigger.refresh(), 400); return () => clearTimeout(t); }, [events, execs, awards, elections]);
+
+  const tunnelSpots = [[-38, -18], [30, -24], [-26, 22], [36, 16], [-6, -30], [8, 26], [-40, 6], [40, -4], [-14, 30], [22, -12]];
+  const words = STATEMENT.split(' ');
+  const leader = (a: any) => a.winner || a.nominees?.[0];
 
   return (
-    <div className="lp" ref={rootRef}>
-      <Head>
-        <title>IDAGHA Class of 2018 — Alumni</title>
-      </Head>
+    <main className="cx" ref={root}>
+      <Head><title>IDAGHA Class of 2018 — Alumni</title></Head>
+      <div className="cx-grain" aria-hidden="true" />
 
-      {/* ── Navigation ── */}
-      <nav className="lp-nav" aria-label="Main">
-        <button className="lp-nav-brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-          <img src="/logo.png" alt="" width={40} height={40} />
-          <span>Idagha ’18</span>
+      {/* Floating glass navigation */}
+      <nav className="cx-nav" aria-label="Main">
+        <button className="cx-nav-brand" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+          <img src="/logo.png" alt="" width={34} height={34} /> Idagha ’18
         </button>
-        <ul className="lp-nav-links">
-          <li><a href="#story">Our story</a></li>
-          <li><a href="#reunions">Reunions</a></li>
-          <li><a href="#elections">Elections</a></li>
-          <li><a href="#awards">Awards</a></li>
-          <li><a href="#memories">Memories</a></li>
-        </ul>
-        <button className="lp-btn" onClick={enterPortal} disabled={!ready}>
-          {cleared ? 'Open the portal' : 'Members sign in'}
+        <div className="cx-nav-links">
+          <a href="#story">Story</a><a href="#together">Together</a><a href="#memories">Memories</a><a href="#executive">Executive</a>
+        </div>
+        <button className="cx-btn cx-btn--primary cx-btn--sm" onClick={enterPortal} disabled={!ready}>
+          {cleared ? 'Open portal' : 'Sign in'}
         </button>
       </nav>
 
-      {/* ── Hero: printed card beside the room ── */}
-      <header className="lp-hero">
-        <div className="lp-card">
-          <div className="lp-stripe" aria-hidden="true">{STRIPES.map((_, i) => <i key={i} style={{ ['--b' as any]: i }} />)}</div>
-          <div className="lp-card-body">
-            <img className="lp-crest" src="/logo.png" alt="IDAGHA Secondary School, Class of 2018 Alumni crest" width={190} height={190} />
-            <h1 className="lp-hero-title"><Words text="Idagha Class of 2018" /></h1>
-            <p className="lp-hero-sub">
-              The home of our set from Idagha Secondary School: reunions, elections, class awards,
-              our photographs, and every naira accounted for.
-            </p>
-            <div className="lp-hero-actions">
-              <button className="lp-btn lp-btn--gold" onClick={enterPortal} disabled={!ready}>
-                {cleared ? 'Go to the members’ portal' : 'Enter the members’ portal'}
-                <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.2" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
-              </button>
-            </div>
-            <div className="lp-hero-links">
-              <button className="lp-link" onClick={() => router.push('/register')}>Not registered? Join the set</button>
-              <a className="lp-link" href="#reunions">Next reunion</a>
-              <a className="lp-link" href="#executives">Executives</a>
+      {/* Attention: the cinematic hero */}
+      <section className="cx-hero" aria-labelledby="hero-h">
+        <div className="cx-hero-bg" aria-hidden="true">
+          <img src={group.src} alt="" style={{ objectPosition: group.focus }} />
+        </div>
+        <div className="cx-hero-wash" aria-hidden="true" />
+        <div className="cx-hero-inner">
+          <div className="cx-crest-wrap"><img ref={crest} className="cx-crest" src="/logo.png" alt="IDAGHA Secondary School crest" width={220} height={220} /></div>
+          <div className="cx-hero-copy">
+            <h1 id="hero-h" className="cx-hero-title">
+              <span className="cx-line"><span>Class of {GRAD_YEAR},</span></span>
+              <span className="cx-line"><span className="cx-gold">still one set.</span></span>
+            </h1>
+            <p className="cx-hero-sub">The home of the Idagha Secondary School class of {GRAD_YEAR}: reunions, elections, class awards, our photographs and our books.</p>
+            <div className="cx-hero-ctas">
+              <button className="cx-btn cx-btn--primary" onClick={enterPortal} disabled={!ready}>{cleared ? 'Open the portal' : 'Enter the portal'}</button>
+              <button className="cx-btn cx-btn--glass" onClick={() => router.push('/register')}>Join the set</button>
             </div>
           </div>
         </div>
+        <div className="cx-scroll-cue" aria-hidden="true"><span /></div>
+      </section>
 
-        <div className="lp-room" aria-label="Photographs">
-          <p className="lp-room-caption">{heroPhotos[heroIdx]?.caption}</p>
-          <div className="lp-room-shield shield lp-fade" data-par="-0.08">
-            {heroPhotos.map((p: any, i: number) => (
-              <img key={i} src={p.src} alt={p.caption || 'Class photograph'} className={i === heroIdx ? 'is-on' : ''} style={{ objectPosition: p.focus }} />
-            ))}
-          </div>
+      {/* Interest: a statement that writes itself as you scroll */}
+      <section className="cx-section cx-statement" id="story" aria-labelledby="story-h">
+        <h2 id="story-h" className="cx-kicker-title">
+          {yearsOut} years out
+          <span className="cx-inline-img" style={{ backgroundImage: `url(${photos[Math.min(1, photos.length - 1)].src})` }} aria-hidden="true" />
+          and counting
+        </h2>
+        <p className="cx-statement-text">
+          {words.map((w, i) => <span key={i} className="cx-word">{w}{' '}</span>)}
+        </p>
+      </section>
+
+      {/* Interest: a horizontal accordion of everything the set does together */}
+      <section className="cx-section" id="together" aria-labelledby="together-h">
+        <h2 id="together-h" className="cx-sweep cx-h2">Everything the set does, in one place</h2>
+        <div className="cx-accordion">
+          <button className="cx-slice" onClick={() => go(next ? `/events/${next._id}` : '/events')} style={{ backgroundImage: `url(${photos[Math.min(2, photos.length - 1)].src})` }}>
+            <span className="cx-slice-label">Reunions</span>
+            <span className="cx-slice-body">
+              <b>{next ? next.title : 'The next reunion is being planned'}</b>
+              <span>{next ? `${fmtDay(next.date)}${next.venue ? ` · ${next.venue}` : ''}` : 'The date goes up here as soon as it is confirmed.'}</span>
+              {clock && (
+                <span className="cx-clock">
+                  {[['d', clock.days], ['h', clock.hours], ['m', clock.mins], ['s', clock.secs]].map(([l, v]) => <i key={l as string}><b key={`${l}${v}`}>{v}</b>{l}</i>)}
+                </span>
+              )}
+              <em>RSVP now</em>
+            </span>
+          </button>
+          <button className="cx-slice" onClick={() => go(election ? `/elections/${election._id}` : '/elections')} style={{ backgroundImage: `url(${photos[Math.min(9, photos.length - 1)].src})` }}>
+            <span className="cx-slice-label">Elections</span>
+            <span className="cx-slice-body">
+              <b>{election ? election.title : 'Run for office, or choose who does'}</b>
+              <span>{election ? (election.status === 'voting' ? 'Voting is open: one vote per member, per position.' : election.status === 'forms' ? 'Nomination forms are on sale now.' : 'Results are published to every member.') : 'When the executive’s tenure ends, positions and form prices appear here.'}</span>
+              <em>{election?.status === 'voting' ? 'Cast your vote' : 'See the positions'}</em>
+            </span>
+          </button>
+          <button className="cx-slice" onClick={() => go('/awards')} style={{ backgroundImage: `url(${photos[Math.min(3, photos.length - 1)].src})` }}>
+            <span className="cx-slice-label">Class awards</span>
+            <span className="cx-slice-body">
+              <b>Best online. Best talker. Most active.</b>
+              <span>{awardList.length ? awardList.slice(0, 3).map((a: any) => `${a.title}: ${leader(a)?.memberName || 'open'}`).join(' · ') : 'Nominate a classmate and back the one who deserves it.'}</span>
+              <em>Nominate someone</em>
+            </span>
+          </button>
+          <button className="cx-slice" onClick={() => go('/finance')} style={{ backgroundImage: `url(${photos[Math.min(8, photos.length - 1)].src})` }}>
+            <span className="cx-slice-label">The books</span>
+            <span className="cx-slice-body">
+              <b>{stats ? formatNaira(stats.walletBalance || 0) : '—'} in our wallets</b>
+              <span>Every contribution and every expense is recorded and open to every member.</span>
+              <em>Open the books</em>
+            </span>
+          </button>
         </div>
-      </header>
+      </section>
 
-      {/* ── A moving band of our photographs ── */}
-      <div className="lp-marquee" aria-hidden="true">
-        <div className="lp-marquee-track">
-          {[...photos, ...photos].map((p: any, i: number) => (
-            <figure key={i} className="lp-marquee-item">
-              <img src={p.src} alt="" loading="lazy" style={{ objectPosition: p.focus }} />
-            </figure>
+      {/* Infinite marquee of giant type */}
+      <div className="cx-marquee" aria-hidden="true">
+        <div className="cx-marquee-track">
+          {Array.from({ length: 2 }).map((_, k) => (
+            <span key={k}>Idagha Secondary School <i>✦</i> Class of {GRAD_YEAR} <i>✦</i> Still one set <i>✦</i> Reunions <i>✦</i> Elections <i>✦</i> Memories <i>✦</i> </span>
           ))}
         </div>
       </div>
 
-      {/* ── Our story ── */}
-      <section className="lp-about" id="story" aria-labelledby="story-h">
-        <div>
-          <h2 id="story-h" className="lp-split"><Words text={`${yearsOut} years out, still one set`} /></h2>
-          <figure className="lp-about-photo shield lp-rise" style={{ ['--i' as any]: 2 }} data-par="0.06">
-            <img src={photos[0].src} alt={photos[0].caption} loading="lazy" style={{ objectPosition: photos[0].focus }} />
-          </figure>
-        </div>
-        <div className="lp-about-text">
-          <div className="lp-rise" style={{ ['--i' as any]: 1 }}>
-            <h3>Where we started</h3>
-            <p>
-              We wrote our final exams at Idagha Secondary School in {GRAD_YEAR}. Since then we have
-              scattered across cities, campuses and jobs, but the WhatsApp group never went quiet.
-            </p>
+      {/* Desire: a 3D tunnel of our photographs flying toward the viewer */}
+      <section className="cx-tunnel" id="memories" aria-labelledby="mem-h" style={{ height: `${Math.max(300, photos.length * 60)}vh` }}>
+        <div className="cx-tunnel-stage">
+          <div className="cx-tunnel-title">
+            <h2 id="mem-h" className="cx-h2">Our memories</h2>
+            <p>{photos.length} photographs from school days. Scroll through them.</p>
+            <button className="cx-btn cx-btn--glass" onClick={() => go('/gallery')}>Open the gallery</button>
           </div>
-          <div className="lp-rise" style={{ ['--i' as any]: 2 }}>
-            <h3>What this place is for</h3>
-            <p>
-              One verified register of the set. Our reunions and who is coming. Elections for the
-              executive, run openly. The awards we argue about. And the books, open to every member.
-            </p>
-          </div>
-          <div className="lp-rise" style={{ ['--i' as any]: 3 }}>
-            <button className="lp-btn lp-btn--gold" onClick={() => go('/about')}>Read about the association</button>
-            {usingFallback && <p className="lp-about-cap">{photos[0].caption}.</p>}
+          <div className="cx-tunnel-space">
+            {photos.map((p, i) => {
+              const [x, y] = tunnelSpots[i % tunnelSpots.length];
+              return (
+                <figure key={p.src} className="cx-tunnel-item" style={{ left: `calc(50% + ${x}vw)`, top: `calc(50% + ${y}vh)` }}>
+                  <img src={p.src} alt={p.caption} loading="lazy" style={{ objectPosition: p.focus }} />
+                  {p.caption && <figcaption>{p.caption}</figcaption>}
+                </figure>
+              );
+            })}
           </div>
         </div>
       </section>
 
-      {/* ── Reunions ── */}
-      <section className="lp-section lp-wrap" id="reunions" aria-labelledby="reunions-h">
-        <div className="lp-reunions-head lp-rise">
-          <h2 id="reunions-h" className="lp-h2 lp-split"><Words text="Reunions and gatherings" /></h2>
+      {/* Desire: pinned title, executives scroll past */}
+      <section className="cx-section cx-split" id="executive" aria-labelledby="exec-h">
+        <div className="cx-split-title">
+          <h2 id="exec-h" className="cx-h2 cx-sweep">The people running the set</h2>
+          <p>Elected by members, accountable to members. Past executives stay on record in the portal.</p>
+          <button className="cx-btn cx-btn--glass" onClick={() => go('/executives')}>Meet the executive</button>
         </div>
-
-        {next ? (
-          <div className="lp-next">
-            <div className="lp-next-main lp-rise">
-              <h3>{next.title}</h3>
-              <p className="lp-next-meta">{fmtDay(next.date)}{next.venue ? ` · ${next.venue}` : ''}</p>
-              {clock && (
-                <div className="lp-clock" aria-label="Time until the event">
-                  <div><b key={`d${clock.days}`}>{clock.days}</b><span>days</span></div>
-                  <div><b key={`h${clock.hours}`}>{clock.hours}</b><span>hours</span></div>
-                  <div><b key={`m${clock.minutes}`}>{clock.minutes}</b><span>minutes</span></div>
-                  <div><b key={`s${clock.seconds}`}>{clock.seconds}</b><span>seconds</span></div>
-                </div>
-              )}
-            </div>
-            <div className="lp-next-side lp-rise" style={{ ['--i' as any]: 1 }}>
-              <p className="lp-lead">
-                <strong>{next.rsvp?.going || 0} classmates</strong> have said they are coming
-                {next.rsvp?.headcount > next.rsvp?.going ? `, ${next.rsvp.headcount} people with guests` : ''}.
-              </p>
-              {next.fee > 0 && <p>Contribution: ₦{Number(next.fee).toLocaleString()} per member.</p>}
-              <div>
-                <button className="lp-btn" onClick={() => go(`/events/${next._id}`)}>RSVP for this reunion</button>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="lp-next">
-            <div className="lp-next-main lp-rise">
-              <h3>The next reunion is being planned</h3>
-              <p className="lp-next-meta">The date goes up here as soon as the executive confirms it.</p>
-            </div>
-            <div className="lp-next-side lp-rise">
-              <p>Every naira for the reunion is tracked in the Reunion Fund, open to all members.</p>
-              <div><button className="lp-btn" onClick={() => go('/reunion-fund')}>See the Reunion Fund</button></div>
-            </div>
-          </div>
-        )}
-
-        {upcoming.length > 1 && (
-          <div className="lp-events">
-            {upcoming.slice(1, 9).map((e: any, i: number) => (
-              <button key={e._id} className="lp-event lp-rise" style={{ ['--i' as any]: i % 2 }} onClick={() => go(`/events/${e._id}`)}>
-                <span className="lp-event-mark shield">
-                  {e.coverImage ? <img src={e.coverImage} alt="" loading="lazy" /> : initials(e.title)}
-                </span>
-                <span>
-                  <span className="lp-event-top"><strong>{e.title}</strong><span>{fmtShort(e.date)}</span></span>
-                  {e.description && <p>{e.description.length > 120 ? e.description.slice(0, 120) + '…' : e.description}</p>}
-                  {e.venue && <em>{e.venue}</em>}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* ── Elections ── */}
-      <section className="lp-elect" id="elections" aria-labelledby="elect-h">
-        <div className="lp-plate lp-rise">
-          {posters.length > 0 ? (
-            <div className="lp-fade" style={{ position: 'absolute', inset: 0 }}>
-              {posters.map((src, i) => (
-                <img key={i} src={src} alt="Campaign poster" className={i === posterIdx ? 'is-on' : ''} style={{ objectFit: 'contain' }} />
-              ))}
-            </div>
-          ) : (
-            <>
-              <div className="shield"><span>{election ? new Date(election.createdAt).getFullYear() : new Date().getFullYear()}</span></div>
-              <p className="lp-plate-cap">{election ? election.title : 'Executive elections'}</p>
-            </>
-          )}
-        </div>
-        <div className="lp-elect-text">
-          <div>
-            <h2 id="elect-h" className="lp-split"><Words text="Run for office, or choose who does" /></h2>
-            <div className="lp-tabs" role="tablist" aria-label="Elections" style={{ marginTop: 28 }}>
-              <button role="tab" aria-selected={electTab === 'positions'} onClick={() => setElectTab('positions')}>Positions</button>
-              <button role="tab" aria-selected={electTab === 'how'} onClick={() => setElectTab('how')}>How it works</button>
-              {election?.status === 'closed' && (
-                <button role="tab" aria-selected={electTab === 'results'} onClick={() => setElectTab('results')}>Results</button>
-              )}
-            </div>
-            {electTab === 'positions' && (
-              election && election.positions?.length ? (
-                <>
-                  <p className="lp-elect-body">
-                    {election.status === 'forms' && 'Nomination forms are on sale now. Pay by bank transfer, upload your receipt, and the Secretary confirms it.'}
-                    {election.status === 'screening' && 'Form sales have closed. Aspirants are being screened.'}
-                    {election.status === 'voting' && 'Voting is open. Every verified member gets one vote per position.'}
-                    {election.status === 'closed' && 'This election is over. The results are published for every member to see.'}
-                  </p>
-                  <ul className="lp-positions">
-                    {election.positions.map((p: any) => (
-                      <li key={p._id}>{p.title}<span>₦{Number(p.formPrice).toLocaleString()} form</span></li>
-                    ))}
-                  </ul>
-                </>
-              ) : (
-                <p className="lp-elect-body">
-                  No election is running right now. When the executive’s tenure ends, the positions and
-                  form prices will be listed here.
-                </p>
-              )
-            )}
-            {electTab === 'how' && (
-              <ol className="lp-steps">
-                <li>Buy a nomination form for the position you want, by bank transfer.</li>
-                <li>Upload your receipt. The Secretary confirms the payment.</li>
-                <li>Submit your manifesto and photo, then wait for screening.</li>
-                <li>Cleared candidates go on the ballot. Members vote once per position, online.</li>
-                <li>Results are published to every member when voting closes.</li>
-              </ol>
-            )}
-            {electTab === 'results' && election && (
-              <p className="lp-elect-body">The full count for every position is on the election page, open to all members.</p>
-            )}
-          </div>
-
-          <div className="lp-cells">
-            <button className="lp-btn" onClick={() => go(election ? `/elections/${election._id}` : '/elections')}>
-              {election?.status === 'voting' ? 'Cast your vote' : election?.status === 'forms' ? 'Buy a nomination form' : 'Go to elections'}
-            </button>
-            <button className="lp-btn lp-btn--tone" onClick={() => go('/executives')}>Meet the executive</button>
-          </div>
-        </div>
-      </section>
-
-      {/* ── Executives ── */}
-      <section className="lp-section lp-wrap" id="executives" aria-labelledby="exec-h">
-        <div className="lp-board">
-          <div className="lp-tile lp-tile--head lp-rise">
-            <h2 id="exec-h" className="lp-split"><Words text="Your executive" /></h2>
-            <p>Elected by members, accountable to members. Past executives are kept on record in the portal.</p>
-          </div>
+        <div className="cx-split-list">
           {execList.length === 0 ? (
-            <div className="lp-tile lp-rise" style={{ gridColumn: 'span 2' }}>
-              <strong>The executive list is on its way</strong>
-              <span>The Secretary will add each officer here with their role.</span>
-            </div>
-          ) : execList.slice(0, 10).map((x: any, i: number) => (
-            <div key={x._id} className="lp-tile lp-rise" style={{ ['--i' as any]: i % 4 }}>
-              <span>{x.position}</span>
-              <strong style={{ maxWidth: x.photo ? '60%' : undefined }}>{x.name}</strong>
-              {x.photo && <div className="lp-tile-photo shield"><img src={x.photo} alt={x.name} loading="lazy" /></div>}
+            <div className="cx-exec"><b>The executive list is on its way</b><span>The Secretary will add each officer here.</span></div>
+          ) : execList.slice(0, 8).map((x: any) => (
+            <div key={x._id} className="cx-exec">
+              <div className="cx-exec-face">{x.photo ? <img src={x.photo} alt={x.name} /> : initials(x.name)}</div>
+              <div><span>{x.position}</span><b>{x.name}</b></div>
             </div>
           ))}
         </div>
       </section>
 
-      {/* ── Class awards ── */}
-      <section className="lp-section lp-wrap" id="awards" aria-labelledby="awards-h">
-        <div className="lp-awards">
-          <div className="lp-awards-intro lp-rise">
-            <h2 id="awards-h" className="lp-h2 lp-split"><Words text="The class awards" /></h2>
-            <p className="lp-lead">
-              Best online. Best talker. Most active. Nominate a classmate, back the one you think deserves it,
-              and watch the board move.
-            </p>
-            <div><button className="lp-btn" onClick={() => go('/awards')}>Nominate a classmate</button></div>
-          </div>
-          <ul className="lp-awards-list">
-            {awardList.length === 0 ? (
-              <li className="lp-award lp-rise">
-                <div><h3>Categories open soon</h3><p>The Secretary sets the categories. Every member can nominate and support.</p></div>
-              </li>
-            ) : awardList.slice(0, 8).map((a: any, i: number) => {
-              const lead = a.winner || a.nominees?.[0];
-              return (
-                <li key={a._id} className={`lp-award lp-rise${a.winner ? ' lp-award--won' : ''}`} style={{ ['--i' as any]: i % 3 }}>
-                  <div>
-                    <h3>{a.title}</h3>
-                    <p>{a.nominees?.length || 0} nominated · {a.totalSupports || 0} supports</p>
-                  </div>
-                  <div className="lp-award-lead">
-                    {lead ? (
-                      <><b>{lead.memberName}</b><span>{a.winner ? 'Winner' : 'Leading'} · {lead.supports}</span></>
-                    ) : <span>No nominations yet</span>}
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
+      {/* Desire: figure cards that stack as you scroll */}
+      <section className="cx-section cx-stack" aria-labelledby="nums-h">
+        <h2 id="nums-h" className="cx-h2 cx-sweep">The set in numbers</h2>
+        <div className="cx-stack-card cx-stack-card--a">
+          <b>{memberCount?.count != null ? <CountUp value={memberCount.count} /> : '—'}</b>
+          <span>classmates verified on the register</span>
+        </div>
+        <div className="cx-stack-card cx-stack-card--b">
+          <b><CountUp value={yearsOut} /></b>
+          <span>years since our final exams</span>
+        </div>
+        <div className="cx-stack-card cx-stack-card--c">
+          <b><CountUp value={upcoming.length} /></b>
+          <span>gatherings on the calendar</span>
         </div>
       </section>
 
-      {/* ── Memories ── */}
-      <section className="lp-section lp-wrap" id="memories" aria-labelledby="mem-h">
-        <div className="lp-gallery">
-          <div>
-            <button className="lp-frame shield lp-fade" onClick={() => setFrameIdx((frameIdx + 1) % photos.length)} aria-label="Next photograph">
-              {photos.map((p: any, i: number) => (
-                <img key={i} src={p.src} alt={p.caption || 'Class photograph'} className={i === frameIdx ? 'is-on' : ''} loading="lazy" style={{ objectPosition: p.focus }} />
-              ))}
-            </button>
-            <p className="lp-frame-cap">{photos[frameIdx]?.caption}</p>
-          </div>
-          <div className="lp-gallery-text lp-rise">
-            <h2 id="mem-h" className="lp-h2 lp-split"><Words text="Our memories" /></h2>
-            <p className="lp-lead">
-              Assembly mornings, inter-house sports, the last day of WAEC, and every reunion since.
-              Members add their own photographs; the Secretary files them into albums.
-            </p>
-            <div><button className="lp-btn" onClick={() => go('/gallery')}>Open the gallery</button></div>
-          </div>
+      {/* Action: the closing call */}
+      <section className="cx-section cx-cta" aria-labelledby="cta-h">
+        <img className="cx-cta-crest" src="/logo.png" alt="" width={180} height={180} />
+        <h2 id="cta-h" className="cx-cta-title cx-sweep">Not on the register yet?</h2>
+        <p>Add your name, phone and photo. The Secretary confirms you, and the portal opens. Registration is free.</p>
+        <div className="cx-hero-ctas" style={{ justifyContent: 'center' }}>
+          <button className="cx-btn cx-btn--primary" onClick={() => router.push('/register')}>Register as a member</button>
+          <button className="cx-btn cx-btn--glass" onClick={enterPortal} disabled={!ready}>I’m already a member</button>
         </div>
       </section>
 
-      {/* ── The set in numbers ── */}
-      <section className="lp-section lp-wrap" aria-labelledby="nums-h">
-        <div className="lp-stats">
-          <h2 id="nums-h" className="lp-stats-head lp-split"><Words text="The set in numbers" /></h2>
-          <div className="lp-stat lp-stat--a lp-rise">
-            <b>{memberCount?.count != null ? <CountUp value={memberCount.count} /> : '—'}</b>
-            <span>classmates verified on the register</span>
-          </div>
-          <div className="lp-stat lp-stat--b lp-rise" style={{ ['--i' as any]: 1 }}>
-            <b><CountUp value={yearsOut} /></b>
-            <span>years since our final exams</span>
-          </div>
-          <div className="lp-stat lp-stat--c lp-rise" style={{ ['--i' as any]: 2 }}>
-            {gallery?.total ? (
-              <><b><CountUp value={gallery.total} /></b><span>photographs in the gallery</span></>
-            ) : (
-              <><b><CountUp value={upcoming.length} /></b><span>gatherings on the calendar</span></>
-            )}
-          </div>
+      <footer className="cx-footer">
+        <div className="cx-foot-word" aria-label="Idagha 2018">
+          {'IDAGHA’18'.split('').map((c, i) => <span key={i}>{c}</span>)}
         </div>
-      </section>
-
-      {/* ── Closing call ── */}
-      <section className="lp-cta" aria-labelledby="cta-h">
-        <div className="lp-cta-shield" aria-hidden="true">
-          <div className="shield" data-par="0.1"><img src="/logo.png" alt="" /></div>
+        <div className="cx-foot-cols">
+          <div><b>The set</b><button onClick={() => go('/members')}>Members</button><button onClick={() => go('/executives')}>Executives</button><button onClick={() => go('/about')}>About</button></div>
+          <div><b>Together</b><button onClick={() => go('/events')}>Reunions</button><button onClick={() => go('/gallery')}>Gallery</button><button onClick={() => go('/awards')}>Class awards</button></div>
+          <div><b>Decide</b><button onClick={() => go('/elections')}>Elections</button><button onClick={() => go('/finance')}>The books</button></div>
+          <div><b>Questions</b><span>Message the Secretary in the class WhatsApp group.</span></div>
         </div>
-        <div className="lp-cta-text">
-          <h2 id="cta-h" className="lp-split"><Words text="Not on the register yet?" /></h2>
-          <p>Add your name, phone and photo. The Secretary confirms you, and the portal opens.</p>
-          <p className="lp-cta-fact">Registration is free.</p>
-          <div><button className="lp-btn lp-btn--gold" onClick={() => router.push('/register')}>Register as a member</button></div>
-        </div>
-      </section>
-
-      {/* ── Footer ── */}
-      <footer className="lp-footer">
-        <div className="lp-blocks" aria-label="Idagha 2018">
-          {'IDAGHA'.split('').map((c, i) => <span key={i} style={{ height: `${[100, 78, 92, 66, 86, 72][i]}%`, ['--k' as any]: i }}>{c}</span>)}
-          <span className="lp-blocks-gap" />
-          {'18'.split('').map((c, i) => <span key={`y${i}`} style={{ height: `${[96, 82][i]}%`, ['--k' as any]: i + 7 }}>{c}</span>)}
-        </div>
-        <div className="lp-footer-cols">
-          <div className="lp-footer-links">
-            <div><h3>The set</h3><ul>
-              <li><button onClick={() => go('/members')}>Members</button></li>
-              <li><button onClick={() => go('/executives')}>Executives</button></li>
-              <li><button onClick={() => go('/about')}>About</button></li>
-            </ul></div>
-            <div><h3>Together</h3><ul>
-              <li><button onClick={() => go('/events')}>Reunions</button></li>
-              <li><button onClick={() => go('/gallery')}>Gallery</button></li>
-              <li><button onClick={() => go('/awards')}>Class awards</button></li>
-            </ul></div>
-            <div><h3>Decide</h3><ul>
-              <li><button onClick={() => go('/elections')}>Elections</button></li>
-              <li><button onClick={() => go('/executives')}>Past executives</button></li>
-            </ul></div>
-            <div><h3>The books</h3><ul>
-              <li><button onClick={() => go('/contributions')}>Contributions</button></li>
-              <li><button onClick={() => go('/expenses')}>Expenses</button></li>
-              <li><button onClick={() => go('/reports')}>Reports</button></li>
-            </ul></div>
-          </div>
-          <div className="lp-footer-contact">
-            <p><strong>IDAGHA Secondary School</strong>Class of {GRAD_YEAR} Alumni Association</p>
-            <p><strong>Questions?</strong>Message the Secretary in the class WhatsApp group.</p>
-          </div>
-        </div>
-        <div className="lp-footer-base">
+        <div className="cx-foot-base">
           <span>© {new Date().getFullYear()} IDAGHA Class of {GRAD_YEAR} Alumni</span>
-          <button className="lp-btn lp-btn--paper" onClick={() => router.push('/admin')}>Secretary login</button>
+          <button onClick={() => router.push('/admin')}>Secretary login</button>
         </div>
-        {usingFallback && (
-          <p className="lp-credits">
-            Photographs: “Reading Wikipedia in the Classroom for Secondary School Students 59” and “… 02” by James Rhoda,{' '}
-            <a href="https://creativecommons.org/licenses/by-sa/4.0" target="_blank" rel="noreferrer">CC BY-SA 4.0</a>, via{' '}
-            <a href="https://commons.wikimedia.org/wiki/File:Reading_Wikipedia_in_the_Classroom_for_Secondary_School_Students_59.jpg" target="_blank" rel="noreferrer">Wikimedia Commons</a>.
-          </p>
-        )}
       </footer>
-    </div>
+    </main>
   );
 }

@@ -62,7 +62,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
 
         {/* Drag handle */}
         <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 10, paddingBottom: 2, flexShrink: 0 }}>
-          <div style={{ width: 36, height: 4, borderRadius: 99, background: 'rgba(15,61,34,0.12)' }} />
+          <div style={{ width: 36, height: 4, borderRadius: 99, background: 'rgba(255,255,255,0.12)' }} />
         </div>
 
         {/* Header */}
@@ -86,7 +86,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
             </div>
             <button onClick={onClose} style={{
               width: 32, height: 32, borderRadius: '50%', border: '1px solid var(--border)',
-              background: 'rgba(15,61,34,0.04)', cursor: 'pointer', color: 'var(--text-3)',
+              background: 'rgba(255,255,255,0.04)', cursor: 'pointer', color: 'var(--text-3)',
               display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '1.2rem', flexShrink: 0, marginLeft: 8,
             }}>×</button>
           </div>
@@ -105,7 +105,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
                   { label: 'Spent',   val: formatNaira(ws.spent),   col: 'var(--red)' },
                 ]
             ).map(s => (
-              <div key={s.label} style={{ background: 'rgba(15,61,34,0.03)', borderRadius: 9, padding: '9px 10px', border: '1px solid var(--border)' }}>
+              <div key={s.label} style={{ background: 'rgba(255,255,255,0.03)', borderRadius: 9, padding: '9px 10px', border: '1px solid var(--border)' }}>
                 <div style={{ fontSize: '0.6rem', color: 'var(--text-3)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 3 }}>{s.label}</div>
                 <div style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: 'clamp(0.72rem,2.5vw,0.95rem)', color: s.col, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{s.val}</div>
               </div>
@@ -130,7 +130,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
                     <div key={p._id} style={{
                       display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                       padding: '9px 12px', borderRadius: 9,
-                      background: 'rgba(15,61,34,0.02)', border: '1px solid var(--border)', gap: 8,
+                      background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)', gap: 8,
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
                         <div style={{
@@ -176,7 +176,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
                   <div key={name} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '9px 12px', borderRadius: 9,
-                    background: 'rgba(15,61,34,0.02)', border: '1px solid var(--border)',
+                    background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)',
                     gap: 8,
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
@@ -217,7 +217,7 @@ function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
                   <div key={tx._id} style={{
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between',
                     padding: '9px 12px', borderRadius: 9,
-                    background: 'rgba(15,61,34,0.015)', border: '1px solid var(--border)',
+                    background: 'rgba(255,255,255,0.015)', border: '1px solid var(--border)',
                     gap: 8,
                   }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0 }}>
@@ -592,7 +592,7 @@ export default function FinanceOverview() {
                 Every contribution, expense & new member — fully transparent
               </p>
             </div>
-            <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', background: 'rgba(15,61,34,0.03)', border: '1px solid var(--border)', borderRadius: 8, padding: '5px 12px' }}>
+            <div style={{ fontSize: '0.78rem', color: 'var(--text-3)', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border)', borderRadius: 8, padding: '5px 12px' }}>
               {activityFeed.length} recent events
             </div>
           </div>

@@ -286,7 +286,7 @@ export default function ContributionsPage() {
                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
                         padding: '16px', borderRadius: 'var(--radius-sm)', cursor: 'pointer',
                         border: `2px dashed ${receiptPreview ? 'rgba(22,101,52,0.5)' : 'var(--border)'}`,
-                        background: receiptPreview ? 'rgba(22,101,52,0.05)' : 'rgba(15,61,34,0.02)',
+                        background: receiptPreview ? 'rgba(22,101,52,0.05)' : 'rgba(255,255,255,0.02)',
                         fontSize: '0.82rem', color: 'var(--text-3)', flexDirection: receiptPreview ? 'column' : 'row',
                       }}>
                         {receiptPreview ? (

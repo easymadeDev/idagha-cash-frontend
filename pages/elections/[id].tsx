@@ -28,7 +28,7 @@ function Stages({ status }: { status: string }) {
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 6, margin: '18px 0 28px' }}>
       {ELECTION_STAGES.map((s, i) => (
         <div key={s} style={{ textAlign: 'center' }}>
-          <div style={{ height: 6, borderRadius: 99, background: i <= at ? 'var(--green-500)' : 'rgba(15,61,34,0.08)' }} />
+          <div style={{ height: 6, borderRadius: 99, background: i <= at ? 'var(--green-500)' : 'rgba(255,255,255,0.08)' }} />
           <div style={{ fontSize: '0.72rem', marginTop: 6, color: i === at ? 'var(--green-400)' : 'var(--text-3)', fontWeight: i === at ? 700 : 500 }}>
             {STATUS_INFO[s].label}
           </div>
@@ -239,7 +239,7 @@ export default function ElectionDetail() {
                 const canApply = f.paymentStatus === 'approved' && ['none', 'submitted'].includes(f.applicationStatus)
                   && ['forms', 'screening'].includes(el.status);
                 return (
-                  <div key={f._id} style={{ padding: 16, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'rgba(15,61,34,0.02)' }}>
+                  <div key={f._id} style={{ padding: 16, borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', background: 'rgba(255,255,255,0.02)' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
                       <div>
                         <div style={{ fontWeight: 800 }}>{f.positionTitle}</div>
