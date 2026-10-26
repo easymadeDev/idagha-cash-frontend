@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { useGate } from '../lib/gate';
+import { RETURN_AFTER_APPROVAL, describePath } from '../lib/requireLogin';
 
 
 type Step = 'pin' | 'question' | 'verify' | 'found' | 'notfound';
@@ -134,8 +135,11 @@ export default function WelcomePopup() {
         });
         setCleared(true);
         setStep('found');
-        const intended = sessionStorage.getItem('idagha_redirect_after_login');
+        // Where to go: this visit's intended page, or the page saved when they registered
+        // (kept until their first approved sign-in, since approval can take days)
+        const intended = sessionStorage.getItem('idagha_redirect_after_login') || localStorage.getItem(RETURN_AFTER_APPROVAL);
         sessionStorage.removeItem('idagha_redirect_after_login');
+        if (!data.pending) localStorage.removeItem(RETURN_AFTER_APPROVAL);
         // Pending members go to /profile so they can complete their details
         const dest = data.pending ? '/profile' : (intended && intended !== '/' ? intended : '/home');
         setTimeout(() => dismiss(dest), 1800);
@@ -156,6 +160,9 @@ export default function WelcomePopup() {
   };
 
   if (!visible) return null;
+
+  // Set when the popup was opened by an action on a public page (see lib/requireLogin)
+  const actionFrom = typeof window !== 'undefined' ? sessionStorage.getItem('idagha_redirect_after_login') : null;
 
   const popupClass = `wp-popup${animOut ? ' wp-popup-out' : ' wp-popup-in'}`;
 
@@ -241,6 +248,12 @@ export default function WelcomePopup() {
               This is the members’ home of the{' '}
               <strong>IDAGHA Secondary School Class of 2018 Alumni</strong>. Are you a registered member?
             </p>
+            {actionFrom && (
+              <p className="wp-sub" style={{ marginTop: -6 }}>
+                Only registered members can buy forms, vote, nominate or RSVP. Sign in and you’ll come straight back to {describePath(actionFrom)}.
+                Not registered yet? Register first: once the Secretary approves you, you can do it.
+              </p>
+            )}
             <div className="wp-actions">
               <button className="wp-btn-yes" onClick={() => setStep('verify')}>
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">

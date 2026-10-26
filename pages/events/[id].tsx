@@ -5,6 +5,8 @@ import Layout from '../../components/Layout';
 import { useToast } from '../../components/Toast';
 import { fetcher, memberFetcher, memberApi, errorMessage, initials } from '../../lib/member';
 import { formatNaira } from '../../lib/api';
+import { useGate } from '../../lib/gate';
+import { useRequireLogin } from '../../lib/requireLogin';
 
 function Countdown({ to }: { to: string }) {
   const [now, setNow] = useState(Date.now());
@@ -29,7 +31,10 @@ export default function EventDetail() {
   const id = router.query.id as string | undefined;
   const key = id ? `/api/events/${id}` : null;
   const { data: e, error } = useSWR(key, fetcher);
-  const { data: mine } = useSWR(id ? `/api/events/${id}/my-rsvp` : null, memberFetcher);
+  const { cleared } = useGate();
+  const requireLogin = useRequireLogin();
+  // the event is public; your own RSVP loads once signed in
+  const { data: mine } = useSWR(id && cleared ? `/api/events/${id}/my-rsvp` : null, memberFetcher);
   const [guests, setGuests] = useState(0);
   const [saving, setSaving] = useState('');
 
@@ -119,13 +124,15 @@ export default function EventDetail() {
                     </select>
                   </div>
                   <div style={{ display: 'grid', gap: 8 }}>
-                    <button className="btn btn-primary" disabled={!!saving || full} onClick={() => respond('going')}>
-                      {saving === 'going' ? 'Saving…' : full ? 'Fully booked' : mine?.status === 'going' ? 'Update — I’m going' : 'I’m going'}
+                    <button className="btn btn-primary" disabled={!!saving || full} onClick={() => requireLogin(() => respond('going'))}>
+                      {saving === 'going' ? 'Saving…' : full ? 'Fully booked' : !cleared ? 'Sign in to RSVP' : mine?.status === 'going' ? 'Update — I’m going' : 'I’m going'}
                     </button>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      <button className="btn btn-ghost" disabled={!!saving} onClick={() => respond('maybe')}>Maybe</button>
-                      <button className="btn btn-ghost" disabled={!!saving} onClick={() => respond('not_going')}>Can’t make it</button>
-                    </div>
+                    {cleared && (
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                        <button className="btn btn-ghost" disabled={!!saving} onClick={() => respond('maybe')}>Maybe</button>
+                        <button className="btn btn-ghost" disabled={!!saving} onClick={() => respond('not_going')}>Can’t make it</button>
+                      </div>
+                    )}
                   </div>
                 </>
               )}

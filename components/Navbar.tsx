@@ -145,7 +145,7 @@ export default function Navbar() {
           })}
 
           {/* signed-out visitors can still browse the public pages */}
-          {ready && !cleared && [['Elections', '/elections'], ['Class awards', '/awards']].map(([label, href]) => (
+          {ready && !cleared && [['Events', '/events'], ['Elections', '/elections'], ['Class awards', '/awards']].map(([label, href]) => (
             <li key={href}>
               <a className={router.pathname.startsWith(href) ? 'active' : ''} onClick={() => navigate(href)} style={{ cursor: 'pointer' }}>
                 {router.pathname.startsWith(href) && <motion.span layoutId="nav-pill" className="nav-pill" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}

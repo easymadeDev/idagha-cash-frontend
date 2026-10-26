@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/router';
 import { useToast } from '../components/Toast';
 import { useGate } from '../lib/gate';
+import { RETURN_AFTER_APPROVAL, describePath } from '../lib/requireLogin';
 
 const BACKEND = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000/api';
 
@@ -23,6 +24,7 @@ export default function RegisterPage() {
   const [photoPreview, setPhotoPreview] = useState('');
   const [saving, setSaving] = useState(false);
   const [done, setDone] = useState(false);
+  const [returnTo, setReturnTo] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
 
   const f = (field: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) =>
@@ -60,7 +62,11 @@ export default function RegisterPage() {
         res = await fetch(`${BACKEND}/members/register`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ ...form, ...(photoBase64 ? { photo: photoBase64 } : {}) }),
+          // leave blank optional fields out: the API rejects an empty email as "not an email"
+          body: JSON.stringify({
+            ...Object.fromEntries(Object.entries(form).filter(([, v]) => v !== '')),
+            ...(photoBase64 ? { photo: photoBase64 } : {}),
+          }),
         });
       } catch {
         throw new Error('Network error — could not reach the server. Check your connection.');
@@ -85,6 +91,13 @@ export default function RegisterPage() {
           sessionStorage.setItem('idagha_member_token', member.member_token);
           localStorage.setItem('idagha_member_token', member.member_token);
         }
+      }
+      // If they came here from an action (buy form, vote, nominate, RSVP), remember that page across
+      // sessions: approval can take days, and their first sign-in afterwards should bring them back to it
+      const intended = sessionStorage.getItem('idagha_redirect_after_login');
+      if (intended && intended !== '/') {
+        localStorage.setItem(RETURN_AFTER_APPROVAL, intended);
+        setReturnTo(intended);
       }
       setCleared(true);
       if (member._id) {
@@ -115,6 +128,15 @@ export default function RegisterPage() {
             <p style={{ color: 'var(--text-3)', lineHeight: 1.8, marginBottom: 24, fontSize: '0.95rem' }}>
               Thank you, <strong style={{ color: 'var(--text-1)' }}>{form.name}</strong>! Your registration is pending approval by the Secretary.
             </p>
+            {returnTo && (
+              <div className="alert alert-success" style={{ textAlign: 'left', flexDirection: 'column', gap: 10 }}>
+                <span>
+                  Buying forms, voting, nominating and RSVPs open up once the Secretary approves you.
+                  After approval, sign in and you’ll be taken straight back to <strong>{describePath(returnTo)}</strong>.
+                </span>
+                <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => router.push(returnTo)}>Back to {describePath(returnTo)}</button>
+              </div>
+            )}
 
             <div style={{ background: 'rgba(37,211,102,0.06)', border: '1px solid rgba(37,211,102,0.25)', borderRadius: 16, padding: '20px 24px', marginBottom: 24, textAlign: 'left' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
