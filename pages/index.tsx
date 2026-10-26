@@ -8,7 +8,7 @@ import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
 import { formatNaira } from '../lib/api';
 import { CountUp } from '../components/motion';
-import GlassHome from '../components/GlassHome';
+import GlassLanding from '../components/GlassLanding';
 import { useSkin } from '../lib/skin';
 
 type Photo = { src: string; caption: string; focus: string };
@@ -101,10 +101,10 @@ function LedgerArt() {
 
 const fmtDay = (d: string) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long' });
 
-// In the glass skin the landing page is the glass dashboard
+// In the glass skin the landing page is the glass landing
 export default function Landing(props: { classPhotos?: Photo[] }) {
   const [skin] = useSkin();
-  return skin === 'glass' ? <GlassHome classPhotos={props.classPhotos} /> : <CinematicLanding {...props} />;
+  return skin === 'glass' ? <GlassLanding classPhotos={props.classPhotos} /> : <CinematicLanding {...props} />;
 }
 
 function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
