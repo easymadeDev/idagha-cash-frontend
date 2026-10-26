@@ -229,6 +229,9 @@ tbody tr:hover td { background: rgba(47,210,122,0.06); }
   transition: background-color 0.3s, border-color 0.3s;
 }
 .navbar.scrolled { background: rgba(8,15,11,0.82); border-color: var(--border-mid); }
+/* `translate` (not transform) so it composes with the drop-in animation's transform */
+.navbar { transition: background-color 0.3s, border-color 0.3s, translate 0.45s var(--ease); }
+.navbar.nav-hidden { translate: 0 -140%; }
 @keyframes navDropIn { from { transform: translate(-50%, -140%); } to { transform: translate(-50%, 0); } }
 .nav-inner { max-width: none; padding: 0 10px 0 18px; }
 .nav-logo-img { filter: drop-shadow(0 0 12px rgba(47,210,122,0.5)); animation: none; transition: transform 0.5s var(--ease); }
@@ -287,6 +290,23 @@ tbody tr:hover td { background: rgba(47,210,122,0.06); }
 .admin-user-role { color: var(--text-3); }
 .admin-user-avatar { background: var(--gold); color: #101a12; }
 .admin-content { background: transparent; }
+
+/* ── Scroll progress line (components/SmoothScroll) ── */
+.scroll-progress {
+  position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 10000; pointer-events: none;
+  transform: scaleX(0); transform-origin: left center;
+  background: linear-gradient(90deg, #12854a, #2fd27a 60%, #f0c445);
+  box-shadow: 0 0 14px rgba(47,210,122,0.9), 0 0 4px rgba(240,196,69,0.8);
+}
+
+/* Portal: tiles and cards lean slightly with scroll speed, then settle (--scroll-v from SmoothScroll) */
+.hm-tile, .event-card, .exec-card, .award-card, .contrib-card { rotate: calc(var(--scroll-v, 0) * 0.9deg); }
+.page-header h1, .hm-greet h1, .fin-hero h1 { translate: 0 calc(var(--scroll-v, 0) * -8px); }
+@media (prefers-reduced-motion: reduce) {
+  .hm-tile, .event-card, .exec-card, .award-card, .contrib-card { rotate: none; }
+  .page-header h1, .hm-greet h1, .fin-hero h1 { translate: none; }
+  .scroll-progress { display: none; }
+}
 
 /* ── Motion: scroll reveal applied by the Layout to cards site-wide ── */
 .rv { opacity: 0; transform: translateY(70px) rotateX(8deg) scale(0.94); transform-origin: 50% 100%; }

@@ -5,6 +5,11 @@ import '../styles/globals.css';
 import '../styles/alumni.css';
 import '../styles/theme.css';
 import '../styles/cine.css';
+import 'lenis/dist/lenis.css';
+import '../styles/glass.css';
+import '../styles/skin-glass.css';
+import { SkinSwitch } from '../lib/skin';
+import SmoothScroll from '../components/SmoothScroll';
 import WelcomePopup from '../components/WelcomePopup';
 import WhatsAppPrompt from '../components/WhatsAppPrompt';
 import { GateContext, SessionMember } from '../lib/gate';
@@ -134,6 +139,8 @@ export default function App({ Component, pageProps }: AppProps) {
             </clipPath>
           </defs>
         </svg>
+        <SmoothScroll />
+        <SkinSwitch />
         <WelcomePopup />
         <WhatsAppPrompt />
         <Component {...pageProps} />

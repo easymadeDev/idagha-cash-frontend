@@ -76,6 +76,8 @@
   background: rgba(10, 18, 13, 0.55); box-shadow: inset 0 0 0 1px var(--cx-line), 0 20px 50px -20px rgba(0, 0, 0, 0.8);
   backdrop-filter: blur(18px) saturate(1.4); -webkit-backdrop-filter: blur(18px) saturate(1.4);
 }
+.cx-nav { transition: translate 0.45s var(--cx-ease); }
+.cx-nav.is-hidden { translate: 0 -140%; }
 .cx-nav-brand { display: flex; align-items: center; gap: 10px; background: none; border: 0; color: #fff; cursor: pointer; font: 800 1.15rem var(--cx-display); letter-spacing: -0.02em; }
 .cx-nav-links { display: flex; gap: 6px; }
 .cx-nav-links a { color: var(--cx-soft); text-decoration: none; font-weight: 600; font-size: 0.95rem; padding: 8px 14px; border-radius: 999px; transition: color 0.2s, background-color 0.2s; }
@@ -164,6 +166,49 @@
 .cx-accordion:not(:hover) .cx-slice:first-child .cx-slice-body { opacity: 1; transform: none; }
 .cx-slice:hover .cx-slice-label, .cx-slice:focus-visible .cx-slice-label,
 .cx-accordion:not(:hover) .cx-slice:first-child .cx-slice-label { opacity: 0; }
+/* Designed artwork slices: each says what its section is */
+.cx-slice--art { background: radial-gradient(120% 90% at 50% 20%, #134a2c, #07140d 70%); }
+.cx-slice--art::before { background: linear-gradient(180deg, transparent 45%, rgba(5, 10, 7, 0.92) 85%); }
+.cx-art { position: absolute; inset: 0 0 30% 0; display: grid; place-items: center; pointer-events: none; }
+.cx-art svg { width: min(78%, 300px); height: auto; overflow: visible; transition: transform 0.9s var(--cx-ease); }
+.cx-slice:hover .cx-art svg, .cx-slice:focus-visible .cx-art svg { transform: scale(1.08) translateY(-6px); }
+
+/* Elections: a ballot drops into the box beside shield posters */
+.cx-art-word {
+  position: absolute; top: 8%; left: 50%; translate: -50% 0; white-space: nowrap;
+  font: 800 clamp(3rem, 7vw, 6.5rem)/1 var(--cx-display); letter-spacing: -0.04em;
+  color: transparent; -webkit-text-stroke: 1.5px rgba(240, 196, 69, 0.35);
+}
+.cx-art-shields { position: absolute; bottom: 4%; display: flex; gap: 10px; opacity: 0.55; }
+.cx-art-shields i { width: 34px; aspect-ratio: 1 / 1.12; background: linear-gradient(160deg, #f0c445, #b8890f); clip-path: url(#shield-clip); -webkit-clip-path: url(#shield-clip); }
+.cx-art-shields i:nth-child(2) { background: linear-gradient(160deg, #2fd27a, #12854a); translate: 0 -8px; }
+.cx-ballot-paper { animation: cxBallot 3.2s var(--cx-ease) infinite; }
+@keyframes cxBallot {
+  0%, 15% { transform: translateY(-30px); opacity: 0; }
+  30%, 55% { transform: translateY(0); opacity: 1; }
+  80%, 100% { transform: translateY(70px); opacity: 0; }
+}
+
+/* Class awards: the crest's laurels around a gold trophy */
+.cx-trophy { transform-origin: 120px 110px; animation: cxTrophy 4s ease-in-out infinite; }
+@keyframes cxTrophy { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-8px) rotate(2deg); } }
+.cx-sparks path { transform-box: fill-box; transform-origin: center; animation: cxSpark 2.2s ease-in-out infinite; }
+.cx-sparks path:nth-child(2) { animation-delay: 0.7s; }
+.cx-sparks path:nth-child(3) { animation-delay: 1.4s; }
+@keyframes cxSpark { 0%, 100% { transform: scale(0.3); opacity: 0.2; } 50% { transform: scale(1.2); opacity: 1; } }
+.cx-art--trophy svg { filter: drop-shadow(0 0 30px rgba(240, 196, 69, 0.45)); }
+
+/* The books: a ledger chart under a giant naira sign */
+.cx-art-naira {
+  position: absolute; top: 2%; right: 8%;
+  font: 800 clamp(5rem, 11vw, 9rem)/1 var(--cx-display);
+  color: transparent; -webkit-text-stroke: 1.5px rgba(47, 210, 122, 0.4);
+}
+.cx-bar { transform-box: fill-box; transform-origin: bottom; animation: cxBar 2.6s var(--cx-ease) infinite; animation-delay: calc(var(--i, 0) * 0.12s); }
+@keyframes cxBar { 0% { transform: scaleY(0.15); } 35%, 75% { transform: scaleY(1); } 100% { transform: scaleY(0.15); } }
+.cx-line-chart { stroke-dasharray: 400; animation: cxDraw 2.6s var(--cx-ease) infinite; filter: drop-shadow(0 0 6px rgba(255, 242, 194, 0.8)); }
+@keyframes cxDraw { 0% { stroke-dashoffset: 400; } 40%, 75% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -400; } }
+
 .cx-clock { display: flex; gap: 8px; margin: 6px 0; }
 .cx-clock i { font-style: normal; display: flex; align-items: baseline; gap: 2px; padding: 8px 12px; border-radius: 14px; background: rgba(255, 255, 255, 0.08); color: var(--cx-soft); font-size: 0.85rem; }
 .cx-clock b { font: 800 1.6rem var(--cx-display); color: #fff; font-variant-numeric: tabular-nums; animation: cxTick 0.45s var(--cx-ease); }
@@ -177,7 +222,9 @@
 
 /* Infinite marquee of outlined giant type */
 .cx-marquee { overflow: hidden; padding: 30px 0; border-block: 1px solid var(--cx-line); }
-.cx-marquee-track { display: flex; width: max-content; animation: cxMarquee 40s linear infinite; }
+/* Driven by GSAP (speed and direction follow the scroll); the letters lean with scroll speed */
+.cx-marquee-track { display: flex; width: max-content; }
+.cx-marquee-track span { display: inline-block; transform: skewX(calc(var(--scroll-v, 0) * -16deg)); transition: transform 0.15s linear; }
 .cx-marquee-track span {
   white-space: nowrap; font: 800 clamp(3rem, 9vw, 8rem)/1 var(--cx-display); letter-spacing: -0.03em;
   color: transparent; -webkit-text-stroke: 1.5px rgba(238, 243, 238, 0.35); padding-right: 0.4em;
@@ -190,7 +237,7 @@
 .cx-tunnel-stage { position: sticky; top: 0; height: 100svh; overflow: hidden; perspective: 1100px; perspective-origin: 50% 50%; }
 .cx-tunnel-space { position: absolute; inset: 0; transform-style: preserve-3d; }
 .cx-tunnel-item {
-  position: absolute; margin: 0; width: clamp(200px, 26vw, 420px); aspect-ratio: 4 / 3;
+  position: absolute; margin: 0; width: clamp(300px, 42vw, 680px); aspect-ratio: 4 / 3;
   border-radius: 20px; overflow: hidden; will-change: transform, opacity;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.12), 0 40px 80px -30px rgba(0, 0, 0, 0.9), 0 0 60px -20px rgba(47, 210, 122, 0.4);
 }
@@ -200,7 +247,7 @@
 .cx-tunnel-title .cx-btn { pointer-events: auto; }
 .cx-tunnel-title p { color: var(--cx-soft); }
 .cx-tunnel-title .cx-h2 { text-shadow: 0 10px 60px rgba(0, 0, 0, 0.9); }
-@media (max-width: 820px) { .cx-tunnel-item { width: 56vw; } }
+@media (max-width: 820px) { .cx-tunnel-item { width: 80vw; } }
 
 /* Pinned split: executive */
 .cx-split { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(32px, 6vw, 96px); align-items: start; }
@@ -260,6 +307,15 @@
 .cx-foot-base { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 48px; color: #6f8075; font-size: 0.9rem; }
 @media (max-width: 760px) { .cx-foot-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
+/* Scroll-speed lean: blocks tilt a touch while the page moves fast, then settle.
+   Uses the individual rotate/translate properties so GSAP's transforms stay untouched. */
+.cx-slice { rotate: calc(var(--scroll-v, 0) * -1.4deg); }
+.cx-exec { rotate: calc(var(--scroll-v, 0) * 1.2deg); }
+.cx-tunnel-title .cx-h2 { translate: 0 calc(var(--scroll-v, 0) * -18px); }
+.cx-statement-text { translate: 0 calc(var(--scroll-v, 0) * -10px); }
+
 @media (prefers-reduced-motion: reduce) {
-  .cx-grain, .cx-gold, .cx-marquee-track, .cx-scroll-cue span, .cx-clock b { animation: none !important; }
+  .cx-grain, .cx-gold, .cx-marquee-track, .cx-scroll-cue span, .cx-clock b,
+  .cx-ballot-paper, .cx-trophy, .cx-sparks path, .cx-bar, .cx-line-chart { animation: none !important; }
+  .cx-slice, .cx-exec, .cx-marquee-track span, .cx-tunnel-title .cx-h2, .cx-statement-text { rotate: none; translate: none; transform: none; }
 }

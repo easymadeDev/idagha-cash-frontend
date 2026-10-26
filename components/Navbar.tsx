@@ -51,8 +51,15 @@ export default function Navbar() {
     router.push(href);
   };
 
+  // Slides away while scrolling down (never covers what you're reading), back on any scroll up
+  const [hidden, setHidden] = useState(false);
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    let last = window.scrollY;
+    const onScroll = () => {
+      const y = window.scrollY;
+      setScrolled(y > 8);
+      if (Math.abs(y - last) > 6) { setHidden(y > last && y > 240); last = y; }
+    };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
@@ -69,7 +76,7 @@ export default function Navbar() {
   const firstName = member?.name?.split(' ')[0] || '';
 
   return (
-    <nav className={`navbar${scrolled ? ' scrolled' : ''}`}>
+    <nav className={`navbar${scrolled ? ' scrolled' : ''}${hidden && !open ? ' nav-hidden' : ''}`}>
       <div className="nav-inner">
         <div className="nav-logo" onClick={() => { if (ready) navigate(cleared ? '/home' : '/'); }}>
           <div className="nav-logo-img">

@@ -55,7 +55,7 @@ html, body {
   max-width: 100%;
   overflow-x: clip; /* clip, not hidden: hidden turns these into scroll containers and breaks position: sticky */
 }
-html { scroll-behavior: smooth; }
+html { scroll-behavior: auto; } /* Lenis (components/SmoothScroll) does the smoothing */
 body {
   background: var(--bg-base);
   color: var(--text-1);

@@ -8,6 +8,8 @@ import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
 import { formatNaira } from '../lib/api';
 import { CountUp } from '../components/motion';
+import GlassHome from '../components/GlassHome';
+import { useSkin } from '../lib/skin';
 
 type Photo = { src: string; caption: string; focus: string };
 
@@ -33,9 +35,79 @@ function useCountdown(target?: string) {
   return { days: Math.floor(d / 864e5), hours: Math.floor((d / 36e5) % 24), mins: Math.floor((d / 6e4) % 60), secs: Math.floor((d / 1e3) % 60) };
 }
 
+// ── Artwork for the accordion slices: each one says what its section is ──
+function BallotArt() {
+  return (
+    <span className="cx-art cx-art--ballot" aria-hidden="true">
+      <span className="cx-art-word">VOTE</span>
+      <span className="cx-art-shields"><i /><i /><i /></span>
+      <svg className="cx-ballot" viewBox="0 0 220 220">
+        <g className="cx-ballot-paper">
+          <rect x="70" y="20" width="80" height="96" rx="6" fill="#f5efdd" />
+          <path d="M86 52h48M86 68h48M86 84h30" stroke="#0f3d22" strokeWidth="5" strokeLinecap="round" opacity="0.35" />
+          <path d="M92 60l12 12 24-26" stroke="#12854a" strokeWidth="9" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </g>
+        <rect x="30" y="112" width="160" height="92" rx="12" fill="#0f3d22" stroke="#f0c445" strokeWidth="4" />
+        <rect x="70" y="108" width="80" height="10" rx="5" fill="#050a07" stroke="#f0c445" strokeWidth="3" />
+        <path d="M78 160h64" stroke="#f0c445" strokeWidth="6" strokeLinecap="round" />
+      </svg>
+    </span>
+  );
+}
+
+function TrophyArt() {
+  return (
+    <span className="cx-art cx-art--trophy" aria-hidden="true">
+      <svg viewBox="0 0 240 240">
+        {/* the crest's laurels */}
+        {Array.from({ length: 7 }).map((_, i) => (
+          <ellipse key={`l${i}`} cx={64 - i * 2} cy={190 - i * 20} rx="9" ry="20" fill="#2fd27a" opacity={0.75 - i * 0.05} transform={`rotate(${-30 + i * 6} ${64 - i * 2} ${190 - i * 20})`} />
+        ))}
+        {Array.from({ length: 7 }).map((_, i) => (
+          <ellipse key={`r${i}`} cx={176 + i * 2} cy={190 - i * 20} rx="9" ry="20" fill="#2fd27a" opacity={0.75 - i * 0.05} transform={`rotate(${30 - i * 6} ${176 + i * 2} ${190 - i * 20})`} />
+        ))}
+        <g className="cx-trophy">
+          <path d="M84 52h72v34a36 36 0 0 1-72 0z" fill="#f0c445" />
+          <path d="M84 60H68a16 16 0 0 0 16 30M156 60h16a16 16 0 0 1-16 30" stroke="#f0c445" strokeWidth="7" fill="none" />
+          <rect x="110" y="120" width="20" height="30" fill="#d9a520" />
+          <rect x="88" y="150" width="64" height="16" rx="4" fill="#f0c445" />
+          <path d="M120 64l6 12 13 2-9 9 2 13-12-6-12 6 2-13-9-9 13-2z" fill="#0f3d22" />
+        </g>
+        <g className="cx-sparks">
+          <path d="M60 50l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#fff2c2" />
+          <path d="M184 40l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#fff2c2" />
+          <path d="M196 110l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#fff2c2" />
+        </g>
+      </svg>
+    </span>
+  );
+}
+
+function LedgerArt() {
+  const bars = [38, 52, 46, 70, 62, 88];
+  return (
+    <span className="cx-art cx-art--ledger" aria-hidden="true">
+      <span className="cx-art-naira">₦</span>
+      <svg viewBox="0 0 240 200">
+        {[40, 80, 120, 160].map((y) => <path key={y} d={`M20 ${y}H220`} stroke="rgba(255,255,255,0.1)" strokeWidth="1" />)}
+        {bars.map((h, i) => (
+          <rect key={i} className="cx-bar" style={{ ['--i' as any]: i }} x={30 + i * 32} y={180 - h * 1.6} width="20" height={h * 1.6} rx="4" fill={i === bars.length - 1 ? '#f0c445' : '#2fd27a'} />
+        ))}
+        <polyline className="cx-line-chart" points={bars.map((h, i) => `${40 + i * 32},${170 - h * 1.6}`).join(' ')} fill="none" stroke="#fff2c2" strokeWidth="3" strokeLinejoin="round" />
+      </svg>
+    </span>
+  );
+}
+
 const fmtDay = (d: string) => new Date(d).toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'long' });
 
-export default function Landing({ classPhotos = [] }: { classPhotos?: Photo[] }) {
+// In the glass skin the landing page is the glass dashboard
+export default function Landing(props: { classPhotos?: Photo[] }) {
+  const [skin] = useSkin();
+  return skin === 'glass' ? <GlassHome classPhotos={props.classPhotos} /> : <CinematicLanding {...props} />;
+}
+
+function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
   const router = useRouter();
   const { cleared, ready, setGateOpen } = useGate();
   const root = useRef<HTMLDivElement>(null);
@@ -114,9 +186,10 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: Photo[] })
         .fromTo('.cx-hero-copy', { yPercent: 0, opacity: 1 }, { yPercent: -60, opacity: 0, ease: 'power1.in', ...still }, 0);
 
       // Statement: words scrub from faint to full
-      gsap.fromTo('.cx-statement .cx-word', { opacity: 0.12 }, {
+      // Starts readable (0.3) and is fully lit by the time the paragraph reaches mid-screen
+      gsap.fromTo('.cx-statement .cx-word', { opacity: 0.3 }, {
         opacity: 1, stagger: 0.1, ease: 'none',
-        scrollTrigger: { trigger: '.cx-statement', start: 'top 75%', end: 'bottom 45%', scrub: true },
+        scrollTrigger: { trigger: '.cx-statement-text', start: 'top 90%', end: 'top 45%', scrub: true },
       });
 
       // Light sweep across big headings when they arrive
@@ -126,6 +199,34 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: Photo[] })
           scrollTrigger: { trigger: h, start: 'top 85%' },
         });
         gsap.from(h, { y: 60, opacity: 0, duration: 1.2, ease: 'expo.out', scrollTrigger: { trigger: h, start: 'top 88%' } });
+      });
+
+      // The floating menu slides away while scrolling down so it never sits on top of text,
+      // and comes straight back on any scroll up
+      const nav = document.querySelector('.cx-nav');
+      ScrollTrigger.create({
+        start: 0, end: 'max',
+        onUpdate: (self) => nav?.classList.toggle('is-hidden', self.direction === 1 && self.scroll() > 240),
+      });
+
+      // Marquee: loops on its own, speeds up with scroll velocity and flips with scroll direction
+      const marquee = gsap.to('.cx-marquee-track', { xPercent: -50, duration: 40, ease: 'none', repeat: -1 });
+      let dir = 1;
+      ScrollTrigger.create({
+        trigger: '.cx-marquee', start: 'top bottom', end: 'bottom top',
+        onUpdate: (self) => {
+          const v = self.getVelocity();
+          if (v !== 0) dir = v > 0 ? 1 : -1;
+          const boost = gsap.utils.clamp(1, 8, 1 + Math.abs(v) / 250);
+          gsap.to(marquee, { timeScale: dir * boost, duration: 0.2, overwrite: true });
+          gsap.to(marquee, { timeScale: dir, duration: 1.2, delay: 0.2, ease: 'power2.out' });
+        },
+      });
+
+      // Accordion photos drift inside their slices (parallax depth)
+      gsap.fromTo('.cx-slice:not(.cx-slice--art)', { backgroundPosition: '50% 15%' }, {
+        backgroundPosition: '50% 85%', ease: 'none',
+        scrollTrigger: { trigger: '.cx-accordion', start: 'top bottom', end: 'bottom top', scrub: true },
       });
 
       // Accordion slices rise in sequence
@@ -246,7 +347,7 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: Photo[] })
       <section className="cx-section" id="together" aria-labelledby="together-h">
         <h2 id="together-h" className="cx-sweep cx-h2">Everything the set does, in one place</h2>
         <div className="cx-accordion">
-          <button className="cx-slice" onClick={() => go(next ? `/events/${next._id}` : '/events')} style={{ backgroundImage: `url(${photos[Math.min(2, photos.length - 1)].src})` }}>
+          <button className="cx-slice" onClick={() => go(next ? `/events/${next._id}` : '/events')} style={{ backgroundImage: `url(${group.src})` }}>
             <span className="cx-slice-label">Reunions</span>
             <span className="cx-slice-body">
               <b>{next ? next.title : 'The next reunion is being planned'}</b>
@@ -259,7 +360,8 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: Photo[] })
               <em>RSVP now</em>
             </span>
           </button>
-          <button className="cx-slice" onClick={() => go(election ? `/elections/${election._id}` : '/elections')} style={{ backgroundImage: `url(${photos[Math.min(9, photos.length - 1)].src})` }}>
+          <button className="cx-slice cx-slice--art" onClick={() => go(election ? `/elections/${election._id}` : '/elections')}>
+            <BallotArt />
             <span className="cx-slice-label">Elections</span>
             <span className="cx-slice-body">
               <b>{election ? election.title : 'Run for office, or choose who does'}</b>
@@ -267,7 +369,8 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: Photo[] })
               <em>{election?.status === 'voting' ? 'Cast your vote' : 'See the positions'}</em>
             </span>
           </button>
-          <button className="cx-slice" onClick={() => go('/awards')} style={{ backgroundImage: `url(${photos[Math.min(3, photos.length - 1)].src})` }}>
+          <button className="cx-slice cx-slice--art" onClick={() => go('/awards')}>
+            <TrophyArt />
             <span className="cx-slice-label">Class awards</span>
             <span className="cx-slice-body">
               <b>Best online. Best talker. Most active.</b>
@@ -275,7 +378,8 @@ export default function Landing({ classPhotos = [] }: { classPhotos?: Photo[] })
               <em>Nominate someone</em>
             </span>
           </button>
-          <button className="cx-slice" onClick={() => go('/finance')} style={{ backgroundImage: `url(${photos[Math.min(8, photos.length - 1)].src})` }}>
+          <button className="cx-slice cx-slice--art" onClick={() => go('/finance')}>
+            <LedgerArt />
             <span className="cx-slice-label">The books</span>
             <span className="cx-slice-body">
               <b>{stats ? formatNaira(stats.walletBalance || 0) : '—'} in our wallets</b>

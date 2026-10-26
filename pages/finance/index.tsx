@@ -6,7 +6,7 @@ import Image from 'next/image';
 import { formatNaira, formatDate } from '../../lib/api';
 
 const walletColor = (w: any) =>
-  w?.type === 'reunion' ? '#b5860f' : w?.type === 'pledge' ? '#1d4f91' : '#0f3d22';
+  w?.type === 'reunion' ? '#f0c445' : w?.type === 'pledge' ? '#8bbcff' : '#3fdc8a';
 
 // Wallet detail modal — shows contributions + expenses for one wallet
 function WalletModal({ ws, onClose }: { ws: any; onClose: () => void }) {
