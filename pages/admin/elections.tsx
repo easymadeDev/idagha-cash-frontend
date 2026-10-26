@@ -114,6 +114,17 @@ function FormsPanel({ election }: { election: any }) {
     } catch (err) { toast(errorMessage(err), 'error'); } finally { setBusy(''); setRejecting(null); setReason(''); }
   };
 
+  const removeForm = async (f: any) => {
+    const paidNote = f.paymentStatus === 'approved' ? ` Its ${formatNaira(f.amount)} payment will be removed from the Group Wallet, and any votes for this candidate deleted.` : '';
+    if (!window.confirm(`Delete ${f.memberName}'s ${f.positionTitle} form (${f.reference})?${paidNote} This cannot be undone.`)) return;
+    setBusy(f._id);
+    try {
+      await api.delete(`/elections/forms/${f._id}`);
+      mutate(key); mutate(`/api/elections/${election._id}`); mutate('/api/contributions'); mutate('/api/stats/summary');
+      toast('Form deleted', 'success');
+    } catch (err) { toast(errorMessage(err), 'error'); } finally { setBusy(''); }
+  };
+
   const setScreening = async (f: any, status: string) => {
     setBusy(f._id);
     try {
@@ -152,6 +163,7 @@ function FormsPanel({ election }: { election: any }) {
                   <button className="btn btn-danger btn-sm" disabled={busy === f._id} onClick={() => setRejecting(f)}>Reject</button>
                 </>}
                 {view === 'rejected' && <button className="btn btn-ghost btn-sm" disabled={busy === f._id} onClick={() => setPayment(f, 'pending')}>Move to pending</button>}
+                <button className="btn btn-danger btn-sm" disabled={busy === f._id} onClick={() => removeForm(f)}>Delete</button>
               </div>
               {view === 'approved' && (
                 <div style={{ padding: 12, borderRadius: 10, background: 'rgba(255,255,255,0.02)', border: '1px solid var(--border)' }}>
@@ -253,9 +265,18 @@ export default function AdminElections() {
     catch (err) { toast(errorMessage(err), 'error'); }
   };
 
-  const remove = async (id: string) => {
-    try { await api.delete(`/elections/${id}`); refresh(); setSelectedId(null); } catch (err) { toast(errorMessage(err), 'error'); }
-    setDeleteId(null);
+  // Paid forms make the first attempt fail with a count; the dialog then asks to remove them too
+  const [paidWarning, setPaidWarning] = useState('');
+  const remove = async (id: string, force = false) => {
+    try {
+      const { data: r } = await api.delete(`/elections/${id}${force ? '?force=true' : ''}`);
+      refresh(); mutate('/api/contributions'); mutate('/api/stats/summary'); setSelectedId(null);
+      toast(r?.paymentsReversed ? `Election deleted, with ${r.paymentsReversed} form payment(s) removed from the books` : 'Election deleted', 'success');
+      setDeleteId(null); setPaidWarning('');
+    } catch (err: any) {
+      if (!force && err?.response?.status === 400 && /paid form/.test(errorMessage(err))) { setPaidWarning(errorMessage(err)); return; }
+      toast(errorMessage(err), 'error'); setDeleteId(null); setPaidWarning('');
+    }
   };
 
   return (
@@ -315,13 +336,19 @@ export default function AdminElections() {
       {editing && <ElectionForm initial={editing} onClose={() => setEditing(null)} onSaved={(e) => { setEditing(null); refresh(); setSelectedId(e._id); }} />}
 
       {deleteId && (
-        <div className="modal-overlay" onClick={() => setDeleteId(null)}>
-          <div className="modal" style={{ maxWidth: 380 }} onClick={(e) => e.stopPropagation()}>
+        <div className="modal-overlay" onClick={() => { setDeleteId(null); setPaidWarning(''); }}>
+          <div className="modal" style={{ maxWidth: 420 }} onClick={(e) => e.stopPropagation()}>
             <p className="modal-title">Delete election?</p>
-            <p style={{ color: 'var(--text-3)', marginBottom: 20, fontSize: '0.9rem' }}>Elections with confirmed form payments cannot be deleted. Pending forms and votes will be removed.</p>
+            {paidWarning ? (
+              <p style={{ color: 'var(--red)', marginBottom: 20, fontSize: '0.9rem' }}>
+                {paidWarning} Their nomination-fee entries will be removed from the Group Wallet, and all votes deleted. This cannot be undone.
+              </p>
+            ) : (
+              <p style={{ color: 'var(--text-3)', marginBottom: 20, fontSize: '0.9rem' }}>All its nomination forms and votes will be removed. This cannot be undone.</p>
+            )}
             <div className="modal-actions">
-              <button className="btn btn-ghost" onClick={() => setDeleteId(null)}>Cancel</button>
-              <button className="btn btn-danger" onClick={() => remove(deleteId)}>Delete</button>
+              <button className="btn btn-ghost" onClick={() => { setDeleteId(null); setPaidWarning(''); }}>Cancel</button>
+              <button className="btn btn-danger" onClick={() => remove(deleteId, !!paidWarning)}>{paidWarning ? 'Delete everything' : 'Delete'}</button>
             </div>
           </div>
         </div>
