@@ -59,7 +59,11 @@ html.has-pointer .cx-exec, html.has-pointer .poster {
   background: radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(255, 255, 255, 0.16), transparent 55%);
   mix-blend-mode: soft-light;
 }
-.page-wrap, .gl, .cx { perspective: 1400px; }
+/* 3D depth for tilting cards lives on the card grids only. Never put perspective (or transform/filter)
+   on .page-wrap, .gl or .cx: it turns them into the containing block for position:fixed children,
+   so modals, the photo viewer and the floating menus open at the top of the page instead of on screen. */
+.hm-grid, .hm-quick, .gl-four, .gl-execs, .gl-nums, .grid-auto, .grid-auto-sm, .stats-grid, .contrib-grid,
+.cx-split-list, .wallet-cards-grid, .quick-grid, .poster-grid { perspective: 1400px; }
 
 /* Magnetic buttons ease back when released */
 html.has-pointer .btn, html.has-pointer .cx-btn, html.has-pointer .gl-btn, html.has-pointer .hm-link {

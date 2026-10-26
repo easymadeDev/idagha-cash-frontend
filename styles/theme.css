@@ -315,7 +315,7 @@ tbody tr:hover td { background: rgba(47,210,122,0.06); }
   transition: opacity 0.9s var(--ease), transform 1.1s var(--ease);
   transition-delay: calc(var(--rv-i, 0) * 90ms);
 }
-.page-wrap { perspective: 1400px; }
+/* no perspective on .page-wrap: it would trap position:fixed modals (see styles/enhance.css) */
 
 /* Finance and home headers float; figures rise in sequence */
 .fin-shield, .hm-greet-shield { animation: shieldFloat 7s ease-in-out infinite; }
