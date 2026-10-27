@@ -27,7 +27,7 @@ const navItems: NavItem[] = [
     label: 'Vote',
     children: [
       { label: 'Elections', href: '/elections' },
-      { label: 'Class Awards', href: '/awards' },
+      { label: 'Alumni Awards', href: '/awards' },
     ],
   },
   { label: 'Finance', href: '/finance', match: FINANCE_PATHS },
@@ -80,7 +80,7 @@ export default function Navbar() {
   return (
     <nav className={`navbar${scrolled ? ' scrolled' : ''}${hidden && !open ? ' nav-hidden' : ''}`}>
       <div className="nav-inner">
-        <div className="nav-logo" onClick={() => { if (ready) navigate(cleared ? '/home' : '/'); }}>
+        <div className="nav-logo" onClick={() => navigate('/')}>
           <div className="nav-logo-img">
             <Image src="/logo.png" alt="IDAGHA Alumni crest" width={42} height={42} style={{ objectFit: 'contain' }} priority />
           </div>
@@ -145,7 +145,7 @@ export default function Navbar() {
           })}
 
           {/* signed-out visitors can still browse the public pages */}
-          {ready && !cleared && [['Events', '/events'], ['Elections', '/elections'], ['Class awards', '/awards']].map(([label, href]) => (
+          {ready && !cleared && [['Events', '/events'], ['Elections', '/elections'], ['Alumni awards', '/awards']].map(([label, href]) => (
             <li key={href}>
               <a className={router.pathname.startsWith(href) ? 'active' : ''} onClick={() => navigate(href)} style={{ cursor: 'pointer' }}>
                 {router.pathname.startsWith(href) && <motion.span layoutId="nav-pill" className="nav-pill" transition={{ type: 'spring', stiffness: 420, damping: 34 }} />}

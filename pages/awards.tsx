@@ -113,9 +113,9 @@ export default function AwardsPage() {
       <div className="container">
         <div className="page-header">
           <div style={{ marginBottom: 14 }}>
-            <span className="badge badge-yellow"><span className="badge-dot" />Class Awards</span>
+            <span className="badge badge-yellow"><span className="badge-dot" />Alumni Awards</span>
           </div>
-          <h1>Class Awards</h1>
+          <h1>Alumni Awards</h1>
           <p>Nominate a classmate, back the one you think deserves it, and watch the board move. One support per category; you can switch until it closes.</p>
         </div>
 
@@ -148,7 +148,7 @@ export default function AwardsPage() {
                       <Poster data={{
                         photo: lead.memberPhoto, name: lead.memberName,
                         band: cat.winner ? 'WINNER' : 'NOMINATED', role: cat.title, slogan: lead.reason,
-                        footer: cat.season || 'Class Awards',
+                        footer: cat.season || 'Alumni Awards',
                         badge: cat.winner ? undefined : lead.supports ? `LEADING · ${lead.supports}` : 'NOMINEE',
                       }} />
                     );
@@ -217,7 +217,7 @@ export default function AwardsPage() {
               photo: posterFor.n.memberPhoto, name: posterFor.n.memberName,
               band: posterFor.cat.winner?._id === posterFor.n._id ? 'WINNER' : 'NOMINATED',
               role: posterFor.cat.title, slogan: posterFor.n.reason,
-              footer: posterFor.cat.season || 'Class Awards', badge: `${posterFor.n.supports} SUPPORTS`,
+              footer: posterFor.cat.season || 'Alumni Awards', badge: `${posterFor.n.supports} SUPPORTS`,
             }} />
             <div className="modal-actions" style={{ marginTop: 12 }}>
               <button className="btn btn-ghost" onClick={() => setPosterFor(null)}>Close</button>

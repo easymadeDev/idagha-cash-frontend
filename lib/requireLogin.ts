@@ -15,7 +15,7 @@ export const describePath = (href: string) => {
   const path = href.split('?')[0];
   if (path.startsWith('/elections/')) return 'the election';
   if (path === '/elections') return 'Elections';
-  if (path === '/awards') return 'Class awards';
+  if (path === '/awards') return 'Alumni awards';
   if (path.startsWith('/events/')) return 'the event';
   if (path === '/events') return 'Events';
   return 'where you were';

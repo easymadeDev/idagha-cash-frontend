@@ -37,7 +37,7 @@ function clearMemberToken() {
   localStorage.removeItem(MEMBER_TOKEN_KEY);
 }
 
-// Fully open — no token needed. Elections and class awards can be browsed by anyone;
+// Fully open — no token needed. Elections and alumni awards can be browsed by anyone;
 // buying a form, applying, voting, nominating and supporting ask for sign-in on the page itself.
 const FULLY_EXEMPT = (pathname: string) =>
   pathname === '/' ||

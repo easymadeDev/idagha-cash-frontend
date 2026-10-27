@@ -7,6 +7,7 @@ import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
 import { withVacancies } from '../lib/positions';
+import LandingMenu from '../components/LandingMenu';
 import { formatNaira } from '../lib/api';
 import { CountUp } from '../components/motion';
 import GlassLanding from '../components/GlassLanding';
@@ -60,25 +61,33 @@ function BallotArt() {
 function TrophyArt() {
   return (
     <span className="cx-art cx-art--trophy" aria-hidden="true">
+      {/* a winners' podium: classmates nominated and backed by the set, the top one under a star */}
       <svg viewBox="0 0 240 240">
-        {/* the crest's laurels */}
-        {Array.from({ length: 7 }).map((_, i) => (
-          <ellipse key={`l${i}`} cx={64 - i * 2} cy={190 - i * 20} rx="9" ry="20" fill="#2fd27a" opacity={0.75 - i * 0.05} transform={`rotate(${-30 + i * 6} ${64 - i * 2} ${190 - i * 20})`} />
-        ))}
-        {Array.from({ length: 7 }).map((_, i) => (
-          <ellipse key={`r${i}`} cx={176 + i * 2} cy={190 - i * 20} rx="9" ry="20" fill="#2fd27a" opacity={0.75 - i * 0.05} transform={`rotate(${30 - i * 6} ${176 + i * 2} ${190 - i * 20})`} />
-        ))}
-        <g className="cx-trophy">
-          <path d="M84 52h72v34a36 36 0 0 1-72 0z" fill="#f0c445" />
-          <path d="M84 60H68a16 16 0 0 0 16 30M156 60h16a16 16 0 0 1-16 30" stroke="#f0c445" strokeWidth="7" fill="none" />
-          <rect x="110" y="120" width="20" height="30" fill="#d9a520" />
-          <rect x="88" y="150" width="64" height="16" rx="4" fill="#f0c445" />
-          <path d="M120 64l6 12 13 2-9 9 2 13-12-6-12 6 2-13-9-9 13-2z" fill="#0f3d22" />
+        {/* drawn in the top of the tile so the caption below stays clear */}
+        <g transform="translate(46 -18) scale(0.62)">
+        {/* podium */}
+        <rect x="88" y="150" width="64" height="70" rx="6" fill="#f0c445" />
+        <rect x="26" y="174" width="62" height="46" rx="6" fill="#12854a" />
+        <rect x="152" y="186" width="62" height="34" rx="6" fill="#0f5a33" />
+        <text x="120" y="196" textAnchor="middle" fontFamily="Arial Black, Arial, sans-serif" fontWeight="900" fontSize="30" fill="#0f3d22">1</text>
+        <text x="57" y="207" textAnchor="middle" fontFamily="Arial Black, Arial, sans-serif" fontWeight="900" fontSize="22" fill="#d9f7e6">2</text>
+        <text x="183" y="212" textAnchor="middle" fontFamily="Arial Black, Arial, sans-serif" fontWeight="900" fontSize="20" fill="#d9f7e6">3</text>
+        {/* the three classmates */}
+        <g fill="#fbf6e8">
+          <circle cx="120" cy="112" r="17" /><path d="M94 150a26 22 0 0 1 52 0z" />
+          <circle cx="57" cy="142" r="13" /><path d="M37 174a20 17 0 0 1 40 0z" />
+          <circle cx="183" cy="156" r="12" /><path d="M164 186a19 16 0 0 1 38 0z" />
         </g>
-        <g className="cx-sparks">
-          <path d="M60 50l3 8 8 3-8 3-3 8-3-8-8-3 8-3z" fill="#fff2c2" />
-          <path d="M184 40l2 6 6 2-6 2-2 6-2-6-6-2 6-2z" fill="#fff2c2" />
-          <path d="M196 110l2 5 5 2-5 2-2 5-2-5-5-2 5-2z" fill="#fff2c2" />
+        {/* the winner's star, bobbing */}
+        <g className="cx-trophy">
+          <path d="M120 50l9 18 20 3-14.5 14 3.5 20-18-9.5-18 9.5 3.5-20L91 71l20-3z" fill="#f0c445" stroke="#fff2c2" strokeWidth="2" />
+        </g>
+        {/* supports rising */}
+        <g className="cx-sparks" fontFamily="Arial, sans-serif" fontWeight="800">
+          <text x="40" y="104" fontSize="15" fill="#2fd27a">+1</text>
+          <text x="186" y="118" fontSize="13" fill="#2fd27a">+1</text>
+          <text x="160" y="70" fontSize="17" fill="#f0c445">+1</text>
+        </g>
         </g>
       </svg>
     </span>
@@ -176,16 +185,18 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
 
       // Hero: pin and zoom through — the photo pushes in, the crest flies at the viewer
       const heroTl = gsap.timeline({
-        scrollTrigger: { trigger: '.cx-hero', start: 'top top', end: '+=120%', scrub: 1, pin: true },
+        scrollTrigger: { trigger: '.cx-hero', start: 'top top', end: '+=70%', scrub: 1, pin: true },
       });
       // Explicit start values: the entrance tweens may still be mid-flight when this is built,
       // and a plain .to() would record their half-finished state as the start
       const still = { immediateRender: false };
+      // Nothing fades all the way out while pinned: the copy is still on screen when the pin
+      // releases, so the story section arrives before the hero has gone (no empty screen)
       heroTl
-        .fromTo('.cx-hero-bg img', { scale: 1 }, { scale: 1.6, ease: 'none', ...still }, 0)
-        .fromTo('.cx-hero-bg', { opacity: 1 }, { opacity: 0.15, ease: 'none', ...still }, 0)
-        .fromTo('.cx-crest-wrap', { scale: 1, opacity: 1, rotate: 0 }, { scale: 4.5, opacity: 0, ease: 'power2.in', ...still }, 0)
-        .fromTo('.cx-hero-copy', { yPercent: 0, opacity: 1 }, { yPercent: -60, opacity: 0, ease: 'power1.in', ...still }, 0);
+        .fromTo('.cx-hero-bg img', { scale: 1 }, { scale: 1.4, ease: 'none', ...still }, 0)
+        .fromTo('.cx-hero-bg', { opacity: 1 }, { opacity: 0.4, ease: 'none', ...still }, 0)
+        .fromTo('.cx-crest-wrap', { scale: 1, opacity: 1, rotate: 0 }, { scale: 3, opacity: 0, ease: 'power2.in', ...still }, 0)
+        .fromTo('.cx-hero-copy', { yPercent: 0, opacity: 1 }, { yPercent: -30, opacity: 0.35, ease: 'power1.in', ...still }, 0);
 
       // Statement: words scrub from faint to full
       // Starts readable (0.3) and is fully lit by the time the paragraph reaches mid-screen
@@ -252,29 +263,30 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
         trigger: '.cx-tunnel', start: 'top top', end: 'bottom bottom', scrub: true,
         onUpdate: (self) => place(self.progress),
       });
-      gsap.fromTo('.cx-tunnel-title', { scale: 0.6, opacity: 0 }, {
+      // the title is already readable as the section enters, so the screen never sits empty
+      gsap.fromTo('.cx-tunnel-title', { scale: 0.85, opacity: 0.4 }, {
         scale: 1, opacity: 1, ease: 'none',
-        scrollTrigger: { trigger: '.cx-tunnel', start: 'top 60%', end: 'top top', scrub: true },
+        scrollTrigger: { trigger: '.cx-tunnel', start: 'top 95%', end: 'top 40%', scrub: true },
       });
 
-      // Executive split: title pinned, cards grow in and darken as they leave (desktop)
+      // Executive split: title pinned (desktop); cards grow in near the bottom of the screen and
+      // stay fully lit while on screen, so one never goes dark before the next has arrived
       const mm = gsap.matchMedia();
       mm.add('(min-width: 900px)', () => {
         ScrollTrigger.create({ trigger: '.cx-split', start: 'top 15%', end: 'bottom 70%', pin: '.cx-split-title' });
       });
       gsap.utils.toArray<HTMLElement>('.cx-exec').forEach((card) => {
-        gsap.fromTo(card, { scale: 0.8, opacity: 0.2 }, { scale: 1, opacity: 1, ease: 'none', scrollTrigger: { trigger: card, start: 'top 95%', end: 'top 55%', scrub: true } });
-        gsap.to(card, { opacity: 0.25, scale: 0.94, ease: 'none', scrollTrigger: { trigger: card, start: 'bottom 30%', end: 'bottom 0%', scrub: true } });
+        gsap.fromTo(card, { scale: 0.9, opacity: 0.35 }, { scale: 1, opacity: 1, ease: 'none', scrollTrigger: { trigger: card, start: 'top 100%', end: 'top 78%', scrub: true } });
       });
 
-      // Stacking figure cards: each one settles and shrinks as the next arrives
+      // Stacking figure cards: each one settles and shrinks only once the next is well on screen
       const stack = gsap.utils.toArray<HTMLElement>('.cx-stack-card');
       stack.forEach((card, i) => {
         if (i === stack.length - 1) return;
         // Covered cards shrink and dim but stay opaque, so numbers never show through
         gsap.to(card, {
-          scale: 0.9 - (stack.length - i) * 0.02, filter: 'brightness(0.45)', ease: 'none',
-          scrollTrigger: { trigger: stack[i + 1], start: 'top bottom', end: 'top 20%', scrub: true },
+          scale: 0.9 - (stack.length - i) * 0.02, filter: 'brightness(0.55)', ease: 'none',
+          scrollTrigger: { trigger: stack[i + 1], start: 'top 40%', end: 'top 15%', scrub: true },
         });
       });
 
@@ -305,9 +317,7 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
         <div className="cx-nav-links">
           <a href="#story">Story</a><a href="#together">Together</a><a href="#memories">Memories</a><a href="#executive">Executive</a>
         </div>
-        <button className="cx-btn cx-btn--primary cx-btn--sm" onClick={enterPortal} disabled={!ready}>
-          {cleared ? 'Open portal' : 'Sign in'}
-        </button>
+        <LandingMenu skin="cine" go={go} enterPortal={enterPortal} cleared={cleared} ready={ready} />
       </nav>
 
       {/* Attention: the cinematic hero */}
@@ -323,7 +333,7 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
               <span className="cx-line"><span>Class of {GRAD_YEAR},</span></span>
               <span className="cx-line"><span className="cx-gold">still one set.</span></span>
             </h1>
-            <p className="cx-hero-sub">The home of the Idagha Secondary School class of {GRAD_YEAR}: reunions, elections, class awards, our photographs and our books.</p>
+            <p className="cx-hero-sub">The home of the Idagha Secondary School class of {GRAD_YEAR}: reunions, elections, alumni awards, our photographs and our books.</p>
             <div className="cx-hero-ctas">
               <button className="cx-btn cx-btn--primary" onClick={enterPortal} disabled={!ready}>{cleared ? 'Open the portal' : 'Enter the portal'}</button>
               <button className="cx-btn cx-btn--glass" onClick={() => router.push('/register')}>Join the set</button>
@@ -373,7 +383,7 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
           </button>
           <button className="cx-slice cx-slice--art" onClick={() => go('/awards')}>
             <TrophyArt />
-            <span className="cx-slice-label">Class awards</span>
+            <span className="cx-slice-label">Alumni awards</span>
             <span className="cx-slice-body">
               <b>Best online. Best talker. Most active.</b>
               <span>{awardList.length ? awardList.slice(0, 3).map((a: any) => `${a.title}: ${leader(a)?.memberName || 'open'}`).join(' · ') : 'Nominate a classmate and back the one who deserves it.'}</span>
@@ -476,7 +486,7 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
         </div>
         <div className="cx-foot-cols">
           <div><b>The set</b><button onClick={() => go('/members')}>Members</button><button onClick={() => go('/executives')}>Executives</button><button onClick={() => go('/about')}>About</button></div>
-          <div><b>Together</b><button onClick={() => go('/events')}>Reunions</button><button onClick={() => go('/gallery')}>Gallery</button><button onClick={() => go('/awards')}>Class awards</button></div>
+          <div><b>Together</b><button onClick={() => go('/events')}>Reunions</button><button onClick={() => go('/gallery')}>Gallery</button><button onClick={() => go('/awards')}>Alumni awards</button></div>
           <div><b>Decide</b><button onClick={() => go('/elections')}>Elections</button><button onClick={() => go('/finance')}>The books</button></div>
           <div><b>Questions</b><span>Message the General Secretary in the class WhatsApp group.</span></div>
         </div>

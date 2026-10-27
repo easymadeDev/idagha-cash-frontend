@@ -7,6 +7,7 @@ import { CalendarDays, Vote, Trophy, Wallet, ArrowRight, Users, GraduationCap, I
 import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
 import { withVacancies } from '../lib/positions';
+import LandingMenu from './LandingMenu';
 import { formatNaira } from '../lib/api';
 import { CountUp } from './motion';
 import { isPublicPath } from '../lib/requireLogin';
@@ -80,7 +81,7 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
       body: election ? `${election.title}: ${election.status === 'voting' ? 'voting is open' : election.status === 'forms' ? 'forms are on sale' : 'results are out'}.` : 'Run for office, or choose who does. One vote per member, per position.',
     },
     {
-      icon: Trophy, title: 'Class awards', href: '/awards', cta: 'Nominate',
+      icon: Trophy, title: 'Alumni awards', href: '/awards', cta: 'Nominate',
       body: awardList.length ? awardList.slice(0, 2).map((a: any) => `${a.title}: ${leader(a)?.memberName || 'open'}`).join(' · ') : 'Best online, best talker, most active. Nominate a classmate.',
     },
     {
@@ -101,7 +102,7 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
           <img src="/logo.png" alt="" width={34} height={34} /> Idagha ’18
         </button>
         <div className="gl-links"><a href="#story">Story</a><a href="#together">Together</a><a href="#memories">Memories</a><a href="#executive">Executive</a></div>
-        <button className="gl-btn gl-btn--solid gl-btn--sm" onClick={enterPortal} disabled={!ready}>{cleared ? 'Open portal' : 'Sign in'}</button>
+        <LandingMenu skin="glass" go={go} enterPortal={enterPortal} cleared={cleared} ready={ready} />
       </motion.nav>
 
       {/* Hero */}
@@ -110,7 +111,7 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
           <motion.img className="gl-crest" src="/logo.png" alt="IDAGHA Secondary School crest" width={150} height={150}
             initial={{ scale: 0.5, rotate: -90, opacity: 0 }} animate={{ scale: 1, rotate: 0, opacity: 1 }} transition={{ duration: 1.2, ease: EASE, delay: 0.3 }} />
           <h1>Class of {GRAD_YEAR},<br /><span>still one set.</span></h1>
-          <p>The home of the Idagha Secondary School class of {GRAD_YEAR}: reunions, elections, class awards, our photographs and our books.</p>
+          <p>The home of the Idagha Secondary School class of {GRAD_YEAR}: reunions, elections, alumni awards, our photographs and our books.</p>
           <div className="gl-ctas">
             <button className="gl-btn gl-btn--solid" onClick={enterPortal} disabled={!ready}>{cleared ? 'Open the portal' : 'Enter the portal'} <ArrowRight size={18} /></button>
             <button className="gl-btn" onClick={() => router.push('/register')}>Join the set</button>
@@ -226,7 +227,7 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
           <div className="gl-foot-brand"><img src="/logo.png" alt="" width={44} height={44} /><b>Idagha ’18</b><span>IDAGHA Secondary School, Class of {GRAD_YEAR} Alumni Association</span></div>
           <div className="gl-foot-cols">
             <div><b>The set</b><button onClick={() => go('/members')}>Members</button><button onClick={() => go('/executives')}>Executives</button><button onClick={() => go('/about')}>About</button></div>
-            <div><b>Together</b><button onClick={() => go('/events')}>Reunions</button><button onClick={() => go('/gallery')}>Gallery</button><button onClick={() => go('/awards')}>Class awards</button></div>
+            <div><b>Together</b><button onClick={() => go('/events')}>Reunions</button><button onClick={() => go('/gallery')}>Gallery</button><button onClick={() => go('/awards')}>Alumni awards</button></div>
             <div><b>Decide</b><button onClick={() => go('/elections')}>Elections</button><button onClick={() => go('/finance')}>The books</button></div>
           </div>
           <div className="gl-foot-base"><span>© {new Date().getFullYear()} IDAGHA Class of {GRAD_YEAR} Alumni</span><span><MapPin size={13} /> Message the General Secretary in the class WhatsApp group</span><button onClick={() => router.push('/admin')}>Secretary login</button></div>

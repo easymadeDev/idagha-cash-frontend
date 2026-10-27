@@ -220,10 +220,10 @@ export default function Home({ classPhotos = [] }: { classPhotos?: { src: string
             )}
           </Reveal>
 
-          {/* ── Class awards ── */}
+          {/* ── Alumni awards ── */}
           <Reveal className="hm-panel hm-span-5" delay={0.08}>
             <div className="hm-panel-head">
-              <h2>Class awards</h2>
+              <h2>Alumni awards</h2>
               <button className="hm-link" onClick={() => router.push('/awards')}>Nominate</button>
             </div>
             {awardList.length === 0 ? (

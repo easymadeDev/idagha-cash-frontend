@@ -7,7 +7,7 @@ import { useToast } from '../../components/Toast';
 import { adminFetcher, errorMessage, initials } from '../../lib/member';
 
 const KEY = '/api/awards/admin/all';
-const EMPTY = { title: '', description: '', emoji: '🏆', season: `${new Date().getFullYear()} Class Awards`, status: 'open', order: 0 };
+const EMPTY = { title: '', description: '', emoji: '🏆', season: `${new Date().getFullYear()} Alumni Awards`, status: 'open', order: 0 };
 const STARTERS = [
   ['Best Online', '📱', 'Always active in the group chat'],
   ['Best Talker', '🎤', 'The voice of the set'],
@@ -64,7 +64,7 @@ export default function AdminAwards() {
 
   return (
     <AdminLayout>
-      <AdminHeader title="Class Awards" sub="Fun categories members nominate and support classmates in."
+      <AdminHeader title="Alumni Awards" sub="Fun categories members nominate and support classmates in."
         action={<div style={{ display: 'flex', gap: 8 }}>
           <button className="btn btn-ghost btn-sm" onClick={addStarters}>Add starter categories</button>
           <button className="btn btn-primary btn-sm" onClick={() => setForm({ ...EMPTY, order: list.length })}>+ New category</button>

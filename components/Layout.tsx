@@ -8,7 +8,7 @@ import { useAutoReveal, EASE } from './motion';
 // Each section gets its own class photograph behind its page title,
 // or artwork where no photo says what the section is (a full path)
 const HERO_PHOTO: Record<string, string> = {
-  '/members': 'idagha-00', '/executives': 'idagha-03', '/about': 'idagha-02', '/events': 'idagha-09',
+  '/members': 'idagha-00', '/executives': 'idagha-03', '/about': 'idagha-02', '/events': '/img/art/events.svg',
   '/elections': '/img/art/elections.svg', '/awards': 'idagha-01', '/gallery': 'idagha-05', '/profile': 'idagha-04',
   '/register': 'idagha-02',
 };
@@ -20,7 +20,7 @@ const heroFor = (path: string) => {
 
 const FOOTER_GROUPS = [
   { title: 'The set', links: [['Home', '/home'], ['Members', '/members'], ['Executives', '/executives'], ['About', '/about']] },
-  { title: 'Together', links: [['Events', '/events'], ['Gallery', '/gallery'], ['Elections', '/elections'], ['Class awards', '/awards']] },
+  { title: 'Together', links: [['Events', '/events'], ['Gallery', '/gallery'], ['Elections', '/elections'], ['Alumni awards', '/awards']] },
   { title: 'Finance', links: [['Overview', '/finance'], ['Contributions', '/contributions'], ['Expenses', '/expenses'], ['Reports', '/reports']] },
 ];
 
