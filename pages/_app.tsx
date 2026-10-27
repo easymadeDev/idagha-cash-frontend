@@ -9,7 +9,7 @@ import 'lenis/dist/lenis.css';
 import '../styles/glass.css';
 import '../styles/skin-glass.css';
 import { SkinSwitch } from '../lib/skin';
-import { isPublicPath } from '../lib/requireLogin';
+import { isPublicPath, AFTER_PIN_KEY } from '../lib/requireLogin';
 import Interactions from '../components/Interactions';
 import '../styles/enhance.css';
 import SmoothScroll from '../components/SmoothScroll';
@@ -122,7 +122,11 @@ export default function App({ Component, pageProps }: AppProps) {
     const gateToken   = sessionStorage.getItem(GATE_TOKEN_KEY);
 
     if (GATE_ONLY(router.pathname)) {
-      if (!isTokenValid(gateToken)) router.replace('/?signin=1');
+      if (!isTokenValid(gateToken)) {
+        // came by a register link: after the PIN, go straight back to the form (no "are you a member?")
+        sessionStorage.setItem(AFTER_PIN_KEY, router.asPath);
+        router.replace('/?signin=1');
+      }
       return;
     }
 

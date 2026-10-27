@@ -2,7 +2,7 @@ import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Image from 'next/image';
 import { useGate } from '../lib/gate';
-import { RETURN_AFTER_APPROVAL, describePath } from '../lib/requireLogin';
+import { RETURN_AFTER_APPROVAL, AFTER_PIN_KEY, describePath } from '../lib/requireLogin';
 
 
 type Step = 'pin' | 'question' | 'verify' | 'found' | 'notfound';
@@ -75,6 +75,13 @@ export default function WelcomePopup() {
       if (res.ok) {
         const data = await res.json();
         if (typeof window !== 'undefined') sessionStorage.setItem('idagha_gate_token', data.gate_token);
+        // Arrived by a register link: the PIN was all that page needs, so go straight to the form
+        const afterPin = sessionStorage.getItem(AFTER_PIN_KEY);
+        if (afterPin) {
+          sessionStorage.removeItem(AFTER_PIN_KEY);
+          dismiss(afterPin);
+          return;
+        }
         setStep('question');
       } else {
         setPinError('Incorrect PIN. Please check with the group admin.');

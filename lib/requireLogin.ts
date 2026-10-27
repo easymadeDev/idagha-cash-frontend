@@ -11,6 +11,9 @@ export const isPublicPath = (href: string) => {
 // Page a newly registered member wanted to act on, kept across sessions until their first approved sign-in
 export const RETURN_AFTER_APPROVAL = 'idagha_return_after_approval';
 
+// A PIN-only page (the register form) the visitor was sent away from; the PIN step returns them to it
+export const AFTER_PIN_KEY = 'idagha_after_pin';
+
 export const describePath = (href: string) => {
   const path = href.split('?')[0];
   if (path.startsWith('/elections/')) return 'the election';
