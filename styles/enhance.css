@@ -208,17 +208,17 @@ html[data-skin='glass'] .wp-input:focus { border-color: #fff !important; box-sha
 
 /* jump chips: one swipeable row on phones, wrapping on wide screens */
 .el-jump { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
-.el-jump a {
+.el-jump button {
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 13px; border-radius: 99px; white-space: nowrap;
   font-size: 0.8rem; font-weight: 600; color: var(--text-2); background: var(--bg-card); border: 1px solid var(--border);
   transition: border-color 0.2s ease, color 0.2s ease;
 }
-.el-jump a b { font-size: 0.68rem; min-width: 18px; height: 18px; display: grid; place-items: center; border-radius: 99px; background: var(--green-500, #12854a); color: #fff; padding: 0 5px; }
-@media (hover: hover) and (pointer: fine) { .el-jump a:hover { border-color: var(--green-400, #2fd27a); color: var(--text-1); } }
+.el-jump button b { font-size: 0.68rem; min-width: 18px; height: 18px; display: grid; place-items: center; border-radius: 99px; background: var(--green-500, #12854a); color: #fff; padding: 0 5px; }
+@media (hover: hover) and (pointer: fine) { .el-jump button:hover { border-color: var(--green-400, #2fd27a); color: var(--text-1); } }
 @media (max-width: 700px) {
   .el-jump { flex-wrap: nowrap; overflow-x: auto; margin-left: -16px; margin-right: -16px; padding: 0 16px 4px; scrollbar-width: none; scroll-snap-type: x proximity; }
   .el-jump::-webkit-scrollbar { display: none; }
-  .el-jump a { scroll-snap-align: start; }
+  .el-jump button { scroll-snap-align: start; }
 }
 
 /* position cards: closed = name + price; the whole head toggles */
@@ -236,8 +236,6 @@ html[data-skin='glass'] .wp-input:focus { border-color: #fff !important; box-sha
   width: 30px; height: 30px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%;
   background: rgba(255, 255, 255, 0.06); color: var(--text-3); transition: transform 0.2s var(--ease), background-color 0.2s ease, color 0.2s ease;
 }
-.el-pos.open .el-pos-chev { transform: rotate(180deg); background: var(--green-500, #12854a); color: #fff; }
-.el-pos.open { border-color: var(--border-mid); }
 @media (hover: hover) and (pointer: fine) { .el-pos-head:hover .el-pos-chev { color: var(--text-1); } }
 
 .el-pos-body { overflow: hidden; }
@@ -258,4 +256,48 @@ html[data-skin='glass'] .wp-input:focus { border-color: #fff !important; box-sha
 @media (prefers-reduced-motion: reduce) {
   .el-pos-head:active { transform: none; }
   .el-pos-chev, .el-guide > summary::after { transition: none; }
+}
+/* position cards are buttons now: reset the button look, keep the card's */
+button.el-pos { width: 100%; text-align: left; font: inherit; color: inherit; border: 1px solid var(--border); background: var(--bg-card); }
+html[data-skin='glass'] button.el-pos { background: rgba(255, 255, 255, 0.1); border-color: rgba(255, 255, 255, 0.25); }
+.el-jump button { cursor: pointer; font-family: inherit; }
+@media (hover: hover) and (pointer: fine) {
+  button.el-pos:hover { border-color: var(--border-mid); }
+  button.el-pos:hover .el-pos-chev { background: var(--green-500, #12854a); color: #fff; }
+}
+
+/* the details sheet: slides up from the bottom on phones, a centred panel on wider screens */
+.el-sheet-overlay {
+  position: fixed; inset: 0; z-index: 390; display: flex; align-items: center; justify-content: center; padding: 24px;
+  background: rgba(2, 5, 3, 0.72); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+}
+html[data-skin='glass'] .el-sheet-overlay { background: rgba(8, 16, 34, 0.55); }
+.el-sheet {
+  width: 100%; max-width: 620px; max-height: min(86vh, 860px); overflow-y: auto; overscroll-behavior: contain;
+  background: var(--bg-card2, #0d1a12); border: 1px solid var(--border-mid); border-radius: 28px;
+  box-shadow: 0 40px 100px -30px rgba(0, 0, 0, 0.85);
+}
+html[data-skin='glass'] .el-sheet { background: rgba(23, 42, 78, 0.94); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-color: rgba(255, 255, 255, 0.3); }
+.el-sheet-grip { display: none; }
+.el-sheet-head {
+  position: sticky; top: 0; z-index: 1; display: flex; align-items: flex-start; gap: 12px; padding: 20px 20px 14px;
+  background: inherit; border-radius: 28px 28px 0 0;
+}
+.el-sheet-kicker { display: block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-3); margin-bottom: 4px; }
+.el-sheet-head h2 { font-family: var(--font-d); font-size: 1.45rem; font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; color: var(--text-1); }
+.el-sheet-close {
+  width: 38px; height: 38px; flex-shrink: 0; display: grid; place-items: center; border-radius: 50%; cursor: pointer;
+  background: rgba(255, 255, 255, 0.08); border: 1px solid var(--border); color: var(--text-2);
+  transition: background-color 0.2s ease, color 0.2s ease, transform 0.12s var(--ease);
+}
+.el-sheet-close:active { transform: scale(0.94); }
+@media (hover: hover) and (pointer: fine) { .el-sheet-close:hover { background: rgba(255, 255, 255, 0.14); color: var(--text-1); } }
+.el-sheet .el-pos-inner { border-top: 1px solid var(--border); padding: 18px 20px 24px; }
+@media (max-width: 700px) {
+  .el-sheet-overlay { padding: 0; align-items: flex-end; }
+  .el-sheet { max-width: none; max-height: 88vh; border-radius: 26px 26px 0 0; border-bottom: 0; padding-bottom: env(safe-area-inset-bottom); }
+  .el-sheet-head { border-radius: 26px 26px 0 0; padding: 8px 16px 12px; }
+  .el-sheet-grip { display: block; width: 42px; height: 5px; border-radius: 99px; background: rgba(255, 255, 255, 0.22); margin: 10px auto 4px; }
+  .el-sheet-head h2 { font-size: 1.25rem; }
+  .el-sheet .el-pos-inner { padding: 16px 16px 26px; }
 }

@@ -228,9 +228,25 @@ export default function ElectionDetail() {
   const [choice, setChoice] = useState<Record<string, string>>({});
   const [confirm, setConfirm] = useState<{ position: any; candidate: any } | null>(null);
   const [voting, setVoting] = useState(false);
-  const [open, setOpen] = useState<Record<string, boolean>>({});
-  const toggle = (pid: string) => setOpen((o) => ({ ...o, [pid]: !o[pid] }));
+  const [sheet, setSheet] = useState<string | null>(null);
   const reduce = useReducedMotion();
+  const [phone, setPhone] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 700px)');
+    const sync = () => setPhone(mq.matches);
+    sync();
+    mq.addEventListener('change', sync);
+    return () => mq.removeEventListener('change', sync);
+  }, []);
+  // While a sheet is open: Escape closes it and the page behind stops scrolling
+  useEffect(() => {
+    if (!sheet) return;
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape' && !document.querySelector('.modal-overlay')) setSheet(null); };
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => { document.body.style.overflow = prev; window.removeEventListener('keydown', onKey); };
+  }, [sheet]);
 
   const refresh = () => { mutate(key); mutate(meKey); };
 
@@ -243,6 +259,7 @@ export default function ElectionDetail() {
 
   const s = STATUS_INFO[el.status] || STATUS_INFO.closed;
   const { lead, rest: guide } = splitDescription(el.description);
+  const sheetPos = el.positions.find((p: any) => p._id === sheet);
   const myForms: any[] = me?.forms || [];
   const votedFor: Record<string, string> = Object.fromEntries((me?.votes || []).map((v: any) => [v.positionId, v.candidateId]));
   const formFor = (pid: string) => myForms.find((f) => f.positionId === pid && f.paymentStatus !== 'rejected');
@@ -309,7 +326,7 @@ export default function ElectionDetail() {
 
         {guide.length > 0 && (
           <details className="card el-guide">
-            <summary>Election guidelines <span>Who can take part, how to contest, how to vote</span></summary>
+            <summary>Election guidelines</summary>
             <Guidelines blocks={guide} />
           </details>
         )}
@@ -318,49 +335,64 @@ export default function ElectionDetail() {
         <div className="section-header" style={{ marginTop: 28 }}>
           <div>
             <div className="section-title">Positions</div>
-            <div className="section-sub">{el.positions.length} offices · tap a card to see the role, requirements and aspirants</div>
+            <div className="section-sub">{el.positions.length} offices</div>
           </div>
         </div>
         <div className="el-jump" role="navigation" aria-label="Positions">
           {el.positions.map((p: any) => (
-            <a key={p._id} href={`#pos-${p._id}`} onClick={(e) => {
-              e.preventDefault();
-              setOpen((o) => ({ ...o, [p._id]: true }));
-              document.getElementById(`pos-${p._id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            }}>{p.title}{p.aspirantCount > 0 && <b>{p.aspirantCount}</b>}</a>
+            <button key={p._id} type="button" onClick={() => setSheet(p._id)}>
+              {p.title}{p.aspirantCount > 0 && <b>{p.aspirantCount}</b>}
+            </button>
           ))}
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {el.positions.map((p: any) => {
-            const mine = formFor(p._id);
-            const voted = votedFor[p._id];
-            const maxVotes = Math.max(1, ...p.candidates.map((c: any) => c.votes || 0));
-            return (
-              <div key={p._id} id={`pos-${p._id}`} className={`card el-pos${open[p._id] ? ' open' : ''}`}>
-                {/* the whole head is the toggle; its own buttons stop the click */}
-                <div className="el-pos-head" role="button" tabIndex={0} aria-expanded={!!open[p._id]}
-                  onClick={() => toggle(p._id)}
-                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(p._id); } }}>
-                  {/* closed: just the office and its form price (or ballot size once voting starts) */}
-                  <h2>{p.title}</h2>
-                  <span className="el-pos-price">
-                    {(mine || voted) && <i className="el-pos-dot" title={voted ? 'You voted' : 'You have this form'} />}
-                    {el.status === 'forms' || el.status === 'draft'
-                      ? formatNaira(p.formPrice)
-                      : `${p.candidates.length} candidate${p.candidates.length === 1 ? '' : 's'}`}
-                  </span>
-                  <span className="el-pos-chev" aria-hidden="true">
-                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" /></svg>
-                  </span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {el.positions.map((p: any) => (
+            // a card is just the office and its form price (or ballot size once voting starts); tapping opens its sheet
+            <button key={p._id} type="button" className="card el-pos el-pos-head" aria-haspopup="dialog" onClick={() => setSheet(p._id)}>
+              <h2>{p.title}</h2>
+              <span className="el-pos-price">
+                {(formFor(p._id) || votedFor[p._id]) && <i className="el-pos-dot" title={votedFor[p._id] ? 'You voted' : 'You have this form'} />}
+                {el.status === 'forms' || el.status === 'draft'
+                  ? formatNaira(p.formPrice)
+                  : `${p.candidates.length} candidate${p.candidates.length === 1 ? '' : 's'}`}
+              </span>
+              <span className="el-pos-chev" aria-hidden="true">
+                <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" /></svg>
+              </span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Position details: a bottom sheet on phones, a centred panel on wider screens */}
+      <AnimatePresence>
+        {sheetPos && (() => {
+          const p = sheetPos;
+          const mine = formFor(p._id);
+          const voted = votedFor[p._id];
+          const maxVotes = Math.max(1, ...p.candidates.map((c: any) => c.votes || 0));
+          const hidden = reduce ? { opacity: 0 } : phone ? { transform: 'translateY(100%)' } : { opacity: 0, transform: 'translateY(16px) scale(0.97)' };
+          const shown = reduce ? { opacity: 1 } : phone ? { transform: 'translateY(0%)' } : { opacity: 1, transform: 'translateY(0px) scale(1)' };
+          return (
+            <motion.div key="sheet" className="el-sheet-overlay" onClick={() => setSheet(null)}
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2, ease: EASE }}>
+              <motion.div className="el-sheet" role="dialog" aria-modal="true" aria-labelledby="el-sheet-title" data-lenis-prevent
+                onClick={(e) => e.stopPropagation()}
+                initial={hidden} animate={shown} exit={hidden}
+                transition={phone ? { duration: 0.32, ease: [0.32, 0.72, 0, 1] } : { duration: 0.22, ease: EASE }}>
+                <div className="el-sheet-grip" aria-hidden="true" />
+                <div className="el-sheet-head">
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <span className="el-sheet-kicker">{el.title}</span>
+                    <h2 id="el-sheet-title">{p.title}</h2>
+                  </div>
+                  <button type="button" className="el-sheet-close" aria-label="Close" autoFocus onClick={() => setSheet(null)}>
+                    <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18" strokeLinecap="round" /></svg>
+                  </button>
                 </div>
-                <AnimatePresence initial={false}>
-                  {open[p._id] && (
-                  <motion.div key="body" className="el-pos-body"
-                    initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
-                    transition={{ height: { duration: reduce ? 0 : 0.26, ease: EASE }, opacity: { duration: 0.18, ease: EASE } }}>
-                    <div className="el-pos-inner">
+                <div className="el-pos-inner">
                 <div className="el-pos-meta">
-                  {p.aspirantCount} aspirant{p.aspirantCount === 1 ? '' : 's'} · {p.candidates.length} cleared to contest
+                  {p.aspirantCount} aspirant{p.aspirantCount === 1 ? '' : 's'} · {p.candidates.length} cleared
                 </div>
                 {p.description && <p className="el-pos-desc">{p.description}</p>}
                 {p.requirements && <p className="el-pos-req"><strong>Requirements</strong>{p.requirements}</p>}
@@ -381,7 +413,7 @@ export default function ElectionDetail() {
                   if (people.length === 0) {
                     return el.status !== 'forms' || p.aspirantCount === 0 ? (
                       <p className="el-pos-empty">
-                        {ballot ? 'No cleared candidates for this position.' : 'No aspirants yet. Be the first to pick up this form.'}
+                        {ballot ? 'No candidates yet.' : 'No aspirants yet.'}
                       </p>
                     ) : null;
                   }
@@ -435,15 +467,12 @@ export default function ElectionDetail() {
                     </button>
                   </div>
                 )}
-                    </div>
-                  </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            );
-          })}
-        </div>
-      </div>
+                </div>
+              </motion.div>
+            </motion.div>
+          );
+        })()}
+      </AnimatePresence>
 
       {buying && (
         <BuyFormModal election={el} position={buying} onClose={() => setBuying(null)}
