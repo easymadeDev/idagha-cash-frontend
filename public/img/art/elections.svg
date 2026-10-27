@@ -1,0 +1,64 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 640" preserveAspectRatio="xMidYMid slice">
+  <defs>
+    <radialGradient id="glow" cx="72%" cy="45%" r="55%">
+      <stop offset="0" stop-color="#12854a" stop-opacity="0.75"/>
+      <stop offset="0.55" stop-color="#0b3a22" stop-opacity="0.6"/>
+      <stop offset="1" stop-color="#050a07"/>
+    </radialGradient>
+    <linearGradient id="box" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#14563a"/>
+      <stop offset="1" stop-color="#0a2b1a"/>
+    </linearGradient>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbf6e8"/>
+      <stop offset="1" stop-color="#e9dfc2"/>
+    </linearGradient>
+    <pattern id="grid" width="48" height="48" patternUnits="userSpaceOnUse">
+      <path d="M48 0H0V48" fill="none" stroke="#2fd27a" stroke-opacity="0.07" stroke-width="1"/>
+    </pattern>
+  </defs>
+
+  <rect width="1600" height="640" fill="#050a07"/>
+  <rect width="1600" height="640" fill="url(#glow)"/>
+  <rect width="1600" height="640" fill="url(#grid)"/>
+
+  <!-- giant outline word -->
+  <text x="1560" y="600" text-anchor="end" font-family="Arial Black, Arial, sans-serif" font-weight="900" font-size="300"
+        fill="none" stroke="#f0c445" stroke-opacity="0.13" stroke-width="3" letter-spacing="-8">VOTE</text>
+
+  <!-- ticked ballots floating behind -->
+  <g opacity="0.35">
+    <g transform="translate(860 120) rotate(-14)">
+      <rect width="120" height="150" rx="10" fill="url(#paper)"/>
+      <path d="M28 78l22 22 44-48" stroke="#12854a" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g transform="translate(1400 90) rotate(12)">
+      <rect width="104" height="132" rx="10" fill="url(#paper)"/>
+      <path d="M24 70l18 18 38-42" stroke="#12854a" stroke-width="11" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+  </g>
+
+  <!-- ballot box -->
+  <g transform="translate(1000 150)">
+    <!-- paper going in -->
+    <g transform="rotate(-4 150 60)">
+      <rect x="80" y="-30" width="160" height="200" rx="12" fill="url(#paper)"/>
+      <path d="M110 30h100M110 60h100M110 90h64" stroke="#0f3d22" stroke-width="9" stroke-linecap="round" opacity="0.28"/>
+      <path d="M118 52l26 26 52-58" stroke="#12854a" stroke-width="16" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <!-- box body -->
+    <rect x="0" y="150" width="320" height="230" rx="22" fill="url(#box)" stroke="#f0c445" stroke-width="6"/>
+    <rect x="70" y="140" width="180" height="22" rx="11" fill="#050a07" stroke="#f0c445" stroke-width="5"/>
+    <!-- crest shield on the box -->
+    <path d="M160 214l46 16v38c0 32-20 52-46 62-26-10-46-30-46-62v-38z" fill="#0b2a19" stroke="#f0c445" stroke-width="5"/>
+    <path d="M140 270l14 14 28-32" stroke="#2fd27a" stroke-width="9" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- sparkles -->
+  <g fill="#f0c445">
+    <circle cx="960" cy="420" r="5" opacity="0.7"/>
+    <circle cx="1370" cy="300" r="4" opacity="0.6"/>
+    <circle cx="1450" cy="460" r="6" opacity="0.5"/>
+    <circle cx="900" cy="300" r="3" opacity="0.6"/>
+  </g>
+</svg>

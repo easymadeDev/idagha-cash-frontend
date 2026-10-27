@@ -5,15 +5,17 @@ import Navbar from './Navbar';
 import MobileTabBar from './MobileTabBar';
 import { useAutoReveal, EASE } from './motion';
 
-// Each section gets its own class photograph behind its page title
+// Each section gets its own class photograph behind its page title,
+// or artwork where no photo says what the section is (a full path)
 const HERO_PHOTO: Record<string, string> = {
   '/members': 'idagha-00', '/executives': 'idagha-03', '/about': 'idagha-02', '/events': 'idagha-09',
-  '/elections': 'idagha-08', '/awards': 'idagha-01', '/gallery': 'idagha-05', '/profile': 'idagha-04',
+  '/elections': '/img/art/elections.svg', '/awards': 'idagha-01', '/gallery': 'idagha-05', '/profile': 'idagha-04',
   '/register': 'idagha-02',
 };
 const heroFor = (path: string) => {
   const key = Object.keys(HERO_PHOTO).find((p) => path === p || path.startsWith(p + '/'));
-  return `url(/img/class/${key ? HERO_PHOTO[key] : 'idagha-06'}.jpg)`;
+  const img = key ? HERO_PHOTO[key] : 'idagha-06';
+  return `url(${img.startsWith('/') ? img : `/img/class/${img}.jpg`})`;
 };
 
 const FOOTER_GROUPS = [
@@ -35,7 +37,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         ref={mainRef}
         className="page-wrap"
         key={router.pathname}
-        style={{ ['--hero-img' as any]: heroFor(router.pathname) }}
+        // artwork keeps its subject on the right, clear of the title
+        style={{ ['--hero-img' as any]: heroFor(router.pathname), ['--hero-pos' as any]: heroFor(router.pathname).includes('/art/') ? '78% 50%' : 'center 30%' }}
         // no filter here: a leftover filter would trap position:fixed modals inside the page
         initial={reduce ? false : { opacity: 0, y: 40, scale: 0.985 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}

@@ -10,6 +10,8 @@ import { formatNaira, formatDate } from '../../lib/api';
 import { STATUS_INFO, ELECTION_STAGES } from '../../lib/elections';
 import Poster from '../../components/Poster';
 import { useRequireLogin } from '../../lib/requireLogin';
+import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { EASE } from '../../components/motion';
 
 const PAY_BADGE: Record<string, [string, string]> = {
   pending: ['badge-yellow', 'Payment pending'],
@@ -35,6 +37,42 @@ function Stages({ status }: { status: string }) {
           </div>
         </div>
       ))}
+    </div>
+  );
+}
+
+// The admin writes guidelines as plain text: the first paragraph is the lead, the rest is
+// paragraphs with optional ALL-CAPS headings, "•"/"-" bullets and "1." numbered steps
+const splitDescription = (text = '') => {
+  const blocks = text.trim().split(/\n\s*\n/).filter(Boolean);
+  return { lead: blocks[0] || '', rest: blocks.slice(1) };
+};
+const isHeading = (line: string) => line.length < 48 && /[A-Z]/.test(line) && line === line.toUpperCase();
+const BULLET = /^[•\-*]\s+/;
+const STEP = /^\d+[.)]\s+/;
+
+function Guidelines({ blocks }: { blocks: string[] }) {
+  return (
+    <div className="el-guide-body">
+      {blocks.map((block, bi) => {
+        const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
+        const out: JSX.Element[] = [];
+        let i = 0;
+        if (lines[0] && isHeading(lines[0])) { out.push(<h3 key="h">{lines[0].toLowerCase()}</h3>); i = 1; }
+        while (i < lines.length) {
+          const kind = BULLET.test(lines[i]) ? 'ul' : STEP.test(lines[i]) ? 'ol' : 'p';
+          const group: string[] = [];
+          while (i < lines.length && (kind === 'ul' ? BULLET.test(lines[i]) : kind === 'ol' ? STEP.test(lines[i]) : !BULLET.test(lines[i]) && !STEP.test(lines[i]))) {
+            group.push(lines[i].replace(kind === 'ul' ? BULLET : kind === 'ol' ? STEP : /^/, ''));
+            i++;
+          }
+          out.push(kind === 'p'
+            ? <p key={i}>{group.join(' ')}</p>
+            : kind === 'ul' ? <ul key={i}>{group.map((g, gi) => <li key={gi}>{g}</li>)}</ul>
+            : <ol key={i}>{group.map((g, gi) => <li key={gi}>{g}</li>)}</ol>);
+        }
+        return <section key={bi}>{out}</section>;
+      })}
     </div>
   );
 }
@@ -190,6 +228,9 @@ export default function ElectionDetail() {
   const [choice, setChoice] = useState<Record<string, string>>({});
   const [confirm, setConfirm] = useState<{ position: any; candidate: any } | null>(null);
   const [voting, setVoting] = useState(false);
+  const [open, setOpen] = useState<Record<string, boolean>>({});
+  const toggle = (pid: string) => setOpen((o) => ({ ...o, [pid]: !o[pid] }));
+  const reduce = useReducedMotion();
 
   const refresh = () => { mutate(key); mutate(meKey); };
 
@@ -201,6 +242,7 @@ export default function ElectionDetail() {
   if (!el) return <Layout><div className="container" style={{ paddingTop: 48 }}><div className="skeleton" style={{ height: 320 }} /></div></Layout>;
 
   const s = STATUS_INFO[el.status] || STATUS_INFO.closed;
+  const { lead, rest: guide } = splitDescription(el.description);
   const myForms: any[] = me?.forms || [];
   const votedFor: Record<string, string> = Object.fromEntries((me?.votes || []).map((v: any) => [v.positionId, v.candidateId]));
   const formFor = (pid: string) => myForms.find((f) => f.positionId === pid && f.paymentStatus !== 'rejected');
@@ -223,11 +265,11 @@ export default function ElectionDetail() {
         <div className="page-header" style={{ paddingTop: 20, paddingBottom: 0 }}>
           <div style={{ marginBottom: 14 }}><span className={`badge ${s.badge}`}><span className="badge-dot" />{s.label}</span></div>
           <h1>{el.title}</h1>
-          {el.description && <p style={{ whiteSpace: 'pre-wrap' }}>{el.description}</p>}
+          {lead && <p className="el-lead">{lead}</p>}
         </div>
         <Stages status={el.status} />
 
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 28, fontSize: '0.82rem', color: 'var(--text-3)' }}>
+        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20, fontSize: '0.82rem', color: 'var(--text-3)' }}>
           {el.formSaleEnds && <span className="badge badge-yellow">Form sales end {formatDate(el.formSaleEnds)}</span>}
           {el.votingStarts && <span className="badge badge-blue">Voting starts {formatDate(el.votingStarts)}</span>}
           {el.votingEnds && <span className="badge badge-green">Voting ends {formatDate(el.votingEnds)}</span>}
@@ -265,32 +307,71 @@ export default function ElectionDetail() {
           </div>
         )}
 
+        {guide.length > 0 && (
+          <details className="card el-guide">
+            <summary>Election guidelines <span>Who can take part, how to contest, how to vote</span></summary>
+            <Guidelines blocks={guide} />
+          </details>
+        )}
+
         {/* Positions */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+        <div className="section-header" style={{ marginTop: 28 }}>
+          <div>
+            <div className="section-title">Positions</div>
+            <div className="section-sub">{el.positions.length} offices · tap a card to see the role, requirements and aspirants</div>
+          </div>
+        </div>
+        <div className="el-jump" role="navigation" aria-label="Positions">
+          {el.positions.map((p: any) => (
+            <a key={p._id} href={`#pos-${p._id}`} onClick={(e) => {
+              e.preventDefault();
+              setOpen((o) => ({ ...o, [p._id]: true }));
+              document.getElementById(`pos-${p._id}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }}>{p.title}{p.aspirantCount > 0 && <b>{p.aspirantCount}</b>}</a>
+          ))}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
           {el.positions.map((p: any) => {
             const mine = formFor(p._id);
             const voted = votedFor[p._id];
             const maxVotes = Math.max(1, ...p.candidates.map((c: any) => c.votes || 0));
             return (
-              <div key={p._id} className="card" style={{ padding: 22 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <h2 style={{ fontFamily: 'var(--font-d)', fontSize: '1.25rem', fontWeight: 800 }}>{p.title}</h2>
-                    <div style={{ fontSize: '0.8rem', color: 'var(--text-3)', marginTop: 4 }}>
-                      Form: <strong style={{ color: 'var(--yellow)' }}>{formatNaira(p.formPrice)}</strong> · {p.aspirantCount} aspirant{p.aspirantCount === 1 ? '' : 's'} · {p.candidates.length} cleared
-                    </div>
-                    {p.description && <p style={{ color: 'var(--text-2)', fontSize: '0.88rem', marginTop: 10 }}>{p.description}</p>}
-                    {p.requirements && <p style={{ color: 'var(--text-3)', fontSize: '0.82rem', marginTop: 6 }}><strong>Requirements:</strong> {p.requirements}</p>}
-                  </div>
-                  {el.status === 'forms' && (
-                    mine
-                      ? <span className="badge badge-green">You have this form</span>
-                      : <button className="btn btn-primary btn-sm" onClick={() => requireLogin(() => setBuying(p))}>
-                          {cleared ? 'Buy form' : 'Sign in to buy form'} · {formatNaira(p.formPrice)}
-                        </button>
-                  )}
-                  {el.status === 'voting' && voted && <span className="badge badge-green">✓ You voted</span>}
+              <div key={p._id} id={`pos-${p._id}`} className={`card el-pos${open[p._id] ? ' open' : ''}`}>
+                {/* the whole head is the toggle; its own buttons stop the click */}
+                <div className="el-pos-head" role="button" tabIndex={0} aria-expanded={!!open[p._id]}
+                  onClick={() => toggle(p._id)}
+                  onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(p._id); } }}>
+                  {/* closed: just the office and its form price (or ballot size once voting starts) */}
+                  <h2>{p.title}</h2>
+                  <span className="el-pos-price">
+                    {(mine || voted) && <i className="el-pos-dot" title={voted ? 'You voted' : 'You have this form'} />}
+                    {el.status === 'forms' || el.status === 'draft'
+                      ? formatNaira(p.formPrice)
+                      : `${p.candidates.length} candidate${p.candidates.length === 1 ? '' : 's'}`}
+                  </span>
+                  <span className="el-pos-chev" aria-hidden="true">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" strokeLinecap="round" strokeLinejoin="round" /></svg>
+                  </span>
                 </div>
+                <AnimatePresence initial={false}>
+                  {open[p._id] && (
+                  <motion.div key="body" className="el-pos-body"
+                    initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }}
+                    transition={{ height: { duration: reduce ? 0 : 0.26, ease: EASE }, opacity: { duration: 0.18, ease: EASE } }}>
+                    <div className="el-pos-inner">
+                <div className="el-pos-meta">
+                  {p.aspirantCount} aspirant{p.aspirantCount === 1 ? '' : 's'} · {p.candidates.length} cleared to contest
+                </div>
+                {p.description && <p className="el-pos-desc">{p.description}</p>}
+                {p.requirements && <p className="el-pos-req"><strong>Requirements</strong>{p.requirements}</p>}
+                {el.status === 'forms' && (
+                  mine
+                    ? <span className="badge badge-green" style={{ alignSelf: 'flex-start' }}>You have this form</span>
+                    : <button className="btn btn-primary el-pos-cta" onClick={() => requireLogin(() => setBuying(p))}>
+                        {cleared ? 'Buy form' : 'Sign in to buy form'} · {formatNaira(p.formPrice)}
+                      </button>
+                )}
+                {el.status === 'voting' && voted && <span className="badge badge-green" style={{ alignSelf: 'flex-start' }}>✓ You voted</span>}
 
                 {(() => {
                   // Before voting every paid aspirant shows; from voting on, only the ballot
@@ -299,8 +380,8 @@ export default function ElectionDetail() {
                     .sort((a: any, b: any) => (el.status === 'closed' ? (b.votes || 0) - (a.votes || 0) : 0));
                   if (people.length === 0) {
                     return el.status !== 'forms' || p.aspirantCount === 0 ? (
-                      <p style={{ color: 'var(--text-3)', fontSize: '0.86rem', marginTop: 14 }}>
-                        {ballot ? 'No cleared candidates for this position.' : 'No aspirants yet — be the first to pick up this form.'}
+                      <p className="el-pos-empty">
+                        {ballot ? 'No cleared candidates for this position.' : 'No aspirants yet. Be the first to pick up this form.'}
                       </p>
                     ) : null;
                   }
@@ -354,6 +435,10 @@ export default function ElectionDetail() {
                     </button>
                   </div>
                 )}
+                    </div>
+                  </motion.div>
+                  )}
+                </AnimatePresence>
               </div>
             );
           })}
