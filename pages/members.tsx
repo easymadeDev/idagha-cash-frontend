@@ -115,7 +115,7 @@ export default function MembersPage() {
         {filtered.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: 56, color: 'var(--text-3)' }}>
             {memberList.length === 0
-              ? 'No members added yet. The Secretary will add members via the admin portal.'
+              ? 'No members added yet. The General Secretary will add members via the admin portal.'
               : 'No members match your search.'}
           </div>
         ) : (
@@ -208,7 +208,7 @@ export default function MembersPage() {
         )}
 
         <div style={{ marginTop: 28, padding: '14px 18px', background: 'rgba(22,101,52,0.04)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-3)', textAlign: 'center' }}>
-          Member information is publicly visible for group transparency. Contact the Secretary to register or update your details.
+          Member information is publicly visible for group transparency. Contact the General Secretary to register or update your details.
         </div>
       </div>
       <style>{`

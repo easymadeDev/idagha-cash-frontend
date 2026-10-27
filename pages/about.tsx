@@ -134,7 +134,7 @@ export default function AboutPage() {
             </div>
             <h3 style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: '1.05rem', marginBottom: 10 }}>Financial Responsibility</h3>
             <p style={{ color: 'var(--text-2)', fontSize: '0.875rem', lineHeight: 1.8 }}>
-              All financial activities are managed by the Group Secretary, responsible for accurate record keeping. Every entry is verifiable by all members.
+              All financial activities are managed by the General Secretary, responsible for accurate record keeping. Every entry is verifiable by all members.
             </p>
           </div>
         </div>
@@ -161,12 +161,12 @@ export default function AboutPage() {
         <div className="card" style={{ marginBottom: 16 }}>
           <div style={{ fontFamily: 'var(--font-d)', fontWeight: 800, fontSize: '1rem', marginBottom: 10 }}>Portal Administration</div>
           <p style={{ color: 'var(--text-2)', fontSize: '0.875rem', lineHeight: 1.75, marginBottom: 12 }}>
-            This portal is managed by the Group Secretary. The admin portal is accessible at{' '}
+            This portal is managed by the General Secretary. The admin portal is accessible at{' '}
             <strong style={{ color: 'var(--green-400)', cursor: 'pointer' }} onClick={() => router.push('/admin')}>/admin</strong>{' '}
             and requires secure login credentials.
           </p>
           <div style={{ padding: '12px 16px', background: 'rgba(8,15,10,0.8)', borderRadius: 'var(--radius-sm)', border: '1px solid var(--border)', fontSize: '0.82rem', color: 'var(--text-3)', lineHeight: 1.7 }}>
-            To report a discrepancy or request a correction, contact the Group Secretary directly. All concerns will be addressed and documented transparently.
+            To report a discrepancy or request a correction, contact the General Secretary directly. All concerns will be addressed and documented transparently.
           </div>
         </div>
 

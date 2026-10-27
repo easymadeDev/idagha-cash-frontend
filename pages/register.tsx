@@ -126,12 +126,12 @@ export default function RegisterPage() {
               Registration Submitted!
             </h2>
             <p style={{ color: 'var(--text-3)', lineHeight: 1.8, marginBottom: 24, fontSize: '0.95rem' }}>
-              Thank you, <strong style={{ color: 'var(--text-1)' }}>{form.name}</strong>! Your registration is pending approval by the Secretary.
+              Thank you, <strong style={{ color: 'var(--text-1)' }}>{form.name}</strong>! Your registration is pending approval by the General Secretary.
             </p>
             {returnTo && (
               <div className="alert alert-success" style={{ textAlign: 'left', flexDirection: 'column', gap: 10 }}>
                 <span>
-                  Buying forms, voting, nominating and RSVPs open up once the Secretary approves you.
+                  Buying forms, voting, nominating and RSVPs open up once the General Secretary approves you.
                   After approval, sign in and you’ll be taken straight back to <strong>{describePath(returnTo)}</strong>.
                 </span>
                 <button className="btn btn-ghost btn-sm" style={{ alignSelf: 'flex-start' }} onClick={() => router.push(returnTo)}>Back to {describePath(returnTo)}</button>
@@ -191,7 +191,7 @@ export default function RegisterPage() {
           <span className="badge badge-green" style={{ marginBottom: 10, display: 'inline-flex' }}><span className="badge-dot" />Membership Registration</span>
           <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', marginBottom: 8 }}>Join IDAGHA Class of 2018</h1>
           <p style={{ color: 'var(--text-3)', fontSize: '0.88rem', maxWidth: 420, margin: '0 auto' }}>
-            Fill in your details below. Your profile will appear on the members directory after the Secretary approves.
+            Fill in your details below. Your profile will appear on the members directory after the General Secretary approves.
           </p>
         </div>
 
@@ -337,7 +337,7 @@ export default function RegisterPage() {
           {/* Privacy notice */}
           <div style={{ display: 'flex', gap: 10, padding: '13px 16px', background: 'rgba(22,101,52,0.04)', border: '1px solid rgba(22,101,52,0.12)', borderRadius: 'var(--radius-sm)', marginBottom: 24, fontSize: '0.8rem', color: 'var(--text-3)', lineHeight: 1.6 }}>
             <svg width="16" height="16" fill="none" stroke="var(--green-400)" strokeWidth="2" viewBox="0 0 24 24" style={{ flexShrink: 0, marginTop: 1 }}><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" strokeLinecap="round" strokeLinejoin="round"/></svg>
-            <span>Your registration will be reviewed by the Secretary before appearing on the public directory. Your phone and WhatsApp numbers will <strong style={{ color: 'var(--text-2)' }}>not</strong> be shown publicly.</span>
+            <span>Your registration will be reviewed by the General Secretary before appearing on the public directory. Your phone and WhatsApp numbers will <strong style={{ color: 'var(--text-2)' }}>not</strong> be shown publicly.</span>
           </div>
 
           <button type="submit" className="btn btn-primary" disabled={saving} style={{ width: '100%', padding: '14px', fontSize: '0.95rem' }}>

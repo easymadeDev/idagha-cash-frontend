@@ -122,7 +122,7 @@ export default function AwardsPage() {
         {isLoading ? (
           <div className="grid-auto">{[...Array(3)].map((_, i) => <div key={i} className="skeleton" style={{ height: 280 }} />)}</div>
         ) : categories.length === 0 ? (
-          <div className="card" style={{ textAlign: 'center', padding: 56, color: 'var(--text-3)' }}>No award categories yet. The Secretary will open them soon.</div>
+          <div className="card" style={{ textAlign: 'center', padding: 56, color: 'var(--text-3)' }}>No award categories yet. The General Secretary will open them soon.</div>
         ) : (
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
             {categories.map((cat: any) => {

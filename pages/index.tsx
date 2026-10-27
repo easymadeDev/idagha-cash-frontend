@@ -6,6 +6,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/dist/ScrollTrigger';
 import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
+import { withVacancies } from '../lib/positions';
 import { formatNaira } from '../lib/api';
 import { CountUp } from '../components/motion';
 import GlassLanding from '../components/GlassLanding';
@@ -127,7 +128,7 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
   const next = upcoming[0];
   const clock = useCountdown(next?.date);
   const election = Array.isArray(elections) ? elections[0] : null;
-  const execList = Array.isArray(execs) ? execs : [];
+  const execList = Array.isArray(execs) ? withVacancies(execs) : [];
   const awardList = Array.isArray(awards) ? awards : [];
   const yearsOut = new Date().getFullYear() - GRAD_YEAR;
 
@@ -431,10 +432,10 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
         </div>
         <div className="cx-split-list">
           {execList.length === 0 ? (
-            <div className="cx-exec"><b>The executive list is on its way</b><span>The Secretary will add each officer here.</span></div>
-          ) : execList.slice(0, 8).map((x: any) => (
-            <div key={x._id} className="cx-exec">
-              <div className="cx-exec-face">{x.photo ? <img src={x.photo} alt={x.name} /> : initials(x.name)}</div>
+            <div className="cx-exec"><b>The executive list is on its way</b><span>The General Secretary will add each officer here.</span></div>
+          ) : execList.map((x: any) => (
+            <div key={x._id} className={`cx-exec${x.vacant ? ' is-vacant' : ''}`}>
+              <div className="cx-exec-face">{x.photo ? <img src={x.photo} alt={x.name} /> : x.vacant ? '?' : initials(x.name)}</div>
               <div><span>{x.position}</span><b>{x.name}</b></div>
             </div>
           ))}
@@ -462,7 +463,7 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
       <section className="cx-section cx-cta" aria-labelledby="cta-h">
         <img className="cx-cta-crest" src="/logo.png" alt="" width={180} height={180} />
         <h2 id="cta-h" className="cx-cta-title cx-sweep">Not on the register yet?</h2>
-        <p>Add your name, phone and photo. The Secretary confirms you, and the portal opens. Registration is free.</p>
+        <p>Add your name, phone and photo. The General Secretary confirms you, and the portal opens. Registration is free.</p>
         <div className="cx-hero-ctas" style={{ justifyContent: 'center' }}>
           <button className="cx-btn cx-btn--primary" onClick={() => router.push('/register')}>Register as a member</button>
           <button className="cx-btn cx-btn--glass" onClick={enterPortal} disabled={!ready}>I’m already a member</button>
@@ -477,7 +478,7 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
           <div><b>The set</b><button onClick={() => go('/members')}>Members</button><button onClick={() => go('/executives')}>Executives</button><button onClick={() => go('/about')}>About</button></div>
           <div><b>Together</b><button onClick={() => go('/events')}>Reunions</button><button onClick={() => go('/gallery')}>Gallery</button><button onClick={() => go('/awards')}>Class awards</button></div>
           <div><b>Decide</b><button onClick={() => go('/elections')}>Elections</button><button onClick={() => go('/finance')}>The books</button></div>
-          <div><b>Questions</b><span>Message the Secretary in the class WhatsApp group.</span></div>
+          <div><b>Questions</b><span>Message the General Secretary in the class WhatsApp group.</span></div>
         </div>
         <div className="cx-foot-base">
           <span>© {new Date().getFullYear()} IDAGHA Class of {GRAD_YEAR} Alumni</span>

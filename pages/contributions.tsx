@@ -17,7 +17,7 @@ const STEPS = [
   { n: '01', title: 'Choose a Category', desc: 'Pick what your contribution is for (dues, reunion fund, etc.)' },
   { n: '02', title: 'Transfer the Amount', desc: 'Send any amount to one of the bank accounts below via mobile banking or USSD' },
   { n: '03', title: 'Fill This Form', desc: 'Enter your name, amount, and upload your receipt/screenshot as proof' },
-  { n: '04', title: 'Admin Confirms', desc: 'The Secretary verifies and records it. It appears publicly on the contributions page' },
+  { n: '04', title: 'Admin Confirms', desc: 'The General Secretary verifies and records it. It appears publicly on the contributions page' },
 ];
 
 const avatarColors = [
@@ -161,7 +161,7 @@ export default function ContributionsPage() {
                 Submission Received!
               </h2>
               <p style={{ color: 'var(--text-3)', fontSize: '0.9rem', lineHeight: 1.7, marginBottom: 28 }}>
-                Thank you, <strong style={{ color: 'var(--text-2)' }}>{form.name}</strong>! Your contribution notice has been sent to the Secretary for verification.
+                Thank you, <strong style={{ color: 'var(--text-2)' }}>{form.name}</strong>! Your contribution notice has been sent to the General Secretary for verification.
                 Once confirmed, your name and amount will appear publicly on the contributions page. 🎉
               </p>
               <div style={{ display: 'flex', gap: 10, justifyContent: 'center', flexWrap: 'wrap' }}>
@@ -241,7 +241,7 @@ export default function ContributionsPage() {
               {/* RIGHT: Submission form */}
               <div className="contribute-right">
                 <div className="card contrib-form-card" style={{ position: 'sticky', top: 90 }}>
-                  <div className="section-title" style={{ marginBottom: 6 }}>Notify the Secretary</div>
+                  <div className="section-title" style={{ marginBottom: 6 }}>Notify the General Secretary</div>
                   <p style={{ fontSize: '0.82rem', color: 'var(--text-3)', marginBottom: 22, lineHeight: 1.6 }}>
                     After transferring, fill this form so your payment can be confirmed and recorded publicly.
                   </p>
@@ -416,7 +416,7 @@ export default function ContributionsPage() {
               </div>
             )}
             <div style={{ marginTop: 24, padding: '16px 20px', background: 'rgba(22,101,52,0.04)', border: '1px solid var(--border)', borderRadius: 'var(--radius-sm)', fontSize: '0.82rem', color: 'var(--text-3)', textAlign: 'center' }}>
-              All contribution records are publicly visible. Contact the Secretary to make a contribution or report a discrepancy.
+              All contribution records are publicly visible. Contact the General Secretary to make a contribution or report a discrepancy.
             </div>
           </>
         )}

@@ -159,3 +159,21 @@ html[data-skin='glass'] .wp-input:focus { border-color: #fff !important; box-sha
   .page-wrap .page-header::before { animation: none; }
   .cursor-glow { display: none; }
 }
+
+/* ── Vacant official seats: present in every executive list, quieter than a filled one ── */
+.is-vacant { opacity: 0.6; }
+.is-vacant .avatar, .is-vacant .cx-exec-face, .is-vacant .gl-face {
+  background: transparent !important; border: 1.5px dashed currentColor; color: var(--text-3, rgba(255, 255, 255, 0.6));
+}
+.is-vacant:hover { opacity: 0.85; }@media (max-width: 640px) {
+  .exec-card.is-vacant { flex-direction: row; flex-wrap: wrap; align-items: center; justify-content: flex-start; text-align: left; gap: 4px 12px; padding: 12px 16px; }
+  .exec-card.is-vacant .avatar { width: 36px; height: 40px; font-size: 0.8rem; grid-row: span 2; }
+  .exec-card.is-vacant .exec-pos { flex: 1; }
+  .exec-card.is-vacant > div:nth-child(3) { font-size: 0.85rem !important; font-weight: 600 !important; }
+  .exec-card.is-vacant p { display: none; }
+}@media (max-width: 640px) {
+  .gl-exec.is-vacant { flex-direction: row; text-align: left; padding: 12px 16px; border-radius: 18px; gap: 12px; }
+  .gl-exec.is-vacant .gl-face { width: 38px; height: 38px; font-size: 0.85rem; border-width: 1.5px; }
+  .gl-exec.is-vacant b { order: 3; margin-left: auto; font-size: 0.85rem; }
+  .gl-exec.is-vacant small { order: 2; }
+}

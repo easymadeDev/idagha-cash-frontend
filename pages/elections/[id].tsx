@@ -92,7 +92,7 @@ function BuyFormModal({ election, position, onClose, onDone }: { election: any; 
           </div>
         ) : (
           <div className="alert" style={{ borderColor: 'var(--yellow-border)', background: 'var(--yellow-bg)', color: 'var(--yellow)' }}>
-            Bank details have not been published yet. Ask the Secretary for the account to pay into.
+            Bank details have not been published yet. Ask the General Secretary for the account to pay into.
           </div>
         )}
         <form onSubmit={submit}>
@@ -256,7 +256,7 @@ export default function ElectionDetail() {
                     </div>
                     {f.paymentStatus === 'rejected' && f.rejectReason && <p style={{ color: 'var(--red)', fontSize: '0.84rem', marginTop: 10 }}>Reason: {f.rejectReason}</p>}
                     {f.applicationStatus === 'disqualified' && f.screeningNote && <p style={{ color: 'var(--red)', fontSize: '0.84rem', marginTop: 10 }}>Screening note: {f.screeningNote}</p>}
-                    {f.paymentStatus === 'pending' && <p style={{ color: 'var(--text-3)', fontSize: '0.84rem', marginTop: 10 }}>The Secretary will confirm your payment. You will get a WhatsApp message when it’s done.</p>}
+                    {f.paymentStatus === 'pending' && <p style={{ color: 'var(--text-3)', fontSize: '0.84rem', marginTop: 10 }}>The General Secretary will confirm your payment. You will get a WhatsApp message when it’s done.</p>}
                     {canApply && <ApplicationForm form={f} footer={el.title} onDone={refresh} />}
                   </div>
                 );

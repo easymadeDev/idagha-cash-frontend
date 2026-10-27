@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { CalendarDays, Vote, Trophy, Wallet, ArrowRight, Users, GraduationCap, Images, MapPin } from 'lucide-react';
 import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
+import { withVacancies } from '../lib/positions';
 import { formatNaira } from '../lib/api';
 import { CountUp } from './motion';
 import { isPublicPath } from '../lib/requireLogin';
@@ -50,7 +51,7 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
   const clock = useClock(next?.date);
   const election = Array.isArray(elections) ? elections[0] : null;
   const awardList = Array.isArray(awards) ? awards : [];
-  const execList = Array.isArray(execs) ? execs : [];
+  const execList = Array.isArray(execs) ? withVacancies(execs) : [];
   const yearsOut = new Date().getFullYear() - GRAD_YEAR;
 
   // Menu slides away while scrolling down, returns on any scroll up
@@ -181,10 +182,10 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
         </div>
         <div className="gl-execs">
           {execList.length === 0 ? (
-            <div className="gl-glass gl-exec"><b>The executive list is on its way</b><small>The Secretary will add each officer.</small></div>
-          ) : execList.slice(0, 8).map((x: any, i: number) => (
-            <motion.div key={x._id} className="gl-glass gl-exec" {...rise(i % 4)} whileHover={{ y: -6 }}>
-              <span className="gl-face">{x.photo ? <img src={x.photo} alt={x.name} /> : initials(x.name)}</span>
+            <div className="gl-glass gl-exec"><b>The executive list is on its way</b><small>The General Secretary will add each officer.</small></div>
+          ) : execList.map((x: any, i: number) => (
+            <motion.div key={x._id} className={`gl-glass gl-exec${x.vacant ? ' is-vacant' : ''}`} {...rise(i % 4)} whileHover={{ y: -6 }}>
+              <span className="gl-face">{x.photo ? <img src={x.photo} alt={x.name} /> : x.vacant ? '?' : initials(x.name)}</span>
               <b>{x.name}</b><small>{x.position}</small>
             </motion.div>
           ))}
@@ -212,7 +213,7 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
         <motion.div className="gl-glass gl-cta" {...rise(0)}>
           <img src="/logo.png" alt="" width={110} height={110} />
           <h2>Not on the register yet?</h2>
-          <p>Add your name, phone and photo. The Secretary confirms you, and the portal opens. Registration is free.</p>
+          <p>Add your name, phone and photo. The General Secretary confirms you, and the portal opens. Registration is free.</p>
           <div className="gl-ctas">
             <button className="gl-btn gl-btn--solid" onClick={() => router.push('/register')}>Register as a member</button>
             <button className="gl-btn" onClick={enterPortal} disabled={!ready}>I’m already a member</button>
@@ -228,7 +229,7 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
             <div><b>Together</b><button onClick={() => go('/events')}>Reunions</button><button onClick={() => go('/gallery')}>Gallery</button><button onClick={() => go('/awards')}>Class awards</button></div>
             <div><b>Decide</b><button onClick={() => go('/elections')}>Elections</button><button onClick={() => go('/finance')}>The books</button></div>
           </div>
-          <div className="gl-foot-base"><span>© {new Date().getFullYear()} IDAGHA Class of {GRAD_YEAR} Alumni</span><span><MapPin size={13} /> Message the Secretary in the class WhatsApp group</span><button onClick={() => router.push('/admin')}>Secretary login</button></div>
+          <div className="gl-foot-base"><span>© {new Date().getFullYear()} IDAGHA Class of {GRAD_YEAR} Alumni</span><span><MapPin size={13} /> Message the General Secretary in the class WhatsApp group</span><button onClick={() => router.push('/admin')}>Secretary login</button></div>
         </div>
       </footer>
     </div>

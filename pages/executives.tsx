@@ -1,15 +1,17 @@
 import Layout from '../components/Layout';
 import useSWR from 'swr';
 import { fetcher, initials } from '../lib/member';
+import { withVacancies, positionRank } from '../lib/positions';
 
 function ExecCard({ x }: { x: any }) {
   return (
-    <div className="card exec-card">
+    <div className={`card exec-card${x.vacant ? ' is-vacant' : ''}`}>
       <div className="avatar avatar-shield">
-        {x.photo ? <img src={x.photo} alt={x.name} /> : initials(x.name)}
+        {x.photo ? <img src={x.photo} alt={x.name} /> : x.vacant ? '?' : initials(x.name)}
       </div>
       <div className="exec-pos">{x.position}</div>
       <div style={{ fontWeight: 800, fontSize: '1.05rem', color: 'var(--text-1)' }}>{x.name}</div>
+      {x.vacant && <p style={{ color: 'var(--text-3)', fontSize: '0.84rem' }}>Filled at the next election</p>}
       {x.bio && <p style={{ color: 'var(--text-3)', fontSize: '0.84rem', lineHeight: 1.6 }}>{x.bio}</p>}
       {(x.phone || x.email) && (
         <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'center', marginTop: 4 }}>
@@ -25,7 +27,7 @@ function ExecCard({ x }: { x: any }) {
 export default function ExecutivesPage() {
   const { data: current, isLoading } = useSWR('/api/executives', fetcher);
   const { data: past } = useSWR('/api/executives/past', fetcher);
-  const list = Array.isArray(current) ? current : [];
+  const list = Array.isArray(current) ? withVacancies(current) : [];
   const pastTeams = Array.isArray(past) ? past : [];
 
   return (
@@ -69,7 +71,7 @@ export default function ExecutivesPage() {
                 <div key={team.tenure}>
                   <div style={{ fontWeight: 800, color: 'var(--yellow)', marginBottom: 12 }}>{team.tenure}</div>
                   <div className="grid-auto-sm">
-                    {team.members.map((x: any) => (
+                    {[...team.members].sort((a: any, b: any) => positionRank(a.position) - positionRank(b.position)).map((x: any) => (
                       <div key={x._id} className="card" style={{ padding: 14, display: 'flex', gap: 12, alignItems: 'center' }}>
                         <div className="avatar avatar-shield" style={{ width: 44, height: 50, fontSize: '0.8rem' }}>
                           {x.photo ? <img src={x.photo} alt={x.name} /> : initials(x.name)}

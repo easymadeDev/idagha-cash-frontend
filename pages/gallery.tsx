@@ -18,7 +18,7 @@ function SubmitModal({ albums, onClose }: { albums: string[]; onClose: () => voi
     setBusy(true);
     try {
       await memberApi.post('/gallery/submit', { image, album, caption });
-      toast('Thanks! Your photo will appear once the Secretary approves it.', 'success');
+      toast('Thanks! Your photo will appear once the General Secretary approves it.', 'success');
       onClose();
     } catch (err) { toast(errorMessage(err), 'error'); } finally { setBusy(false); }
   };

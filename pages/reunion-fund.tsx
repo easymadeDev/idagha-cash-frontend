@@ -225,7 +225,7 @@ export default function ReunionFundPage() {
             </div>
 
             <p style={{ marginTop: 16, fontSize: '0.8rem', color: 'var(--text-3)', textAlign: 'center' }}>
-              Only contributions with category <strong style={{ color: 'var(--text-2)' }}>"reunion-fund"</strong> are counted here. Contact the Secretary to make a payment.
+              Only contributions with category <strong style={{ color: 'var(--text-2)' }}>"reunion-fund"</strong> are counted here. Contact the General Secretary to make a payment.
             </p>
           </div>
         )}
@@ -268,7 +268,7 @@ export default function ReunionFundPage() {
             {[
               { num: '01', title: 'Each member: ₦10,000', desc: 'Every registered member contributes ₦10,000 total. You can spread this across multiple payments — no fixed installment size.' },
               { num: '02', title: 'Pay any amount, any time', desc: 'Pay ₦500, ₦2,000, ₦5,000 — whatever you can. Your running balance is tracked until you hit ₦10,000.' },
-              { num: '03', title: 'Secretary records payments', desc: 'When you pay, inform the Secretary. Every payment is logged with category "reunion-fund" and shows on this page.' },
+              { num: '03', title: 'Secretary records payments', desc: 'When you pay, inform the General Secretary. Every payment is logged with category "reunion-fund" and shows on this page.' },
               { num: '04', title: 'Fully transparent', desc: 'All contributions are visible publicly. Funds are used exclusively for the 2026 reunion. Expenses are documented here.' },
             ].map((item) => (
               <div key={item.num} style={{ display: 'flex', gap: 14 }}>

@@ -7,6 +7,7 @@ import Poster from '../components/Poster';
 import { Reveal, Stagger, Item, CountUp, EASE } from '../components/motion';
 import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
+import { withVacancies } from '../lib/positions';
 import { formatNaira, formatDate } from '../lib/api';
 
 const greeting = () => {
@@ -79,7 +80,7 @@ export default function Home({ classPhotos = [] }: { classPhotos?: { src: string
   ].slice(0, 6);
   const news = Array.isArray(announcements) ? announcements.slice(0, 4) : [];
   const awardList = Array.isArray(awards) ? awards.slice(0, 4) : [];
-  const execList = Array.isArray(execs) ? execs : [];
+  const execList = Array.isArray(execs) ? withVacancies(execs) : [];
   const firstName = member?.name?.split(' ')[0] || 'classmate';
   const monthName = new Date().toLocaleDateString('en-GB', { month: 'long' });
 
@@ -276,12 +277,12 @@ export default function Home({ classPhotos = [] }: { classPhotos?: { src: string
               <p style={{ color: 'var(--text-3)' }}>The executive list is on its way.</p>
             ) : (
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))', gap: 10 }}>
-                {execList.slice(0, 6).map((x: any, i: number) => (
-                  <motion.div key={x._id} onClick={() => router.push('/executives')}
+                {execList.map((x: any, i: number) => (
+                  <motion.div key={x._id} className={x.vacant ? 'is-vacant' : undefined} onClick={() => router.push('/executives')}
                     initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: i * 0.06, ease: EASE, duration: 0.5 }}
                     whileHover={{ y: -4 }}
                     style={{ display: 'flex', gap: 10, alignItems: 'center', cursor: 'pointer', padding: 10, borderRadius: 14, background: 'var(--bg-surface)' }}>
-                    <div className="avatar avatar-shield" style={{ width: 40, height: 45, fontSize: '0.75rem' }}>{x.photo ? <img src={x.photo} alt="" /> : initials(x.name)}</div>
+                    <div className="avatar avatar-shield" style={{ width: 40, height: 45, fontSize: '0.75rem' }}>{x.photo ? <img src={x.photo} alt="" /> : x.vacant ? '?' : initials(x.name)}</div>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ fontWeight: 700, fontSize: '0.9rem', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{x.name}</div>
                       <div style={{ fontSize: '0.78rem', color: 'var(--gold-deep)', fontWeight: 600 }}>{x.position}</div>

@@ -251,7 +251,7 @@ export default function WelcomePopup() {
             {actionFrom && (
               <p className="wp-sub" style={{ marginTop: -6 }}>
                 Only registered members can buy forms, vote, nominate or RSVP. Sign in and you’ll come straight back to {describePath(actionFrom)}.
-                Not registered yet? Register first: once the Secretary approves you, you can do it.
+                Not registered yet? Register first: once the General Secretary approves you, you can do it.
               </p>
             )}
             <div className="wp-actions">
@@ -370,7 +370,7 @@ export default function WelcomePopup() {
                 <h2 className="wp-title" style={{ marginTop: 8, color: 'var(--red)' }}>Account Deactivated</h2>
                 <p className="wp-sub">{verifyError}</p>
                 <p className="wp-sub" style={{ fontSize: '0.78rem', marginTop: 12, marginBottom: 16 }}>
-                  If you believe this is an error or would like to reactivate your account, please reach out to the admin or the Secretary.
+                  If you believe this is an error or would like to reactivate your account, please reach out to the admin or the General Secretary.
                 </p>
                 <div className="wp-actions">
                   <button className="wp-btn-back" onClick={() => { setStep('verify'); setVerifyError(''); setIsDeactivated(false); }}>
@@ -388,7 +388,7 @@ export default function WelcomePopup() {
                 <h2 className="wp-title" style={{ marginTop: 8, color: 'rgba(251,191,36,1)' }}>Pending Approval</h2>
                 <p className="wp-sub">{verifyError}</p>
                 <p className="wp-sub" style={{ fontSize: '0.78rem', marginTop: 12, marginBottom: 16 }}>
-                  Please contact the Secretary to check on your application status or if you have any questions.
+                  Please contact the General Secretary to check on your application status or if you have any questions.
                 </p>
                 <div className="wp-actions">
                   <button className="wp-btn-back" onClick={() => { setStep('verify'); setVerifyError(''); setIsPending(false); }}>
@@ -420,7 +420,7 @@ export default function WelcomePopup() {
                     ← Try Again
                   </button>
                 </div>
-                <p className="wp-note">Contact the Secretary if your name is already registered.</p>
+                <p className="wp-note">Contact the General Secretary if your name is already registered.</p>
               </>
             )}
           </>

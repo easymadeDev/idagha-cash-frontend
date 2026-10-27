@@ -6,7 +6,7 @@ export type PosterData = {
   photo?: string;      // data URL or same-origin URL
   name: string;
   band: string;        // e.g. "VOTE" or "NOMINATED"
-  role: string;        // e.g. "for President" / "Best Online"
+  role: string;        // e.g. "for Chairman" / "Best Online"
   slogan?: string;
   footer: string;      // e.g. "2026 Executive Elections"
   badge?: string;      // e.g. "CANDIDATE", "ASPIRANT", "WINNER"
