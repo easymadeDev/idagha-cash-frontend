@@ -301,3 +301,10 @@ html[data-skin='glass'] .el-sheet { background: rgba(23, 42, 78, 0.94); backdrop
   .el-sheet-head h2 { font-size: 1.25rem; }
   .el-sheet .el-pos-inner { padding: 16px 16px 26px; }
 }
+/* phones: the banner keeps just the title; the intro moves into the guidelines */
+.el-guide-lead { display: none; }
+@media (max-width: 700px) {
+  .page-wrap .page-header .el-lead { display: none; }
+  .el-guide-lead { display: block; }
+  .el-guide-lead p { color: var(--text-1) !important; }
+}

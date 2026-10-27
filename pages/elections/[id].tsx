@@ -51,9 +51,10 @@ const isHeading = (line: string) => line.length < 48 && /[A-Z]/.test(line) && li
 const BULLET = /^[•\-*]\s+/;
 const STEP = /^\d+[.)]\s+/;
 
-function Guidelines({ blocks }: { blocks: string[] }) {
+function Guidelines({ lead, blocks }: { lead?: string; blocks: string[] }) {
   return (
     <div className="el-guide-body">
+      {lead && <section className="el-guide-lead"><p>{lead}</p></section>}
       {blocks.map((block, bi) => {
         const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
         const out: JSX.Element[] = [];
@@ -324,10 +325,11 @@ export default function ElectionDetail() {
           </div>
         )}
 
-        {guide.length > 0 && (
+        {(guide.length > 0 || lead) && (
           <details className="card el-guide">
             <summary>Election guidelines</summary>
-            <Guidelines blocks={guide} />
+            {/* on phones the banner drops the intro, so it opens the guidelines instead */}
+            <Guidelines lead={lead} blocks={guide} />
           </details>
         )}
 
@@ -337,13 +339,6 @@ export default function ElectionDetail() {
             <div className="section-title">Positions</div>
             <div className="section-sub">{el.positions.length} offices</div>
           </div>
-        </div>
-        <div className="el-jump" role="navigation" aria-label="Positions">
-          {el.positions.map((p: any) => (
-            <button key={p._id} type="button" onClick={() => setSheet(p._id)}>
-              {p.title}{p.aspirantCount > 0 && <b>{p.aspirantCount}</b>}
-            </button>
-          ))}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {el.positions.map((p: any) => (
