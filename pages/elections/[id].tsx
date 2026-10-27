@@ -287,12 +287,19 @@ export default function ElectionDetail() {
         </div>
         <Stages status={el.status} />
 
-        <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 20, fontSize: '0.82rem', color: 'var(--text-3)' }}>
-          {el.formSaleEnds && <span className="badge badge-yellow">Form sales end {formatDate(el.formSaleEnds)}</span>}
-          {el.votingStarts && <span className="badge badge-blue">Voting starts {formatDate(el.votingStarts)}</span>}
-          {el.votingEnds && <span className="badge badge-green">Voting ends {formatDate(el.votingEnds)}</span>}
-          {el.totalVoters > 0 && <span className="badge badge-green">{el.totalVoters} members have voted</span>}
-        </div>
+        {(el.formSaleEnds || el.votingStarts || el.votingEnds) && (
+          <dl className="el-dates">
+            {([['Forms close', el.formSaleEnds], ['Voting opens', el.votingStarts], ['Voting closes', el.votingEnds]] as const)
+              .filter(([, d]) => d)
+              .map(([label, d]) => (
+                <div key={label}>
+                  <dt>{label}</dt>
+                  <dd>{new Date(d).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</dd>
+                </div>
+              ))}
+          </dl>
+        )}
+        {el.totalVoters > 0 && <p className="el-voters">{el.totalVoters} members have voted</p>}
 
         {/* My nomination forms */}
         {myForms.length > 0 && (
@@ -340,7 +347,7 @@ export default function ElectionDetail() {
             <div className="section-sub">{el.positions.length} offices</div>
           </div>
         </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div className="el-pos-grid">
           {el.positions.map((p: any) => (
             // a card is just the office and its form price (or ballot size once voting starts); tapping opens its sheet
             <button key={p._id} type="button" className="card el-pos el-pos-head" aria-haspopup="dialog" onClick={() => setSheet(p._id)}>
