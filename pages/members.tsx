@@ -128,7 +128,8 @@ export default function MembersPage() {
                     <MemberFigure id={String(m._id || i)} photo={m.photo} gender={m.gender} />
                     <div className="mf-caption">
                       <b>{m.name}</b>
-                      {m.position && m.position !== 'Member' && <em>{m.position}</em>}
+                      {/* everyone gets a tag: officers in gold, everyone else as Member */}
+                      {m.position && m.position !== 'Member' ? <em>{m.position}</em> : <em className="is-member">Member</em>}
                     </div>
                   </div>
                   {/* The face: photo fills the card's top, name written across it (on phones: the icon's head) */}
@@ -142,7 +143,9 @@ export default function MembersPage() {
                           : <PersonAvatar gender={m.gender} className="mf-drawn" />}
                       </div>
                     </div>
-                    {m.position && m.position !== 'Member' && <span className="mf-role">{m.position}</span>}
+                    {m.position && m.position !== 'Member'
+                      ? <span className="mf-role">{m.position}</span>
+                      : <span className="mf-role is-member">Member</span>}
                     <div className="mf-name">
                       <b>{m.name}</b>
                       {m.nickname && <span>“{m.nickname}”</span>}
