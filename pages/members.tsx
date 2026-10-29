@@ -1,6 +1,6 @@
 import Layout from '../components/Layout';
 import useSWR from 'swr';
-import { formatNaira } from '../lib/api';
+import { positionRank } from '../lib/positions';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import PersonAvatar from '../components/PersonAvatar';
@@ -27,33 +27,17 @@ function formatBirthday(d: string) {
 
 export default function MembersPage() {
   const router = useRouter();
-  const { data: contributions } = useSWR('/api/contributions', fetcher);
   const { data: members } = useSWR('/api/members', fetcher);
   const [search, setSearch] = useState('');
 
-  const contribList = Array.isArray(contributions) ? contributions : [];
   const memberList = Array.isArray(members) ? members : [];
 
-  const contribByName: Record<string, { total: number; count: number; last: string }> = {};
-  contribList.forEach((c: any) => {
-    const key = c.contributorName.trim();
-    if (!contribByName[key]) contribByName[key] = { total: 0, count: 0, last: c.date };
-    contribByName[key].total += c.amount;
-    contribByName[key].count += 1;
-    if (new Date(c.date) > new Date(contribByName[key].last)) contribByName[key].last = c.date;
-  });
-
+  // committee first in official rank (Chairman first), then everyone else by name
   const filtered = memberList
     .filter((m: any) => m.name.toLowerCase().includes(search.toLowerCase()) ||
       (m.nickname || '').toLowerCase().includes(search.toLowerCase()) ||
       (m.location || '').toLowerCase().includes(search.toLowerCase()))
-    .sort((a: any, b: any) => {
-      const ac = contribByName[a.name]?.total || 0;
-      const bc = contribByName[b.name]?.total || 0;
-      return bc - ac;
-    });
-
-  const totalContrib = contribList.reduce((s: number, c: any) => s + c.amount, 0);
+    .sort((a: any, b: any) => positionRank(a.position) - positionRank(b.position) || a.name.localeCompare(b.name));
 
   return (
     <Layout>
@@ -64,22 +48,6 @@ export default function MembersPage() {
           </div>
           <h1>Members Directory</h1>
           <p>All registered group members. Publicly visible for accountability and transparency.</p>
-        </div>
-
-        {/* Stats */}
-        <div className="stats-grid" style={{ marginBottom: 32 }}>
-          {[
-            { label: 'Total Members', value: memberList.length, sub: 'Registered', cls: '' },
-            { label: 'Contributors', value: Object.keys(contribByName).length, sub: 'Have paid', cls: 'green' },
-            { label: 'Total Collected', value: formatNaira(totalContrib), sub: 'From all members', cls: 'green' },
-            { label: 'Total Payments', value: contribList.length, sub: 'Transactions', cls: '' },
-          ].map((s, i) => (
-            <div className="stat-card" key={i}>
-              <div className="stat-label">{s.label}</div>
-              <div className={`stat-value ${s.cls}`}>{s.value}</div>
-              <div className="stat-sub">{s.sub}</div>
-            </div>
-          ))}
         </div>
 
         {/* Wallet CTA */}
