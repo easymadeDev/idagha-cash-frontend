@@ -124,48 +124,21 @@ export default function MembersPage() {
               const [bg, fg] = avatarColors[i % avatarColors.length];
               const contrib = contribByName[m.name] || { total: 0, count: 0, last: '' };
               return (
-                <div key={m._id || m.name} className="anim-fade-up" style={{
-                  background: 'var(--grad-card)', border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius)', overflow: 'hidden',
-                  transition: 'all 0.25s var(--ease)',
-                  animationDelay: `${i * 0.04}s`,
-                }}
-                  onMouseEnter={(e) => { e.currentTarget.style.borderColor = 'var(--border-mid)'; e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 8px 30px rgba(0,0,0,0.35)'; }}
-                  onMouseLeave={(e) => { e.currentTarget.style.borderColor = 'var(--border)'; e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = ''; }}
-                >
-                  {/* Card top */}
-                  <div className="member-card-top">
-                    <div className="member-card-avatar" style={{
-                      background: bg, color: fg,
-                      border: m.photo ? '2px solid rgba(22,101,52,0.3)' : 'none',
-                    }}>
-                      {m.photo ? (
-                        <img src={m.photo} alt={m.name} loading="lazy" decoding="async" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                      ) : getInitials(m.name)}
-                    </div>
-                    <div style={{ flex: 1, minWidth: 0 }}>
-                      <div className="member-card-name">
-                        {m.name}
-                      </div>
-                      {m.nickname && (
-                        <div style={{ fontSize: '0.78rem', color: fg, fontWeight: 600, marginBottom: 5, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          "{m.nickname}"
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
-                        {m.position && <span className="badge badge-green" style={{ fontSize: '0.66rem', padding: '2px 7px' }}>{m.position}</span>}
-                        {m.gender && <span className="badge badge-blue" style={{ fontSize: '0.66rem', padding: '2px 7px' }}>{m.gender}</span>}
-                        {contrib.count > 0 && (
-                          <span className="badge" style={{ fontSize: '0.66rem', padding: '2px 7px', background: 'rgba(22,101,52,0.1)', color: 'var(--green-400)', borderColor: 'rgba(22,101,52,0.25)' }}>
-                            {contrib.count} payment{contrib.count > 1 ? 's' : ''}
-                          </span>
-                        )}
-                      </div>
+                <div key={m._id || m.name} className="mf-card anim-fade-up" style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}>
+                  {/* The face: photo fills the card's top, name written across it */}
+                  <div className="mf-face" style={m.photo ? undefined : { background: `radial-gradient(120% 90% at 50% 20%, ${bg}, rgba(5,12,8,0.9))`, color: fg }}>
+                    {m.photo
+                      ? <img src={m.photo} alt={m.name} loading="lazy" decoding="async" />
+                      : <span className="mf-initials">{getInitials(m.name)}</span>}
+                    {m.position && m.position !== 'Member' && <span className="mf-role">{m.position}</span>}
+                    <div className="mf-name">
+                      <b>{m.name}</b>
+                      {m.nickname && <span>“{m.nickname}”</span>}
                     </div>
                   </div>
 
                   {/* Details */}
-                  <div className="member-card-details">
+                  <div className="member-card-details mf-details">
                     {m.location && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'var(--text-3)' }}>
                         <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" strokeLinecap="round"/><path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" strokeLinecap="round"/></svg>
@@ -187,19 +160,10 @@ export default function MembersPage() {
                   </div>
 
                   {/* Contribution footer */}
-                  <div className="member-card-footer">
-                    <div>
-                      <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>Total Contributed</div>
-                      <div className="member-card-contrib-value" style={{ color: contrib.total > 0 ? 'var(--green-400)' : 'var(--text-3)' }}>
-                        {contrib.total > 0 ? formatNaira(contrib.total) : '—'}
-                      </div>
-                    </div>
-                    {contrib.last && (
-                      <div style={{ textAlign: 'right' }}>
-                        <div style={{ fontSize: '0.68rem', color: 'var(--text-3)', fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>Last Payment</div>
-                        <div style={{ fontSize: '0.78rem', color: 'var(--text-2)' }}>{formatDate(contrib.last)}</div>
-                      </div>
-                    )}
+                  <div className="mf-footer">
+                    <span>Contributed</span>
+                    <b style={{ color: contrib.total > 0 ? 'var(--green-400)' : 'var(--text-3)' }}>{contrib.total > 0 ? formatNaira(contrib.total) : '—'}</b>
+                    {contrib.last && <small>Last {formatDate(contrib.last)}</small>}
                   </div>
                 </div>
               );
