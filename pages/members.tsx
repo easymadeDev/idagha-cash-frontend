@@ -117,16 +117,30 @@ export default function MembersPage() {
           </div>
         ) : (
           <div className="members-grid">
+            {/* head and shoulders, in card units (0–1), used to cut the phone cards */}
+            <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
+              <clipPath id="mf-person" clipPathUnits="objectBoundingBox">
+                <ellipse cx="0.5" cy="0.27" rx="0.25" ry="0.24" />
+                <rect x="0.4" y="0.42" width="0.2" height="0.2" />
+                <path d="M0.03 1 C0.03 0.74 0.22 0.6 0.5 0.6 C0.78 0.6 0.97 0.74 0.97 1 Z" />
+              </clipPath>
+            </svg>
             {filtered.map((m: any, i: number) => {
               const [bg] = avatarColors[i % avatarColors.length];
               const contrib = contribByName[m.name] || { total: 0, count: 0, last: '' };
               return (
                 <div key={m._id || m.name} className="mf-card anim-fade-up" style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}>
                   {/* The face: photo fills the card's top, name written across it */}
-                  <div className={`mf-face${m.photo ? '' : ' no-photo'}`} style={m.photo ? undefined : { ['--mf-tint' as any]: bg }}>
-                    {m.photo
-                      ? <img src={m.photo} alt={m.name} loading="lazy" decoding="async" />
-                      : <PersonAvatar gender={m.gender} className="mf-drawn" />}
+                  <div className={`mf-face${m.photo ? '' : ' no-photo'} g-${(m.gender || '').toLowerCase().startsWith('f') ? 'f' : (m.gender || '').toLowerCase().startsWith('m') ? 'm' : 'n'}`}
+                    style={m.photo ? undefined : { ['--mf-tint' as any]: bg }}>
+                    {/* on phones this is cut into a head-and-shoulders shape (#mf-person below) */}
+                    <div className="mf-shape-wrap">
+                      <div className="mf-shape">
+                        {m.photo
+                          ? <img src={m.photo} alt={m.name} loading="lazy" decoding="async" />
+                          : <PersonAvatar gender={m.gender} className="mf-drawn" />}
+                      </div>
+                    </div>
                     {m.position && m.position !== 'Member' && <span className="mf-role">{m.position}</span>}
                     <div className="mf-name">
                       <b>{m.name}</b>
