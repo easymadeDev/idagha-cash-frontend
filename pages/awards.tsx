@@ -159,13 +159,13 @@ export default function AwardsPage() {
                   {/* every nominee gets their own poster: a swipeable strip, tap one to open it full size */}
                   {nominees.length > 0 && (
                     <div className="aw-posters">
-                      {nominees.map((n: any, i: number) => (
+                      {nominees.map((n: any) => (
                         <Poster key={n._id} download={false} onClick={() => setPosterFor({ cat, n })}
                           data={{
                             photo: n.memberPhoto, name: n.memberName,
                             band: cat.winner?._id === n._id ? 'WINNER' : 'NOMINATED', role: cat.title, slogan: n.reason,
                             footer: cat.season || 'Alumni Awards',
-                            badge: cat.winner?._id === n._id ? undefined : i === 0 && n.supports > 0 ? `LEADING · ${n.supports}` : `${n.supports} SUPPORTS`,
+                            badge: cat.winner?._id === n._id ? undefined : n.supports > 0 && n.supports === top ? `LEADING · ${n.supports}` : `${n.supports} SUPPORTS`,
                           }} />
                       ))}
                     </div>
@@ -179,7 +179,8 @@ export default function AwardsPage() {
                       {nominees.map((n: any, i: number) => {
                         const isMine = myPick[cat._id] === n._id;
                         const isSelf = member?._id === n.memberId;
-                        const leading = i === 0 && n.supports > 0;
+                        // everyone tied at the top count leads, not just whoever was nominated first
+                        const leading = n.supports > 0 && n.supports === top;
                         return (
                           <li key={n._id} className={`aw-row${isMine ? ' mine' : ''}${leading ? ' lead' : ''}`}>
                             <button type="button" className="avatar aw-face" title="View poster" onClick={() => setPosterFor({ cat, n })}>
@@ -224,7 +225,7 @@ export default function AwardsPage() {
               role: posterFor.cat.title, slogan: posterFor.n.reason,
               footer: posterFor.cat.season || 'Alumni Awards',
               badge: posterFor.cat.winner?._id === posterFor.n._id ? undefined
-                : posterFor.cat.nominees?.[0]?._id === posterFor.n._id && posterFor.n.supports > 0 ? `LEADING · ${posterFor.n.supports}` : `${posterFor.n.supports} SUPPORTS`,
+                : posterFor.n.supports > 0 && posterFor.n.supports === (posterFor.cat.nominees?.[0]?.supports || 0) ? `LEADING · ${posterFor.n.supports}` : `${posterFor.n.supports} SUPPORTS`,
             }} />
             <div className="modal-actions" style={{ marginTop: 12 }}>
               <button className="btn btn-ghost" onClick={() => setPosterFor(null)}>Close</button>
