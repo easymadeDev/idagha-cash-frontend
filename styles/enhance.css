@@ -737,4 +737,11 @@ body:has(.navbar.nav-hidden) .fin-bar { top: 10px; }
   }
   .ex-contact a:active { transform: scale(0.92); }
   .ex-contact a:last-child { background: #1fa855; }
+}/* executives: normal size on phones, two officers to a row */
+@media (max-width: 640px) {
+  .ex-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 20px 12px !important; }
+  .ex-figure .mf-caption b { font-size: 0.9rem; }
+  .ex-figure .mf-caption em { font-size: 0.6rem; padding: 2px 9px; }
+  .ex-contact a { width: 32px; height: 32px; }
+  .ex-contact svg { width: 15px; height: 15px; }
 }
