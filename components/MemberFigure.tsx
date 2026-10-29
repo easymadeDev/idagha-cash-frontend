@@ -8,7 +8,8 @@ export default function MemberFigure({ id, photo, gender, initials }: { id: stri
   const suit = female ? ['#4a82b0', '#2f5f88', '#1d4262'] : male ? ['#646b73', '#474d54', '#2e3237'] : ['#2a7d53', '#1b5c3a', '#103d26'];
   const skin = ['#f7d3b4', '#e9b68e', '#c98d66'];
   const hair = female ? ['#f4cd72', '#c9951c'] : ['#4a4440', '#211e1c'];
-  const k = (s: string) => `${s}-${id}`;
+  // gradient/clip ids go into url(#...): keep them to safe characters (vacant seats are keyed by title)
+  const k = (s: string) => `${s}-${id}`.replace(/[^A-Za-z0-9_-]/g, '_');
 
   return (
     <svg className="mf-figure-svg" viewBox="0 52 200 198" aria-hidden="true">
