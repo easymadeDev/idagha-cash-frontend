@@ -23,10 +23,12 @@ export default function FinanceLayout({ children }: { children: React.ReactNode 
   const { data: stats } = useSWR('/api/stats/summary', fetcher, { refreshInterval: 30000 });
   const current = TABS.find((t) => router.pathname === t.href) || TABS[0];
   const naira = (n: number) => formatNaira(Math.round(n));
+  // the headline totals belong to Overview; the other tabs open straight onto their own content
+  const overview = current.href === '/finance';
 
   return (
     <Layout>
-      <section className="fin-hero">
+      <section className={`fin-hero${overview ? '' : ' fin-hero--compact'}`}>
         <div className="fin-shield" aria-hidden="true" />
         <div className="fin-hero-inner">
           <motion.p key={current.href + '-k'} initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ color: 'var(--gold)', fontWeight: 600, marginTop: 0 }}>
@@ -37,6 +39,7 @@ export default function FinanceLayout({ children }: { children: React.ReactNode 
           </motion.h1>
           <p>{current.sub}</p>
 
+          {overview && (
           <div className="fin-figures">
             <div>
               <span>Balance across wallets</span>
@@ -55,20 +58,24 @@ export default function FinanceLayout({ children }: { children: React.ReactNode 
               <b>{stats ? <><CountUp value={stats.reunionFund?.percentage || 0} format={(n) => `${Math.round(n)}%`} /></> : '—'}</b>
             </div>
           </div>
+          )}
 
-          <nav className="fin-tabs" aria-label="Finance sections">
-            {TABS.map((t) => {
-              const on = t.href === current.href;
-              return (
-                <button key={t.href} className={on ? 'on' : ''} onClick={() => router.push(t.href)} aria-current={on ? 'page' : undefined}>
-                  {t.label}
-                  {on && <motion.span layoutId="fin-tab" className="fin-tab-line" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />}
-                </button>
-              );
-            })}
-          </nav>
         </div>
       </section>
+      {/* every finance page stays one tap away: the tabs pin to the top while you scroll */}
+      <div className="fin-bar">
+        <nav className="fin-tabs" aria-label="Finance sections">
+          {TABS.map((t) => {
+            const on = t.href === current.href;
+            return (
+              <button key={t.href} className={on ? 'on' : ''} onClick={() => router.push(t.href)} aria-current={on ? 'page' : undefined}>
+                {on && <motion.span layoutId="fin-tab" className="fin-tab-pill" transition={{ type: 'spring', stiffness: 380, damping: 32 }} />}
+                <span>{t.label}</span>
+              </button>
+            );
+          })}
+        </nav>
+      </div>
       <div className="fin-body">{children}</div>
     </Layout>
   );
