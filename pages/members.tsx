@@ -1,6 +1,6 @@
 import Layout from '../components/Layout';
 import useSWR from 'swr';
-import { formatNaira, formatDate } from '../lib/api';
+import { formatNaira } from '../lib/api';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import PersonAvatar from '../components/PersonAvatar';
@@ -120,19 +120,15 @@ export default function MembersPage() {
           <div className="members-grid">
             {filtered.map((m: any, i: number) => {
               const [bg] = avatarColors[i % avatarColors.length];
-              const contrib = contribByName[m.name] || { total: 0, count: 0, last: '' };
               const g = (m.gender || '').toLowerCase().startsWith('f') ? 'f' : (m.gender || '').toLowerCase().startsWith('m') ? 'm' : 'n';
               return (
                 <div key={m._id || m.name} className={`mf-card g-${g} anim-fade-up`} style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}>
-                  {/* phones: the member drawn as a person, name badge on the lanyard */}
+                  {/* phones: the member drawn as a person, name and role under them */}
                   <div className="mf-figure">
                     <MemberFigure id={String(m._id || i)} photo={m.photo} gender={m.gender} />
                     <div className="mf-caption">
                       <b>{m.name}</b>
                       {m.position && m.position !== 'Member' && <em>{m.position}</em>}
-                      <span className={contrib.total > 0 ? 'paid' : ''}>
-                        {contrib.total > 0 ? formatNaira(contrib.total) : 'No payments yet'}
-                      </span>
                     </div>
                   </div>
                   {/* The face: photo fills the card's top, name written across it (on phones: the icon's head) */}
@@ -179,13 +175,6 @@ export default function MembersPage() {
                         {formatBirthday(m.birthday)}
                       </div>
                     )}
-                  </div>
-
-                  {/* Contribution footer */}
-                  <div className="mf-footer">
-                    <span>Contributed</span>
-                    <b style={{ color: contrib.total > 0 ? 'var(--green-400)' : 'var(--text-3)' }}>{contrib.total > 0 ? formatNaira(contrib.total) : '—'}</b>
-                    {contrib.last && <small>Last {formatDate(contrib.last)}</small>}
                   </div>
                   </div>
                 </div>
