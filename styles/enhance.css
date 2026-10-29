@@ -599,3 +599,44 @@ body:has(.navbar.nav-hidden) .fin-bar { top: 10px; }
   .mf-body .mf-details { width: 100%; }
   .mf-body .mf-footer { width: 100%; }
 }
+/* ═══ Members on phones: each card is a profile icon — one circle, a round head, shoulders across the bottom ═══ */
+@media (max-width: 640px) {
+  .members-grid { gap: 14px 12px !important; }
+  .mf-card {
+    position: relative; aspect-ratio: 1; display: block; overflow: hidden !important; border-radius: 50% !important;
+    background: radial-gradient(circle at 50% 28%, #1f7a4a, #0b2a19 75%) !important;
+    border: 3px solid rgba(240, 196, 69, 0.8) !important;
+    box-shadow: 0 14px 26px -14px rgba(0, 0, 0, 0.85), inset 0 0 0 3px rgba(255, 255, 255, 0.06) !important;
+  }
+  .mf-card.g-m { background: radial-gradient(circle at 50% 28%, #5aaef2, #1f6fc0 75%) !important; }
+  .mf-card.g-f { background: radial-gradient(circle at 50% 28%, #e6f1fd, #a9cdf0 75%) !important; }
+
+  /* head */
+  .mf-face, .mf-face.no-photo { position: absolute; left: 50%; top: 8%; width: 42%; translate: -50% 0; padding: 0; z-index: 2; display: block; }
+  .mf-shape-wrap { width: 100%; margin: 0; filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35)); }
+  .mf-shape { aspect-ratio: 1; border-radius: 50%; border: 2px solid rgba(255, 255, 255, 0.85); background: #0b1a11; }
+  /* no photo: a plain faceless head, like the classic profile icon */
+  .mf-face.no-photo .mf-drawn { display: none !important; }
+  .mf-face.no-photo .mf-shape { background: radial-gradient(circle at 40% 35%, #fbd8bf, #f0b98d) !important; }
+  .mf-card.g-m .mf-face.no-photo .mf-shape { box-shadow: inset 0 9px 0 -2px #3a3a3a; }
+  .mf-card.g-f .mf-face.no-photo .mf-shape { box-shadow: inset 0 11px 0 -2px #f2c66b; }
+
+  /* shoulders: the details sit on the body */
+  .mf-body {
+    position: absolute; left: 8%; right: 8%; bottom: 0; top: 54%; z-index: 1; margin: 0;
+    padding: 13% 8% 0; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; gap: 2px;
+    background: linear-gradient(180deg, #123a26, #0a2416) !important; border: 0 !important; box-shadow: none !important;
+    border-radius: 50% 50% 0 0 / 38% 38% 0 0 !important;
+    border-top: 2px solid rgba(240, 196, 69, 0.7) !important;
+  }
+  .mf-card.g-m .mf-body { background: linear-gradient(180deg, #555b62, #3c4147) !important; }
+  .mf-card.g-f .mf-body { background: linear-gradient(180deg, #2f5d82, #234866) !important; }
+  .mf-body-name { gap: 1px; }
+  .mf-body-name b { font-size: 0.74rem; color: #fff; -webkit-line-clamp: 1; }
+  .mf-body-name span { display: none; }
+  .mf-body-name em { margin-top: 1px; font-size: 0.52rem; padding: 1px 6px; }
+  .mf-body .mf-details { display: none !important; }
+  .mf-body .mf-footer { border: 0; padding: 2px 0 0; margin: 0; justify-content: center; }
+  .mf-body .mf-footer span, .mf-body .mf-footer small { display: none; }
+  .mf-body .mf-footer b { font-size: 0.72rem; }
+}

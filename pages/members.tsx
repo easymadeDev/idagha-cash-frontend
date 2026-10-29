@@ -120,10 +120,11 @@ export default function MembersPage() {
             {filtered.map((m: any, i: number) => {
               const [bg] = avatarColors[i % avatarColors.length];
               const contrib = contribByName[m.name] || { total: 0, count: 0, last: '' };
+              const g = (m.gender || '').toLowerCase().startsWith('f') ? 'f' : (m.gender || '').toLowerCase().startsWith('m') ? 'm' : 'n';
               return (
-                <div key={m._id || m.name} className="mf-card anim-fade-up" style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}>
-                  {/* The face: photo fills the card's top, name written across it */}
-                  <div className={`mf-face${m.photo ? '' : ' no-photo'} g-${(m.gender || '').toLowerCase().startsWith('f') ? 'f' : (m.gender || '').toLowerCase().startsWith('m') ? 'm' : 'n'}`}
+                <div key={m._id || m.name} className={`mf-card g-${g} anim-fade-up`} style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}>
+                  {/* The face: photo fills the card's top, name written across it (on phones: the icon's head) */}
+                  <div className={`mf-face${m.photo ? '' : ' no-photo'} g-${g}`}
                     style={m.photo ? undefined : { ['--mf-tint' as any]: bg }}>
                     {/* on phones this is the head: a round photo above the body */}
                     <div className="mf-shape-wrap">
