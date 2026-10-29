@@ -124,84 +124,89 @@ export default function AwardsPage() {
         ) : categories.length === 0 ? (
           <div className="card" style={{ textAlign: 'center', padding: 56, color: 'var(--text-3)' }}>No award categories yet. The General Secretary will open them soon.</div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16 }}>
+          <div className="aw-grid">
             {categories.map((cat: any) => {
               const open = cat.status === 'open';
               const top = cat.nominees?.[0]?.supports || 0;
+              const nominees: any[] = cat.nominees || [];
               return (
-                <div key={cat._id} className="card award-card">
-                  <div className="award-head">
-                    <div className="award-emoji" aria-hidden="true">{cat.emoji || '🏆'}</div>
-                    <div style={{ minWidth: 0, flex: 1 }}>
-                      <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>{cat.title}</div>
-                      <div style={{ fontSize: '0.76rem', color: 'var(--text-3)' }}>
-                        {cat.season ? `${cat.season} · ` : ''}{cat.totalSupports} support{cat.totalSupports === 1 ? '' : 's'}
-                      </div>
+                <div key={cat._id} className={`card aw-card${open ? '' : ' is-closed'}`}>
+                  {/* head: emoji, title and count, with Nominate at the side */}
+                  <div className="aw-head">
+                    <div className="aw-emoji" aria-hidden="true">{cat.emoji || '🏆'}</div>
+                    <div className="aw-title">
+                      <h2>{cat.title}</h2>
+                      <span>{open ? `${cat.totalSupports} support${cat.totalSupports === 1 ? '' : 's'}` : 'Closed'}</span>
                     </div>
-                    <span className={`badge ${open ? 'badge-green' : 'badge-red'}`}>{open ? 'Open' : 'Closed'}</span>
+                    {open && (
+                      <button type="button" className="aw-nominate" onClick={() => requireLogin(() => setNominating(cat))}
+                        aria-label={`Nominate someone for ${cat.title}`}>
+                        <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14" strokeLinecap="round" /></svg>
+                        Nominate
+                      </button>
+                    )}
                   </div>
-                  {cat.description && <p style={{ fontSize: '0.84rem', color: 'var(--text-3)' }}>{cat.description}</p>}
-
-                  {(cat.winner || cat.nominees?.[0]) && (() => {
-                    const lead = cat.winner || cat.nominees[0];
-                    return (
-                      <Poster data={{
-                        photo: lead.memberPhoto, name: lead.memberName,
-                        band: cat.winner ? 'WINNER' : 'NOMINATED', role: cat.title, slogan: lead.reason,
-                        footer: cat.season || 'Alumni Awards',
-                        badge: cat.winner ? undefined : lead.supports ? `LEADING · ${lead.supports}` : 'NOMINEE',
-                      }} />
-                    );
-                  })()}
+                  {cat.description && <p className="aw-desc">{cat.description}</p>}
 
                   {cat.winner && (
-                    <div className="winner-banner">
-                      <div className="avatar avatar-shield" style={{ width: 48, height: 54 }}>{cat.winner.memberPhoto ? <img src={cat.winner.memberPhoto} alt="" /> : initials(cat.winner.memberName)}</div>
-                      <div>
-                        <div style={{ fontSize: '0.7rem', color: 'var(--yellow)', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Winner</div>
-                        <div style={{ fontWeight: 800 }}>{cat.winner.memberName}</div>
-                        <div style={{ fontSize: '0.76rem', color: 'var(--text-3)' }}>{cat.winner.supports} supports</div>
-                      </div>
+                    <button type="button" className="aw-winner" onClick={() => setPosterFor({ cat, n: cat.winner })}>
+                      <span className="avatar">{cat.winner.memberPhoto ? <img src={cat.winner.memberPhoto} alt="" /> : initials(cat.winner.memberName)}</span>
+                      <span><small>Winner</small><b>{cat.winner.memberName}</b></span>
+                      <em>{cat.winner.supports}</em>
+                    </button>
+                  )}
+
+                  {/* every nominee gets their own poster: a swipeable strip, tap one to open it full size */}
+                  {nominees.length > 0 && (
+                    <div className="aw-posters">
+                      {nominees.map((n: any, i: number) => (
+                        <Poster key={n._id} download={false} onClick={() => setPosterFor({ cat, n })}
+                          data={{
+                            photo: n.memberPhoto, name: n.memberName,
+                            band: cat.winner?._id === n._id ? 'WINNER' : 'NOMINATED', role: cat.title, slogan: n.reason,
+                            footer: cat.season || 'Alumni Awards',
+                            badge: cat.winner?._id === n._id ? undefined : i === 0 && n.supports > 0 ? `LEADING · ${n.supports}` : `${n.supports} SUPPORTS`,
+                          }} />
+                      ))}
                     </div>
                   )}
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {(cat.nominees || []).length === 0 && <p style={{ fontSize: '0.84rem', color: 'var(--text-3)' }}>No nominations yet. Be the first.</p>}
-                    {(cat.nominees || []).map((n: any, i: number) => {
-                      const isMine = myPick[cat._id] === n._id;
-                      const isSelf = member?._id === n.memberId;
-                      return (
-                        <div key={n._id} className={`nominee-row${isMine ? ' mine' : ''}`} style={{ flexWrap: 'wrap' }}>
-                          <span style={{ width: 18, fontWeight: 800, color: i === 0 && n.supports > 0 ? 'var(--yellow)' : 'var(--text-3)', fontSize: '0.8rem' }}>{i + 1}</span>
-                          <button type="button" className="avatar" title="View poster" onClick={() => setPosterFor({ cat, n })}
-                            style={{ cursor: 'zoom-in', padding: 0, font: 'inherit' }}>
-                            {n.memberPhoto ? <img src={n.memberPhoto} alt="" /> : initials(n.memberName)}
-                          </button>
-                          <div style={{ minWidth: 0, flex: 1 }}>
-                            <div style={{ fontWeight: 700, fontSize: '0.9rem' }}>{n.memberName}</div>
-                            {n.reason && <div style={{ fontSize: '0.74rem', color: 'var(--text-3)', overflow: 'hidden', textOverflow: 'ellipsis' }} title={n.reason}>“{n.reason}”</div>}
-                            <div className="vote-bar" style={{ marginTop: 6 }}><i style={{ width: `${top ? (n.supports / top) * 100 : 0}%` }} /></div>
-                          </div>
-                          <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontWeight: 800, color: 'var(--green-400)' }}>{n.supports}</div>
-                            {open && !isMine && (
-                              <button className="btn btn-ghost btn-sm" style={{ marginTop: 4 }} disabled={busy === n._id} onClick={() => requireLogin(() => support(cat, n))}>
-                                {isSelf ? 'Back yourself' : 'Support'}
+                  {/* nominees: one row each, Support at the side */}
+                  {nominees.length === 0 ? (
+                    <p className="aw-empty">No nominations yet.</p>
+                  ) : (
+                    <ol className="aw-list">
+                      {nominees.map((n: any, i: number) => {
+                        const isMine = myPick[cat._id] === n._id;
+                        const isSelf = member?._id === n.memberId;
+                        const leading = i === 0 && n.supports > 0;
+                        return (
+                          <li key={n._id} className={`aw-row${isMine ? ' mine' : ''}${leading ? ' lead' : ''}`}>
+                            <button type="button" className="avatar aw-face" title="View poster" onClick={() => setPosterFor({ cat, n })}>
+                              {n.memberPhoto ? <img src={n.memberPhoto} alt="" /> : initials(n.memberName)}
+                              {leading && <i className="aw-crown" aria-hidden="true">★</i>}
+                            </button>
+                            <div className="aw-who">
+                              <b>{n.memberName}</b>
+                              {n.reason && <span title={n.reason}>“{n.reason}”</span>}
+                              <div className="vote-bar"><i style={{ width: `${top ? (n.supports / top) * 100 : 0}%` }} /></div>
+                            </div>
+                            {open ? (
+                              <button type="button" className={`aw-support${isMine ? ' on' : ''}`}
+                                disabled={busy === n._id || busy === cat._id}
+                                aria-pressed={isMine}
+                                aria-label={isMine ? `Withdraw support from ${n.memberName}` : `Support ${n.memberName}`}
+                                onClick={() => (isMine ? withdraw(cat) : requireLogin(() => support(cat, n)))}>
+                                <b>{n.supports}</b>
+                                <span>{isMine ? 'Backing' : isSelf ? 'Back me' : 'Support'}</span>
                               </button>
+                            ) : (
+                              <span className="aw-support is-static"><b>{n.supports}</b><span>supports</span></span>
                             )}
-                            {open && isMine && (
-                              <button className="btn btn-ghost btn-sm" style={{ marginTop: 4 }} disabled={busy === cat._id} onClick={() => withdraw(cat)}>Withdraw</button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-
-                  {open && (
-                    <button className="btn btn-primary" style={{ marginTop: 'auto' }} onClick={() => requireLogin(() => setNominating(cat))}>
-                      {cleared ? '+ Nominate a classmate' : 'Sign in to nominate'}
-                    </button>
+                          </li>
+                        );
+                      })}
+                    </ol>
                   )}
                 </div>
               );
@@ -217,7 +222,9 @@ export default function AwardsPage() {
               photo: posterFor.n.memberPhoto, name: posterFor.n.memberName,
               band: posterFor.cat.winner?._id === posterFor.n._id ? 'WINNER' : 'NOMINATED',
               role: posterFor.cat.title, slogan: posterFor.n.reason,
-              footer: posterFor.cat.season || 'Alumni Awards', badge: `${posterFor.n.supports} SUPPORTS`,
+              footer: posterFor.cat.season || 'Alumni Awards',
+              badge: posterFor.cat.winner?._id === posterFor.n._id ? undefined
+                : posterFor.cat.nominees?.[0]?._id === posterFor.n._id && posterFor.n.supports > 0 ? `LEADING · ${posterFor.n.supports}` : `${posterFor.n.supports} SUPPORTS`,
             }} />
             <div className="modal-actions" style={{ marginTop: 12 }}>
               <button className="btn btn-ghost" onClick={() => setPosterFor(null)}>Close</button>
