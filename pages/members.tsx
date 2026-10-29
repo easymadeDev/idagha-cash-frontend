@@ -3,7 +3,6 @@ import useSWR from 'swr';
 import { positionRank } from '../lib/positions';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import PersonAvatar from '../components/PersonAvatar';
 import MemberFigure from '../components/MemberFigure';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -18,6 +17,8 @@ const avatarColors = [
   ['rgba(34,211,238,0.18)', '#22d3ee'],
   ['rgba(244,114,182,0.18)', '#f472b6'],
 ];
+
+const initialsOf = (name: string) => name.split(' ').filter(Boolean).slice(0, 2).map((n) => n[0]).join('').toUpperCase();
 
 function formatBirthday(d: string) {
   if (!d) return '';
@@ -93,7 +94,7 @@ export default function MembersPage() {
                 <div key={m._id || m.name} className={`mf-card g-${g} anim-fade-up`} style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}>
                   {/* phones: the member drawn as a person, name and role under them */}
                   <div className="mf-figure">
-                    <MemberFigure id={String(m._id || i)} photo={m.photo} gender={m.gender} />
+                    <MemberFigure id={String(m._id || i)} photo={m.photo} gender={m.gender} initials={initialsOf(m.name)} />
                     <div className="mf-caption">
                       <b>{m.name}</b>
                       {/* everyone gets a tag: officers in gold, everyone else as Member */}
@@ -108,7 +109,7 @@ export default function MembersPage() {
                       <div className="mf-shape">
                         {m.photo
                           ? <img src={m.photo} alt={m.name} loading="lazy" decoding="async" />
-                          : <PersonAvatar gender={m.gender} className="mf-drawn" />}
+                          : <span className="mf-initials">{initialsOf(m.name)}</span>}
                       </div>
                     </div>
                     {m.position && m.position !== 'Member'

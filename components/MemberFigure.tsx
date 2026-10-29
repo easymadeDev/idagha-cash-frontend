@@ -1,6 +1,6 @@
 // A member drawn as a person from the chest up: their photo is the face, a tailored suit (or
 // blazer) below with a gold school pin, fading into the page. Used for the phone member cards.
-export default function MemberFigure({ id, photo, gender }: { id: string; photo?: string; gender?: string }) {
+export default function MemberFigure({ id, photo, gender, initials }: { id: string; photo?: string; gender?: string; initials: string }) {
   const g = (gender || '').toLowerCase();
   const female = g.startsWith('f');
   const male = !female && g.startsWith('m');
@@ -11,7 +11,7 @@ export default function MemberFigure({ id, photo, gender }: { id: string; photo?
   const k = (s: string) => `${s}-${id}`;
 
   return (
-    <svg className="mf-figure-svg" viewBox="0 44 200 206" aria-hidden="true">
+    <svg className="mf-figure-svg" viewBox="0 52 200 198" aria-hidden="true">
       <defs>
         <radialGradient id={k('spot')} cx="50%" cy="40%" r="55%">
           <stop offset="0" stopColor={female ? '#a6cdf2' : male ? '#86baf0' : '#62d69a'} stopOpacity="0.5" />
@@ -45,17 +45,15 @@ export default function MemberFigure({ id, photo, gender }: { id: string; photo?
           <rect x="0" y="44" width="200" height="206" fill={`url(#${k('fadeG')})`} />
         </mask>
         <clipPath id={k('head')}><circle cx="100" cy="104" r="45" /></clipPath>
+        <radialGradient id={k('initialsBg')} cx="40%" cy="35%" r="75%">
+          <stop offset="0" stopColor="#1f7a4a" /><stop offset="1" stopColor="#0b2a19" />
+        </radialGradient>
       </defs>
 
       {/* portrait spotlight */}
       <ellipse cx="100" cy="128" rx="96" ry="88" fill={`url(#${k('spot')})`} />
 
       <g mask={`url(#${k('fade')})`}>
-        {/* long hair falling over the shoulders (drawn faces only) */}
-        {!photo && female && (
-          <path d="M57 108c0-34 19-52 43-52s43 18 43 52l3 56c-6 10-17 13-25 8H79c-8 5-19 2-25-8z" fill={`url(#${k('hair')})`} />
-        )}
-
         {/* neck: short and broad, mostly under the head */}
         <path d="M83 132h34v34c0 7-8 12-17 12s-17-5-17-12z" fill={`url(#${k('neck')})`} />
 
@@ -89,35 +87,23 @@ export default function MemberFigure({ id, photo, gender }: { id: string; photo?
         <circle cx="100" cy="240" r="2.6" fill={suit[2]} stroke="#fff" strokeOpacity="0.3" />
       </g>
 
-      {/* head */}
+      {/* head, set low on the neck (the clip circle moves with the group) */}
+      <g transform="translate(0 9)">
       <circle cx="100" cy="107" r="47" fill="#000" opacity="0.28" />
       {photo ? (
         <image href={photo} x="55" y="59" width="90" height="90" preserveAspectRatio="xMidYMid slice" clipPath={`url(#${k('head')})`} />
       ) : (
-        <g clipPath={`url(#${k('head')})`}>
-          <rect x="55" y="59" width="90" height="90" fill={female ? '#e2effc' : male ? '#dbeaf9' : '#dbece2'} />
-          <ellipse cx="72" cy="110" rx="5" ry="8" fill={skin[1]} />
-          <ellipse cx="128" cy="110" rx="5" ry="8" fill={skin[1]} />
-          <ellipse cx="100" cy="110" rx="27" ry="31" fill={`url(#${k('face')})`} />
-          {/* a friendly face */}
-          <path d="M86 101q4-3 8 0M106 101q4-3 8 0" stroke="#5a3d2b" strokeWidth="2" strokeLinecap="round" fill="none" />
-          <ellipse cx="90" cy="108" rx="2.6" ry="3.2" fill="#3b2a20" />
-          <ellipse cx="110" cy="108" rx="2.6" ry="3.2" fill="#3b2a20" />
-          <circle cx="90.8" cy="107" r="0.9" fill="#fff" />
-          <circle cx="110.8" cy="107" r="0.9" fill="#fff" />
-          <ellipse cx="84" cy="117" rx="5" ry="3" fill="#f08a8a" opacity="0.3" />
-          <ellipse cx="116" cy="117" rx="5" ry="3" fill="#f08a8a" opacity="0.3" />
-          <path d="M93 121q7 6 14 0" stroke="#b5604a" strokeWidth="2.2" strokeLinecap="round" fill="none" />
-          {female
-            ? <path d="M70 108c0-28 14-42 31-42s30 13 30 36c-12-2-24-10-30-22-6 15-16 25-31 28z" fill={`url(#${k('hair')})`} />
-            : male
-              ? <path d="M72 106c-2-27 12-41 28-41s30 14 28 41c-3-12-8-18-14-20-12 4-26 4-36-2-3 5-5 12-6 22z" fill={`url(#${k('hair')})`} />
-              : <path d="M73 104c0-25 12-37 27-37s27 12 27 37c-8-8-18-12-27-12s-19 4-27 12z" fill="#5b6b62" />}
-          {(female || male) && <path d="M86 74c6-3 14-4 22-1" stroke="#fff" strokeOpacity="0.4" strokeWidth="3" strokeLinecap="round" fill="none" />}
+        // no photo yet: their initials in gold on the school green
+        <g>
+          <circle cx="100" cy="104" r="45" fill={`url(#${k('initialsBg')})`} />
+          <text x="100" y="104" textAnchor="middle" dominantBaseline="central"
+            fontFamily="'Cabinet Grotesk', 'Satoshi', Arial, sans-serif" fontWeight="800" fontSize={initials.length > 2 ? 26 : 32}
+            letterSpacing="-1" fill="#f0c445">{initials}</text>
         </g>
       )}
       <circle cx="100" cy="104" r="45" fill="none" stroke="#fff" strokeOpacity="0.92" strokeWidth="2.5" />
       <circle cx="100" cy="104" r="48.5" fill="none" stroke={`url(#${k('rim')})`} strokeWidth="2.6" />
+      </g>
     </svg>
   );
 }

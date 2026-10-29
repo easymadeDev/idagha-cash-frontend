@@ -716,4 +716,6 @@ body:has(.navbar.nav-hidden) .fin-bar { top: 10px; }
 .mf-role.is-member { color: #e8f7ee; background: rgba(18, 133, 74, 0.85); box-shadow: none; }
 @media (max-width: 640px) {
   .mf-caption em.is-member { color: #c9f0da; background: rgba(18, 133, 74, 0.55); border: 1px solid rgba(47, 210, 122, 0.4); }
-}
+}/* no photo yet: initials in gold on green (computer cards) */
+.mf-face.no-photo { background: radial-gradient(120% 90% at 50% 25%, #1f7a4a, #0b2a19) !important; }
+.mf-face.no-photo .mf-initials { color: #f0c445; margin-top: -16%; }
