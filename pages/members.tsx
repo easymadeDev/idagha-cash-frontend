@@ -128,6 +128,7 @@ export default function MembersPage() {
                   <div className="mf-figure">
                     <MemberFigure id={String(m._id || i)} photo={m.photo} gender={m.gender} />
                     <div className="mf-badge">
+                      <i className="mf-badge-head">IDAGHA ’18</i>
                       <b>{m.name}</b>
                       {m.position && m.position !== 'Member' && <em>{m.position}</em>}
                       <span style={{ color: contrib.total > 0 ? 'var(--green-500, #12854a)' : '#8a958f' }}>

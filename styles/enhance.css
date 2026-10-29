@@ -667,3 +667,33 @@ body:has(.navbar.nav-hidden) .fin-bar { top: 10px; }
   .mf-badge b { font-size: 0.7rem; }
   .mf-badge span { font-size: 0.56rem; }
 }
+/* ═══ Member figures (phones): polished badge and a gentle tap response ═══ */
+@media (max-width: 640px) {
+  .mf-figure { transition: transform 0.25s var(--ease); -webkit-tap-highlight-color: transparent; }
+  .mf-figure:active { transform: scale(0.97); }
+  .mf-figure-svg { filter: drop-shadow(0 16px 20px rgba(0, 0, 0, 0.5)); }
+  .mf-badge {
+    top: 79%; width: 64%; padding: 0 0 5px; gap: 1px; overflow: hidden; border-radius: 8px;
+    background: linear-gradient(180deg, #fffdf6, #f3ecd7); box-shadow: 0 8px 16px -6px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(15, 61, 34, 0.15);
+  }
+  .mf-badge::before {
+    top: -6px; width: 16px; height: 9px; border-radius: 3px 3px 2px 2px;
+    background: linear-gradient(180deg, #e2e6ea, #9aa3ab); box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+  }
+  .mf-badge-head {
+    display: block; width: 100%; margin-bottom: 3px; padding: 2px 0 1px; font-style: normal;
+    font-size: 0.48rem; font-weight: 800; letter-spacing: 0.16em; color: #f0c445; background: #0f5a33;
+  }
+  .mf-badge b { padding: 0 5px; }
+  .mf-badge em, .mf-badge span { padding: 0 5px; }
+}
+@media (max-width: 640px) and (prefers-reduced-motion: reduce) { .mf-figure, .mf-figure:active { transition: none; transform: none; } }/* smaller: three people to a row on phones */
+@media (max-width: 640px) {
+  .members-grid { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 14px 6px !important; }
+  .mf-badge { width: 76%; border-radius: 6px; padding-bottom: 3px; }
+  .mf-badge::before { top: -5px; width: 12px; height: 7px; }
+  .mf-badge-head { font-size: 0.38rem; letter-spacing: 0.12em; margin-bottom: 2px; }
+  .mf-badge b { font-size: 0.6rem; padding: 0 3px; }
+  .mf-badge em { font-size: 0.44rem; padding: 0 3px; }
+  .mf-badge span { font-size: 0.46rem; padding: 0 3px; }
+}
