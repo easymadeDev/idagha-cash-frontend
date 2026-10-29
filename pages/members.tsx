@@ -117,14 +117,6 @@ export default function MembersPage() {
           </div>
         ) : (
           <div className="members-grid">
-            {/* head and shoulders, in card units (0–1), used to cut the phone cards */}
-            <svg width="0" height="0" aria-hidden="true" style={{ position: 'absolute' }}>
-              <clipPath id="mf-person" clipPathUnits="objectBoundingBox">
-                <ellipse cx="0.5" cy="0.27" rx="0.25" ry="0.24" />
-                <rect x="0.4" y="0.42" width="0.2" height="0.2" />
-                <path d="M0.03 1 C0.03 0.74 0.22 0.6 0.5 0.6 C0.78 0.6 0.97 0.74 0.97 1 Z" />
-              </clipPath>
-            </svg>
             {filtered.map((m: any, i: number) => {
               const [bg] = avatarColors[i % avatarColors.length];
               const contrib = contribByName[m.name] || { total: 0, count: 0, last: '' };
@@ -133,7 +125,7 @@ export default function MembersPage() {
                   {/* The face: photo fills the card's top, name written across it */}
                   <div className={`mf-face${m.photo ? '' : ' no-photo'} g-${(m.gender || '').toLowerCase().startsWith('f') ? 'f' : (m.gender || '').toLowerCase().startsWith('m') ? 'm' : 'n'}`}
                     style={m.photo ? undefined : { ['--mf-tint' as any]: bg }}>
-                    {/* on phones this is cut into a head-and-shoulders shape (#mf-person below) */}
+                    {/* on phones this is the head: a round photo above the body */}
                     <div className="mf-shape-wrap">
                       <div className="mf-shape">
                         {m.photo
@@ -148,7 +140,13 @@ export default function MembersPage() {
                     </div>
                   </div>
 
-                  {/* Details */}
+                  {/* the body (shoulders on phones): name, role and details */}
+                  <div className="mf-body">
+                  <div className="mf-body-name">
+                    <b>{m.name}</b>
+                    {m.nickname && <span>“{m.nickname}”</span>}
+                    {m.position && m.position !== 'Member' && <em>{m.position}</em>}
+                  </div>
                   <div className="member-card-details mf-details">
                     {m.location && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.8rem', color: 'var(--text-3)' }}>
@@ -175,6 +173,7 @@ export default function MembersPage() {
                     <span>Contributed</span>
                     <b style={{ color: contrib.total > 0 ? 'var(--green-400)' : 'var(--text-3)' }}>{contrib.total > 0 ? formatNaira(contrib.total) : '—'}</b>
                     {contrib.last && <small>Last {formatDate(contrib.last)}</small>}
+                  </div>
                   </div>
                 </div>
               );
