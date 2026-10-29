@@ -3,6 +3,7 @@ import useSWR from 'swr';
 import { formatNaira, formatDate } from '../lib/api';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
+import PersonAvatar from '../components/PersonAvatar';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -16,10 +17,6 @@ const avatarColors = [
   ['rgba(34,211,238,0.18)', '#22d3ee'],
   ['rgba(244,114,182,0.18)', '#f472b6'],
 ];
-
-function getInitials(name: string) {
-  return name.split(' ').slice(0, 2).map((n) => n[0]).join('').toUpperCase();
-}
 
 function formatBirthday(d: string) {
   if (!d) return '';
@@ -121,15 +118,15 @@ export default function MembersPage() {
         ) : (
           <div className="members-grid">
             {filtered.map((m: any, i: number) => {
-              const [bg, fg] = avatarColors[i % avatarColors.length];
+              const [bg] = avatarColors[i % avatarColors.length];
               const contrib = contribByName[m.name] || { total: 0, count: 0, last: '' };
               return (
                 <div key={m._id || m.name} className="mf-card anim-fade-up" style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}>
                   {/* The face: photo fills the card's top, name written across it */}
-                  <div className="mf-face" style={m.photo ? undefined : { background: `radial-gradient(120% 90% at 50% 20%, ${bg}, rgba(5,12,8,0.9))`, color: fg }}>
+                  <div className={`mf-face${m.photo ? '' : ' no-photo'}`} style={m.photo ? undefined : { ['--mf-tint' as any]: bg }}>
                     {m.photo
                       ? <img src={m.photo} alt={m.name} loading="lazy" decoding="async" />
-                      : <span className="mf-initials">{getInitials(m.name)}</span>}
+                      : <PersonAvatar gender={m.gender} className="mf-drawn" />}
                     {m.position && m.position !== 'Member' && <span className="mf-role">{m.position}</span>}
                     <div className="mf-name">
                       <b>{m.name}</b>
