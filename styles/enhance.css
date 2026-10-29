@@ -745,3 +745,12 @@ body:has(.navbar.nav-hidden) .fin-bar { top: 10px; }
   .ex-contact a { width: 32px; height: 32px; }
   .ex-contact svg { width: 15px; height: 15px; }
 }
+/* ═══ Landing pages: the executive as person figures on phones, two per row ═══ */
+.lx-item { display: contents; }
+@media (max-width: 640px) {
+  .cx-split-list, .gl-execs { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 20px 12px !important; }
+  .lx-item { display: block; min-width: 0; }
+  .lx-item > .cx-exec, .lx-item > .gl-exec { display: none !important; }
+  .lx-item .mf-caption b { font-size: 0.9rem; color: #fff; }
+  .lx-item .mf-caption em { font-size: 0.6rem; padding: 2px 9px; }
+}

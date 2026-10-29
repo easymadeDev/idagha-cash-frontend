@@ -8,6 +8,7 @@ import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
 import { withVacancies } from '../lib/positions';
 import LandingMenu from '../components/LandingMenu';
+import ExecFigure from '../components/ExecFigure';
 import { formatNaira } from '../lib/api';
 import { CountUp } from '../components/motion';
 import GlassLanding from '../components/GlassLanding';
@@ -444,9 +445,13 @@ function CinematicLanding({ classPhotos = [] }: { classPhotos?: Photo[] }) {
           {execList.length === 0 ? (
             <div className="cx-exec"><b>The executive list is on its way</b><span>The General Secretary will add each officer here.</span></div>
           ) : execList.map((x: any) => (
-            <div key={x._id} className={`cx-exec${x.vacant ? ' is-vacant' : ''}`}>
-              <div className="cx-exec-face">{x.photo ? <img src={x.photo} alt={x.name} /> : x.vacant ? '?' : initials(x.name)}</div>
-              <div><span>{x.position}</span><b>{x.name}</b></div>
+            // phones show the officer as a person figure; wider screens keep the row
+            <div key={x._id} className="lx-item">
+              <ExecFigure x={x} contact={false} />
+              <div className={`cx-exec${x.vacant ? ' is-vacant' : ''}`}>
+                <div className="cx-exec-face">{x.photo ? <img src={x.photo} alt={x.name} /> : x.vacant ? '?' : initials(x.name)}</div>
+                <div><span>{x.position}</span><b>{x.name}</b></div>
+              </div>
             </div>
           ))}
         </div>

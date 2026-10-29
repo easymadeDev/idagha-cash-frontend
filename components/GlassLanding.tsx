@@ -8,6 +8,7 @@ import { useGate } from '../lib/gate';
 import { fetcher, initials } from '../lib/member';
 import { withVacancies } from '../lib/positions';
 import LandingMenu from './LandingMenu';
+import ExecFigure from './ExecFigure';
 import { formatNaira } from '../lib/api';
 import { CountUp } from './motion';
 import { isPublicPath } from '../lib/requireLogin';
@@ -185,10 +186,14 @@ export default function GlassLanding({ classPhotos = [] }: { classPhotos?: Photo
           {execList.length === 0 ? (
             <div className="gl-glass gl-exec"><b>The executive list is on its way</b><small>The General Secretary will add each officer.</small></div>
           ) : execList.map((x: any, i: number) => (
-            <motion.div key={x._id} className={`gl-glass gl-exec${x.vacant ? ' is-vacant' : ''}`} {...rise(i % 4)} whileHover={{ y: -6 }}>
-              <span className="gl-face">{x.photo ? <img src={x.photo} alt={x.name} /> : x.vacant ? '?' : initials(x.name)}</span>
-              <b>{x.name}</b><small>{x.position}</small>
-            </motion.div>
+            // phones show the officer as a person figure; wider screens keep the glass card
+            <div key={x._id} className="lx-item">
+              <ExecFigure x={x} contact={false} />
+              <motion.div className={`gl-glass gl-exec${x.vacant ? ' is-vacant' : ''}`} {...rise(i % 4)} whileHover={{ y: -6 }}>
+                <span className="gl-face">{x.photo ? <img src={x.photo} alt={x.name} /> : x.vacant ? '?' : initials(x.name)}</span>
+                <b>{x.name}</b><small>{x.position}</small>
+              </motion.div>
+            </div>
           ))}
         </div>
       </section>
