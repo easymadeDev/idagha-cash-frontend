@@ -640,3 +640,30 @@ body:has(.navbar.nav-hidden) .fin-bar { top: 10px; }
   .mf-body .mf-footer span, .mf-body .mf-footer small { display: none; }
   .mf-body .mf-footer b { font-size: 0.72rem; }
 }
+/* ═══ Members on phones: each member drawn as a person (photo as the face), name badge on the chest ═══ */
+.mf-figure { display: none; }
+@media (max-width: 640px) {
+  .mf-card, .mf-card.g-m, .mf-card.g-f {
+    aspect-ratio: auto; border-radius: 0 !important; overflow: visible !important;
+    background: none !important; border: 0 !important; box-shadow: none !important;
+  }
+  .mf-card > .mf-face, .mf-card > .mf-body { display: none !important; }
+  .mf-figure { display: block; position: relative; width: 100%; }
+  .mf-figure-svg { display: block; width: 100%; height: auto; filter: drop-shadow(0 14px 18px rgba(0, 0, 0, 0.55)); }
+  /* the badge hangs from the lanyard, pinned over the chest */
+  .mf-badge {
+    position: absolute; left: 50%; top: 81%; translate: -50% 0; width: 78%;
+    display: flex; flex-direction: column; align-items: center; gap: 1px; padding: 6px 6px 5px;
+    border-radius: 9px; background: #fbf6e8; color: #0f3d22; text-align: center;
+    box-shadow: 0 6px 14px -4px rgba(0, 0, 0, 0.55), inset 0 3px 0 #f0c445;
+  }
+  .mf-badge::before { content: ''; position: absolute; top: -5px; left: 50%; translate: -50% 0; width: 14px; height: 7px; border-radius: 3px; background: #c9cfd4; }
+  .mf-badge b { font-family: var(--font-d); font-size: 0.76rem; font-weight: 800; line-height: 1.15; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mf-badge em { font-style: normal; font-size: 0.56rem; font-weight: 800; letter-spacing: 0.03em; text-transform: uppercase; color: #b8890f; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mf-badge span { font-size: 0.6rem; font-weight: 700; white-space: nowrap; }
+  .members-grid { gap: 18px 10px !important; }
+}@media (max-width: 640px) { .mf-badge { top: 78%; } }@media (max-width: 640px) {
+  .mf-badge { width: 66%; top: 80%; padding: 4px 5px 4px; border-radius: 7px; }
+  .mf-badge b { font-size: 0.7rem; }
+  .mf-badge span { font-size: 0.56rem; }
+}

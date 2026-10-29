@@ -4,6 +4,7 @@ import { formatNaira, formatDate } from '../lib/api';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import PersonAvatar from '../components/PersonAvatar';
+import MemberFigure from '../components/MemberFigure';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -123,6 +124,17 @@ export default function MembersPage() {
               const g = (m.gender || '').toLowerCase().startsWith('f') ? 'f' : (m.gender || '').toLowerCase().startsWith('m') ? 'm' : 'n';
               return (
                 <div key={m._id || m.name} className={`mf-card g-${g} anim-fade-up`} style={{ animationDelay: `${Math.min(i, 12) * 0.04}s` }}>
+                  {/* phones: the member drawn as a person, name badge on the lanyard */}
+                  <div className="mf-figure">
+                    <MemberFigure id={String(m._id || i)} photo={m.photo} gender={m.gender} />
+                    <div className="mf-badge">
+                      <b>{m.name}</b>
+                      {m.position && m.position !== 'Member' && <em>{m.position}</em>}
+                      <span style={{ color: contrib.total > 0 ? 'var(--green-500, #12854a)' : '#8a958f' }}>
+                        {contrib.total > 0 ? `${formatNaira(contrib.total)} contributed` : 'No payments yet'}
+                      </span>
+                    </div>
+                  </div>
                   {/* The face: photo fills the card's top, name written across it (on phones: the icon's head) */}
                   <div className={`mf-face${m.photo ? '' : ' no-photo'} g-${g}`}
                     style={m.photo ? undefined : { ['--mf-tint' as any]: bg }}>
