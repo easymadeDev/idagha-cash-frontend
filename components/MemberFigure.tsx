@@ -1,109 +1,123 @@
 // A member drawn as a person from the chest up: their photo is the face, a tailored suit (or
-// blazer) below, and a lanyard the card's name badge hangs from. Used for the phone member cards.
+// blazer) below with a gold school pin, fading into the page. Used for the phone member cards.
 export default function MemberFigure({ id, photo, gender }: { id: string; photo?: string; gender?: string }) {
   const g = (gender || '').toLowerCase();
   const female = g.startsWith('f');
   const male = !female && g.startsWith('m');
   // jacket: light, mid, dark
-  const suit = female ? ['#3d74a0', '#2c5a80', '#1f4361'] : male ? ['#5c636b', '#454b52', '#30353a'] : ['#23704a', '#195635', '#103d26'];
-  const skin = ['#f6cfae', '#e8b48c', '#cf956d'];
-  const hair = female ? ['#f2c66b', '#d9a520'] : ['#45403c', '#262321'];
+  const suit = female ? ['#4a82b0', '#2f5f88', '#1d4262'] : male ? ['#646b73', '#474d54', '#2e3237'] : ['#2a7d53', '#1b5c3a', '#103d26'];
+  const skin = ['#f7d3b4', '#e9b68e', '#c98d66'];
+  const hair = female ? ['#f4cd72', '#c9951c'] : ['#4a4440', '#211e1c'];
   const k = (s: string) => `${s}-${id}`;
 
   return (
-    <svg className="mf-figure-svg" viewBox="0 30 200 220" aria-hidden="true">
+    <svg className="mf-figure-svg" viewBox="0 44 200 206" aria-hidden="true">
       <defs>
-        <radialGradient id={k('spot')} cx="50%" cy="42%" r="55%">
-          <stop offset="0" stopColor={female ? '#9cc7f0' : male ? '#7fb6ef' : '#5fd497'} stopOpacity="0.55" />
+        <radialGradient id={k('spot')} cx="50%" cy="40%" r="55%">
+          <stop offset="0" stopColor={female ? '#a6cdf2' : male ? '#86baf0' : '#62d69a'} stopOpacity="0.5" />
           <stop offset="1" stopColor="#000" stopOpacity="0" />
         </radialGradient>
         <linearGradient id={k('jacket')} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={suit[0]} /><stop offset="0.45" stopColor={suit[1]} /><stop offset="1" stopColor={suit[2]} />
+          <stop offset="0" stopColor={suit[0]} /><stop offset="0.5" stopColor={suit[1]} /><stop offset="1" stopColor={suit[2]} />
         </linearGradient>
         <linearGradient id={k('sheen')} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0" stopColor="#fff" stopOpacity="0" /><stop offset="0.3" stopColor="#fff" stopOpacity="0.16" />
-          <stop offset="0.5" stopColor="#fff" stopOpacity="0" /><stop offset="0.75" stopColor="#fff" stopOpacity="0.08" />
+          <stop offset="0" stopColor="#fff" stopOpacity="0" /><stop offset="0.28" stopColor="#fff" stopOpacity="0.18" />
+          <stop offset="0.5" stopColor="#fff" stopOpacity="0" /><stop offset="0.78" stopColor="#fff" stopOpacity="0.07" />
           <stop offset="1" stopColor="#fff" stopOpacity="0" />
         </linearGradient>
         <linearGradient id={k('neck')} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor={skin[2]} /><stop offset="0.5" stopColor={skin[1]} /><stop offset="1" stopColor={skin[1]} />
+          <stop offset="0" stopColor={skin[2]} /><stop offset="0.6" stopColor={skin[1]} />
         </linearGradient>
-        <radialGradient id={k('face')} cx="45%" cy="40%" r="65%">
+        <radialGradient id={k('face')} cx="45%" cy="38%" r="70%">
           <stop offset="0" stopColor={skin[0]} /><stop offset="1" stopColor={skin[1]} />
         </radialGradient>
         <linearGradient id={k('hair')} x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor={hair[0]} /><stop offset="1" stopColor={hair[1]} />
         </linearGradient>
         <linearGradient id={k('rim')} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#fff2c2" /><stop offset="0.5" stopColor="#f0c445" /><stop offset="1" stopColor="#b8890f" />
+          <stop offset="0" stopColor="#fff4c9" /><stop offset="0.5" stopColor="#f0c445" /><stop offset="1" stopColor="#a87c0c" />
         </linearGradient>
-        <clipPath id={k('head')}><circle cx="100" cy="98" r="44" /></clipPath>
+        {/* the bust dissolves into the page at the bottom */}
+        <linearGradient id={k('fadeG')} x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0.72" stopColor="#fff" /><stop offset="1" stopColor="#fff" stopOpacity="0" />
+        </linearGradient>
+        <mask id={k('fade')} maskUnits="userSpaceOnUse" x="0" y="44" width="200" height="206">
+          <rect x="0" y="44" width="200" height="206" fill={`url(#${k('fadeG')})`} />
+        </mask>
+        <clipPath id={k('head')}><circle cx="100" cy="104" r="45" /></clipPath>
       </defs>
 
       {/* portrait spotlight */}
-      <ellipse cx="100" cy="118" rx="96" ry="92" fill={`url(#${k('spot')})`} />
+      <ellipse cx="100" cy="128" rx="96" ry="88" fill={`url(#${k('spot')})`} />
 
-      {/* long hair falls behind the shoulders (drawn faces only) */}
-      {!photo && female && <path d="M60 100c0-28 17-46 40-46s40 18 40 46v74H60z" fill={`url(#${k('hair')})`} />}
+      <g mask={`url(#${k('fade')})`}>
+        {/* long hair falling over the shoulders (drawn faces only) */}
+        {!photo && female && (
+          <path d="M57 108c0-34 19-52 43-52s43 18 43 52l3 56c-6 10-17 13-25 8H79c-8 5-19 2-25-8z" fill={`url(#${k('hair')})`} />
+        )}
 
-      {/* neck */}
-      <path d="M86 128h28v40c0 6-6 10-14 10s-14-4-14-10z" fill={`url(#${k('neck')})`} />
+        {/* neck: short and broad, mostly under the head */}
+        <path d="M83 132h34v34c0 7-8 12-17 12s-17-5-17-12z" fill={`url(#${k('neck')})`} />
 
-      {/* jacket: sloping shoulders, soft sheen */}
-      <path d="M12 250c0-30 6-50 22-62 14-10 34-16 50-20l16 8 16-8c16 4 36 10 50 20 16 12 22 32 22 62z" fill={`url(#${k('jacket')})`} />
-      <path d="M12 250c0-30 6-50 22-62 14-10 34-16 50-20l16 8 16-8c16 4 36 10 50 20 16 12 22 32 22 62z" fill={`url(#${k('sheen')})`} />
+        {/* jacket with sloping shoulders and a soft sheen */}
+        <path id={k('body')} d="M8 250c0-34 8-56 26-68 15-10 34-15 49-18l17 9 17-9c15 3 34 8 49 18 18 12 26 34 26 68z" fill={`url(#${k('jacket')})`} />
+        <path d="M8 250c0-34 8-56 26-68 15-10 34-15 49-18l17 9 17-9c15 3 34 8 49 18 18 12 26 34 26 68z" fill={`url(#${k('sheen')})`} />
+        {/* arm seams */}
+        <path d="M40 186c-6 18-8 40-8 64M160 186c6 18 8 40 8 64" stroke="#000" strokeOpacity="0.16" strokeWidth="2" fill="none" />
 
-      {/* shirt / blouse in the V */}
-      <path d="M84 168l16 8 16-8 6 10-22 52-22-52z" fill={female ? '#e88686' : '#fbfbfb'} />
-      {female && <path d="M86 172c8 10 20 10 28 0" stroke="#d26d6d" strokeWidth="2.5" fill="none" />}
-      {male && (
-        <>
-          {/* collar points */}
-          <path d="M84 168l16 9-9 12zM116 168l-16 9 9 12z" fill="#fff" stroke="#d7d7d7" strokeWidth="1" />
-          {/* tie */}
-          <path d="M96 178h8l2 6-2 3h-8l-2-3z" fill="#b92c25" />
-          <path d="M96 187h8l4 34-8 11-8-11z" fill="#d93a32" />
-          <path d="M100 187v44" stroke="#b92c25" strokeWidth="1" opacity="0.6" />
-        </>
-      )}
+        {/* shirt / blouse */}
+        <path d="M83 164l17 9 17-9 7 11-24 56-24-56z" fill={female ? '#ee9a9a' : '#fbfbfb'} />
+        {female && <path d="M85 170c9 11 21 11 30 0" stroke="#d97878" strokeWidth="2.5" fill="none" />}
+        {male && (
+          <>
+            <path d="M83 164l17 10-9 13zM117 164l-17 10 9 13z" fill="#fff" stroke="#d9d9d9" strokeWidth="1" />
+            <path d="M96 175h8l2 6-2 3h-8l-2-3z" fill="#a8261f" />
+            <path d="M96 184h8l4 36-8 11-8-11z" fill="#d6372f" />
+            <path d="M97 190l7 6M96 200l9 8M95 211l10 8" stroke="#a8261f" strokeWidth="1.4" opacity="0.7" />
+          </>
+        )}
 
-      {/* lapels with a crisp edge */}
-      <path d="M84 168l-6 10 22 52-10 20H66l6-58z" fill={suit[2]} opacity="0.55" />
-      <path d="M116 168l6 10-22 52 10 20h24l-6-58z" fill={suit[2]} opacity="0.55" />
-      <path d="M78 178l22 52M122 178l-22 52" stroke="#fff" strokeOpacity="0.18" strokeWidth="1.2" />
+        {/* lapels */}
+        <path d="M83 164l-7 11 24 56-11 19H64l7-62z" fill={suit[2]} opacity="0.6" />
+        <path d="M117 164l7 11-24 56 11 19h25l-7-62z" fill={suit[2]} opacity="0.6" />
+        <path d="M76 175l24 56M124 175l-24 56" stroke="#fff" strokeOpacity="0.2" strokeWidth="1.2" />
 
-      {/* gold pocket square and jacket buttons */}
-      <path d="M136 206l14-2 1 7-14 2z" fill="#f0c445" />
-      <circle cx="100" cy="238" r="2.6" fill={suit[2]} stroke="#fff" strokeOpacity="0.25" />
-
-      {/* lanyard */}
-      <path d="M88 170c2 14 6 28 11 40M112 170c-2 14-6 28-11 40" stroke="#0f5a33" strokeWidth="4" strokeLinecap="round" fill="none" />
-      <path d="M88 170c2 14 6 28 11 40M112 170c-2 14-6 28-11 40" stroke="#f0c445" strokeWidth="1.6" strokeLinecap="round" fill="none" />
+        {/* gold school pin on the lapel, pocket square, button */}
+        <circle cx="78" cy="196" r="4.2" fill={`url(#${k('rim')})`} stroke="#7a5a08" strokeWidth="0.8" />
+        <path d="M78 193.2l0.9 1.9 2 0.3-1.5 1.4 0.4 2-1.8-1-1.8 1 0.4-2-1.5-1.4 2-0.3z" fill="#0f5a33" />
+        <path d="M134 204l15-3 1.5 7-15 3z" fill="#f0c445" />
+        <circle cx="100" cy="240" r="2.6" fill={suit[2]} stroke="#fff" strokeOpacity="0.3" />
+      </g>
 
       {/* head */}
-      <circle cx="100" cy="100" r="47" fill="#000" opacity="0.25" />
+      <circle cx="100" cy="107" r="47" fill="#000" opacity="0.28" />
       {photo ? (
-        <image href={photo} x="56" y="54" width="88" height="88" preserveAspectRatio="xMidYMid slice" clipPath={`url(#${k('head')})`} />
+        <image href={photo} x="55" y="59" width="90" height="90" preserveAspectRatio="xMidYMid slice" clipPath={`url(#${k('head')})`} />
       ) : (
         <g clipPath={`url(#${k('head')})`}>
-          <rect x="56" y="54" width="88" height="88" fill={female ? '#dcecfb' : male ? '#d6e7f8' : '#d6e8de'} />
-          {/* ears */}
-          <ellipse cx="72" cy="104" rx="5" ry="8" fill={skin[1]} />
-          <ellipse cx="128" cy="104" rx="5" ry="8" fill={skin[1]} />
-          <ellipse cx="100" cy="104" rx="27" ry="31" fill={`url(#${k('face')})`} />
-          {/* shadow under the hairline */}
-          <path d="M74 92c8-6 17-8 26-8s18 2 26 8" stroke="#000" strokeOpacity="0.08" strokeWidth="6" fill="none" />
+          <rect x="55" y="59" width="90" height="90" fill={female ? '#e2effc' : male ? '#dbeaf9' : '#dbece2'} />
+          <ellipse cx="72" cy="110" rx="5" ry="8" fill={skin[1]} />
+          <ellipse cx="128" cy="110" rx="5" ry="8" fill={skin[1]} />
+          <ellipse cx="100" cy="110" rx="27" ry="31" fill={`url(#${k('face')})`} />
+          {/* a friendly face */}
+          <path d="M86 101q4-3 8 0M106 101q4-3 8 0" stroke="#5a3d2b" strokeWidth="2" strokeLinecap="round" fill="none" />
+          <ellipse cx="90" cy="108" rx="2.6" ry="3.2" fill="#3b2a20" />
+          <ellipse cx="110" cy="108" rx="2.6" ry="3.2" fill="#3b2a20" />
+          <circle cx="90.8" cy="107" r="0.9" fill="#fff" />
+          <circle cx="110.8" cy="107" r="0.9" fill="#fff" />
+          <ellipse cx="84" cy="117" rx="5" ry="3" fill="#f08a8a" opacity="0.3" />
+          <ellipse cx="116" cy="117" rx="5" ry="3" fill="#f08a8a" opacity="0.3" />
+          <path d="M93 121q7 6 14 0" stroke="#b5604a" strokeWidth="2.2" strokeLinecap="round" fill="none" />
           {female
-            ? <path d="M70 102c0-27 14-40 31-40s30 12 30 34c-12-2-24-9-30-21-6 14-16 24-31 27z" fill={`url(#${k('hair')})`} />
+            ? <path d="M70 108c0-28 14-42 31-42s30 13 30 36c-12-2-24-10-30-22-6 15-16 25-31 28z" fill={`url(#${k('hair')})`} />
             : male
-              ? <path d="M72 100c-2-26 12-40 28-40s30 14 28 40c-3-11-8-17-14-19-12 4-26 4-36-2-3 5-5 11-6 21z" fill={`url(#${k('hair')})`} />
-              : <path d="M73 98c0-24 12-36 27-36s27 12 27 36c-8-8-18-12-27-12s-19 4-27 12z" fill="#5b6b62" />}
-          {/* soft highlight on the hair */}
-          {(female || male) && <path d="M86 70c6-3 14-4 22-1" stroke="#fff" strokeOpacity="0.35" strokeWidth="3" strokeLinecap="round" fill="none" />}
+              ? <path d="M72 106c-2-27 12-41 28-41s30 14 28 41c-3-12-8-18-14-20-12 4-26 4-36-2-3 5-5 12-6 22z" fill={`url(#${k('hair')})`} />
+              : <path d="M73 104c0-25 12-37 27-37s27 12 27 37c-8-8-18-12-27-12s-19 4-27 12z" fill="#5b6b62" />}
+          {(female || male) && <path d="M86 74c6-3 14-4 22-1" stroke="#fff" strokeOpacity="0.4" strokeWidth="3" strokeLinecap="round" fill="none" />}
         </g>
       )}
-      <circle cx="100" cy="98" r="44" fill="none" stroke="#fff" strokeOpacity="0.9" strokeWidth="2.5" />
-      <circle cx="100" cy="98" r="47.5" fill="none" stroke={`url(#${k('rim')})`} strokeWidth="2.5" />
+      <circle cx="100" cy="104" r="45" fill="none" stroke="#fff" strokeOpacity="0.92" strokeWidth="2.5" />
+      <circle cx="100" cy="104" r="48.5" fill="none" stroke={`url(#${k('rim')})`} strokeWidth="2.6" />
     </svg>
   );
 }

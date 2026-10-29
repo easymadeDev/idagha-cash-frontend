@@ -697,3 +697,18 @@ body:has(.navbar.nav-hidden) .fin-bar { top: 10px; }
   .mf-badge em { font-size: 0.44rem; padding: 0 3px; }
   .mf-badge span { font-size: 0.46rem; padding: 0 3px; }
 }
+/* ═══ Member figures (phones): the person, then a clean caption under them ═══ */
+@media (max-width: 640px) {
+  .mf-figure-svg { filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.45)); }
+  .mf-caption { display: flex; flex-direction: column; align-items: center; gap: 1px; margin-top: -2px; text-align: center; min-width: 0; }
+  .mf-caption b {
+    font-family: var(--font-d); font-size: 0.74rem; font-weight: 800; line-height: 1.2; color: var(--text-1, #fff); letter-spacing: -0.01em;
+    max-width: 100%; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .mf-caption em {
+    font-style: normal; margin-top: 2px; padding: 1px 7px; border-radius: 999px; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    font-size: 0.5rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: #0f3d22; background: linear-gradient(90deg, #f6d77a, #f0c445);
+  }
+  .mf-caption span { margin-top: 2px; font-size: 0.62rem; font-weight: 700; color: var(--text-3); font-variant-numeric: tabular-nums; }
+  .mf-caption span.paid { color: var(--green-400, #2fd27a); }
+}

@@ -127,12 +127,11 @@ export default function MembersPage() {
                   {/* phones: the member drawn as a person, name badge on the lanyard */}
                   <div className="mf-figure">
                     <MemberFigure id={String(m._id || i)} photo={m.photo} gender={m.gender} />
-                    <div className="mf-badge">
-                      <i className="mf-badge-head">IDAGHA ’18</i>
+                    <div className="mf-caption">
                       <b>{m.name}</b>
                       {m.position && m.position !== 'Member' && <em>{m.position}</em>}
-                      <span style={{ color: contrib.total > 0 ? 'var(--green-500, #12854a)' : '#8a958f' }}>
-                        {contrib.total > 0 ? `${formatNaira(contrib.total)} contributed` : 'No payments yet'}
+                      <span className={contrib.total > 0 ? 'paid' : ''}>
+                        {contrib.total > 0 ? formatNaira(contrib.total) : 'No payments yet'}
                       </span>
                     </div>
                   </div>
